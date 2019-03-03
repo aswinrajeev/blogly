@@ -6,5 +6,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'blogly';
+  title = 'Blogly';
+  version = '0.1.0';
 }
