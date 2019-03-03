@@ -1,0 +1,12 @@
+@import '../styles/const_dark.scss';
+
+.app-toolbar {
+	background-color: $panel-background;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	left: 0px;
+	height: 35px;
+	box-shadow: -2px 2px 20px -8px rgba(0,0,0,0.8);
+	z-index: 100;
+}
