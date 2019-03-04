@@ -1,1 +1,12 @@
+<!-- <i class="toolbar-icon material-icons">note_add</i>
+<i class="toolbar-icon material-icons">save</i> -->
 
+<button mat-button class="toolbar-icon material-icons md-18" >note_add</button>
+
+<button mat-button class="toolbar-icon material-icons md-18" [matMenuTriggerFor]="menu2">save</button>
+<mat-menu #menu2="matMenu">
+  <button mat-menu-item><span class="material-icons md-18">bookmark_border</span>Save locally</button>
+  <button mat-menu-item><span class="material-icons md-18">bookmark</span>Save to drafts</button>
+</mat-menu>
+
+<button mat-button class="toolbar-icon material-icons md-18" >backup</button>

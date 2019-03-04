@@ -1,0 +1,21 @@
+@import '../../../styles/const_dark.scss';
+@import '../../../styles/material_overrides.scss';
+@import '../../../../node_modules/material-design-icons/iconfont/material-icons.css';
+
+.toolbar-icon {
+	padding: 4px;
+	margin-left: 1px;
+	margin-right: 1px;
+	border: solid 1px;
+	color: $app-foreground;
+	border-color: $panel-background;
+	background-color: $panel-background;
+	min-width: 0px;
+}
+
+.toolbar-icon:hover {
+	border: solid 1px;
+	box-shadow: -2px 2px 20px -8px rgba(0,0,0,0.6);
+	background-color: $app-background;
+	border-color: $panel-outline-color;
+}
