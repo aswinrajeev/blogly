@@ -9,7 +9,7 @@ button.mat-menu-item {
 }
 
 button.mat-menu-item:hover {
-    background-color: $app-secondary;
+    background-color: $app-second-background;
 }
 
 .mat-menu-content {
@@ -24,4 +24,8 @@ button.mat-menu-item:hover {
 
 .material-icons.md-18 { 
 	font-size: 18px; 
+}
+
+.material-icons.md-15 { 
+	font-size: 15px; 
 }

@@ -1,0 +1,16 @@
+@import '../../../styles/const_dark.scss';
+@import '../../../styles/material_overrides.scss';
+
+.sidepanel-title {
+	background-color: $panel-background;
+	font-size: 12px;
+	padding: 5px;
+	padding-top: 8px;
+}
+
+.sidepanel-close {
+	position: absolute;
+	right: 0px;
+	padding: 5px;
+	padding-top: 2px;
+}

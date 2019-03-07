@@ -20,3 +20,13 @@
 	background-color: $app-background;
 	border-color: $panel-outline-color;
 }
+
+.toolbar-group {
+	display: inline-block;
+	padding-right: 8px;
+	padding-left: 5px;
+}
+
+.toolbar-group:not(:last-child) {
+	border-right: 1px solid grey;
+}
