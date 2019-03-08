@@ -9,7 +9,7 @@
 	height: 38px;
 	padding: 5px;
 	box-shadow: -2px 2px 20px -8px rgba(0,0,0,0.8);
-	z-index: 5;
+	z-index: 7;
 }
 
 .app-container {
@@ -42,16 +42,15 @@
 	width: 280px;
 	padding: 0px;
 	box-shadow: 4px 2px 20px -8px rgba(0,0,0,0.8);
-	z-index: 2px;
+	z-index: 5px;
 }
 
 .app-blogarea {
 	position:absolute;
 	right: 0px;
-	bottom: 0px;
 	top: 0px;
+	bottom: 0px;
 	left: 330px;
-	padding: 5px;
 }
 
 .app-footer {
@@ -62,5 +61,5 @@
 	right: 0px;
 	height: 25px;
 	padding: 5px;
-	z-index: 5px;
+	z-index: 6;
 }

@@ -18,6 +18,8 @@ class MainWindow {
 		this.mainWindow = new BrowserWindow({ 
 			width: 1080, 
 			height: 640, 
+			minHeight: 618,
+			minWidth: 1080,
 			show: false,
 			backgroundColor: 'rgb(55, 55, 55)'
 		});

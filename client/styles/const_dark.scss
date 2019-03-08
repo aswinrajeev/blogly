@@ -3,9 +3,12 @@
 /* App Main Screen */
 $app-background: rgb(55, 55, 55);
 $app-foreground: rgb(230, 230, 230);
+$app-second-background: rgb(45, 45, 45);
+$app-third-background: rgb(50, 50, 50);
 
 /* Panels */
 $panel-background: rgb(40, 40, 40);
 $panel-outline-color: rgb(30, 30, 30);
-$app-second-background: rgb(45, 45, 45);
-$app-third-background: rgb(50, 50, 50);
+
+/* Form Controls */
+$control-outline-color: rgb(90, 90, 90);
