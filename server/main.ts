@@ -18,7 +18,10 @@ class MainWindow {
 		this.mainWindow = new BrowserWindow({ 
 			width: 1080, 
 			height: 640, 
-			show: false
+			minHeight: 618,
+			minWidth: 1080,
+			show: false,
+			backgroundColor: 'rgb(55, 55, 55)'
 		});
 
 		//Load the compiled index.html file

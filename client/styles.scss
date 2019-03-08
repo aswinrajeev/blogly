@@ -1,1 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
+/* App Global Styles */
+
+@import 'styles/const_dark.scss';
+@import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+@import '../node_modules/material-design-icons/iconfont/material-icons.css';
+
+@import '../node_modules/quill/dist/quill.core.css';
+@import '../node_modules/quill/dist/quill.bubble.css';
+@import '../node_modules/quill/dist/quill.snow.css';
+
+@import 'styles/quill_overrides.scss';
+
+.app_body {
+	background-color: $app-background;
+	color: $app-foreground;
+}
+
+.app-container {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+}

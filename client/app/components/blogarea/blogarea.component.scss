@@ -1,0 +1,11 @@
+@import '../../../styles/const_dark.scss';
+
+.title-text{
+	background-color: $app-background;
+	border: none;
+	border-radius: 0px;
+	color: $app-foreground;
+	width: 100%;
+	margin-top: 2px;
+}
+

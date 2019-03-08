@@ -1,0 +1,65 @@
+@import '../styles/const_dark.scss';
+
+.app-toolbar {
+	background-color: $panel-background;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	left: 0px;
+	height: 38px;
+	padding: 5px;
+	box-shadow: -2px 2px 20px -8px rgba(0,0,0,0.8);
+	z-index: 7;
+}
+
+.app-container {
+	position: absolute;
+	top: 35px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	z-index: 4px;
+	padding: 0px;
+}
+
+.app-sidebar {
+	background-color: $app-second-background;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	width: 50px;
+	padding: 5px;
+	z-index: 3px;
+}
+
+.app-sidepanel {
+	background-color: $app-third-background;
+	position: absolute;
+	top: 0px;
+	left: 50px;
+	bottom: 0px;
+	width: 280px;
+	padding: 0px;
+	box-shadow: 4px 2px 20px -8px rgba(0,0,0,0.8);
+	z-index: 5px;
+}
+
+.app-blogarea {
+	position:absolute;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	left: 330px;
+}
+
+.app-footer {
+	background-color: $panel-background;
+	position: absolute;
+	left: 0px;
+	bottom: 0px;
+	right: 0px;
+	height: 25px;
+	padding: 5px;
+	z-index: 6;
+}
