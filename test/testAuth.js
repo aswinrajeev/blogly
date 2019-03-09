@@ -1,5 +1,6 @@
 const {google} = require('googleapis');
 const api_creds = require('../configs/googleapi');
+const test_config = require('../configs/tests');
 
 var oauth2Client = new google.auth.OAuth2(
 	api_creds.client_id,
@@ -44,8 +45,28 @@ var server = http.createServer(async function (req, res) {
 
 		// console.log('Tokens: ' + tokens)
 		oauth2Client.setCredentials(tokens);
+
+		insertBlog();
 	}
 	server.close();
   });
   
  server.listen(8080);
+
+ var insertBlog = async function() {
+
+	const blogger = google.blogger({
+		version: 'v3',
+		auth: oauth2Client,
+	});
+
+	const res = await blogger.posts.insert({
+		blogId: test_config.testBlogId, 
+		isDraft: false,
+		resource: {
+			title: 'My test blog',
+			content: 'This is just a sample <b>blog post</b>. Let us see how it goes.'
+		}
+	});
+	console.log(`The post has been plublished. The blog post url is ${res.data.url}.`);
+ }
