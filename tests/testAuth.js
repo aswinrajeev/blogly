@@ -1,6 +1,13 @@
+// This is a test utility to try out a blog post insertion
+// For executing the test, provide the required parameters in configurations. 
+
 const {google} = require('googleapis');
-const api_creds = require('../configs/googleapi');
-const test_config = require('../configs/tests');
+
+/* configurations for the client authentication for google apis. exports client_id, secret and api_key */
+const api_creds = require('../configs/googleapi'); // file not included as part of the source.
+
+/* configurations for the tests. exports a testBlogId for the experimental blog. */
+const test_config = require('../configs/tests'); // file not included as part of the source.
 
 var oauth2Client = new google.auth.OAuth2(
 	api_creds.client_id,

@@ -1,5 +1,10 @@
+
+// This is a test utility to get the deta for a specified blog
+// For executing the test, provide the required parameters in configurations. 
 const {google} = require('googleapis');
-const api_creds = require('../configs/googleapi');
+
+/* configurations for the client authentication for google apis. exports client_id, secret and api_key */
+const api_creds = require('../configs/googleapi'); // file not included as part of the source.
 
 // Each API may support multiple version. With this sample, we're getting
 // v3 of the blogger API, and using an API key to authenticate.
