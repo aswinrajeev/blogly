@@ -2,7 +2,7 @@
   "name": "blogly",
   "version": "0.1.0",
   "description": "Blogly is an open-source desktop application for bloggers and content writers",
-  "main": "./out/server/main.js",
+  "main": "./server/main.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aswinrajeev/blogly.git"
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/aswinrajeev/blogly#readme",
   "scripts": {
-    "run-unix": "pushd server && tsc && popd && ng build --base-href ./ && electron .",
+    "run-unix": " ng build --base-href ./ && electron .",
     "start": "electron .",
     "ng": "ng",
     "build": "ng build",
