@@ -63,7 +63,7 @@ class BloggerAdapter {
 	}
 
 	// listens for a callback from the google authorization service with the authorization code
-	async awaitAuthorization(args) {
+	awaitAuthorization(args) {
 		var httpListener;
 
 		// create a promise that would be resolved when the code is obtained
@@ -129,7 +129,7 @@ class BloggerAdapter {
 		});
 
 		// resolution action for the authorization promise
-		await codePromise.then((code) => {
+		codePromise.then((code) => {
 			
 			// stops the listener
 			httpListener.close();
@@ -168,32 +168,30 @@ class BloggerAdapter {
 				});
 			}
 		});
+
+		return codePromise;
 	}
 
 	// returns the blog args from a specified URL
 	async getBlogByUrl(args) {
 
-		try {
-			const res = await args.blogAPI.blogs.getByUrl({
-				url: args.url
-			});
+		const result = await args.blogAPI.blogs.getByUrl({
+			url: args.url
+		});
 
-			if (this.debugMode) {
-				console.debug('Received blog data from Google server.');
-			}
-	
-			// calls the callback if provided
-			if (args.callback) {
-				if (this.debugMode) {
-					console.debug('Invoking the callback on getting blog data.');
-				}
-				args.callback(res);
-			}
-
-			return res.args;
-		} catch (error) {
-			console.error(error);
+		if (this.debugMode) {
+			console.debug('Received blog data from Google server.');
 		}
+
+		// calls the callback if provided
+		if (args.callback) {
+			if (this.debugMode) {
+				console.debug('Invoking the callback on getting blog data.');
+			}
+			args.callback(result);
+		}
+
+		return result.data;
 	}
 
 	// publish a blog
@@ -203,7 +201,7 @@ class BloggerAdapter {
 			console.debug('Publishing the post to the blog.');
 		}
 
-		const status = await args.blogAPI.posts.insert({
+		const result = await args.blogAPI.posts.insert({
 			blogId: args.blogId,
 			isDraft: args.isDraft,
 			resource: {
@@ -221,10 +219,10 @@ class BloggerAdapter {
 			if (this.debugMode) {
 				console.debug('Invoking the callback after publish.');
 			}
-			args.callback(status);
+			args.callback(result);
 		}
 
-		return status.args;
+		return result.data;
 
 	}
 

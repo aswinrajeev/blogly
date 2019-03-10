@@ -14,34 +14,30 @@ var blogger = new BloggerAdapter({
 
 console.log(blogger.generateAuthUrl());
 
-blogger.awaitAuthorization({
-	callback: blogger.getBlogByUrl,
+const promise = blogger.awaitAuthorization({
 	blogAPI: blogger.getBloggerAPI(),
 	authClient: blogger.getAuth(),
-	data: {
-		url: 'https://asrtestblog.blogspot.com/',
-		blogAPI: blogger.getBloggerAPI(),
-		callback: function(res) {
-			var blogId = res.data.id
-			console.log('BlogId: ' + blogId);
-			try {
-				blogger.publish({
-					blogAPI: blogger.getBloggerAPI(),
-					blogId: blogId, 
-					blogPost: {
-						title: 'Test Blog 8', 
-						content: 'Some contents are always there.', 
-						tags: []
-					}, 
-					isDraft:false,
-					callback: function() {
-						console.log("Blog published.");
-					}
-				});
-			} catch (error) {
-				console.error(error);
-			}
-		}
-	}
-});
+})
 
+promise.then(() => {
+	blogger.getBlogByUrl({
+		blogAPI: blogger.getBloggerAPI(),
+		authClient: blogger.getAuth(),
+		url: 'https://asrtestblog.blogspot.com/'
+	}).then((result) => {
+		var blogId = result.id;
+		console.log(`Blog Id is ${blogId}`);
+		blogger.publish({
+			blogAPI: blogger.getBloggerAPI(),
+			authClient: blogger.getAuth(),
+			blogId: blogId,
+			isDraft: false,
+			blogPost: {
+				title: 'First perfect blog',
+				content: 'Finally after a lot of trial and errors, I got to publish a blog post through my prototype application <b>Blogly</b>. Going foreward, I would be continuing with the development of the application. Let`s see'
+			}
+		}).then((result) => {
+			console.log(`Blog published. The post URL is ${result.url}`)
+		})
+	})
+})
