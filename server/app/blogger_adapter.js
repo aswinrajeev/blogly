@@ -1,40 +1,58 @@
 const { google } = require('googleapis');
-const { APIKeys } = require('../configs/googleapi');
 const http = require('http');
 const url = require('url');
 
+/**
+ * Adapter for interfacing the application with Blogger.
+ * 
+ * @author Aswin Rajeev
+ * 
+ */
 class BloggerAdapter {
 
-	constructor() {
+	// accepts the api configurations and application configurations passed from the application
+	constructor(args) {
 
-		var apikeys = new APIKeys();
+		// backup the app configurations
+		this.appConf = args.appConf;
+		this.debugMode = args.debugMode;
 
+		// create a google API authenticator
 		this.authClient = new google.auth.OAuth2(
-			apikeys.client_id,
-			apikeys.client_secret,
-			'http://localhost:8080'
+			args.apiConf.client_id,
+			args.apiConf.client_secret,
+			`http://${this.appConf.listener_host}:${this.appConf.listener_port}`
 		);
 
+		// event handler for the token update
 		this.authClient.on('tokens', (tokens) => {
 			if (tokens.refresh_token) {
-			  console.log('Found a refresh token.');
+
 			}
-			console.log('Updated the tokens.');
 		});
 
-		this.authClient.on('tokens', (tokens) => {
-			if (tokens.refresh_token) {
-				console.log('Found a refresh token.');
-			}
-			console.log('Updated the tokens.');
-		});
-
+		// define the google blogger API controller with the API authenticator
 		this.blogAPI = google.blogger({
 			version: 'v3',
 			auth: this.authClient
 		});
+
+		if (this.debugMode) {
+			console.debug('Blogger API initialized.');
+		}
+	}
+	
+	// returns the API authenticator
+	getAuth() {
+		return this.authClient;
 	}
 
+	// returns the blogger API 
+	getBloggerAPI() {
+		return this.blogAPI;
+	}
+
+	// generates an authorization URL for the user
 	generateAuthUrl() {
 		return this.authClient.generateAuthUrl({
 			access_type: 'offline',
@@ -44,74 +62,171 @@ class BloggerAdapter {
 		});
 	}
 
-	getAuth() {
-		return this.authClient;
-	}
+	// listens for a callback from the google authorization service with the authorization code
+	async awaitAuthorization(args) {
+		var httpListener;
 
-	getConnection() {
-		return this.blogAPI;
-	}
-
-	async getBlogByUrl(blogAPI, data) {
-		const res = await blogAPI.blogs.getByUrl({
-			url: data.url
-		});
-		if (data.callback) {
-			data.callback(res);
-		}
-		return res.data;
-	}
-
-
-	async authorizeAction(data, callback) {
-		var self = this;
-
+		// create a promise that would be resolved when the code is obtained
 		var codePromise = new Promise((resolve, reject) => {
-			self.httpListener = http.createServer(async (req, res) => {
-				res.writeHead(200, {'Content-Type': 'text/plain'});
-				res.end();
 
-				var urlParams = url.parse(req.url, true).query;
-				if (urlParams.code) {
-					var code = urlParams.code;
-					const {tokens} = await self.authClient.getToken(code);
-					self.authClient.setCredentials(tokens);
+			try {		
+				// define a server to listen for any incoming requests
+				httpListener = http.createServer(async (req, res) => {
+					try {
 
-					resolve(code);
+						if (this.debugMode) {
+							console.debug('Received response on listener.');
+						}
+
+						// provides a success message
+						res.writeHead(200, {'Content-Type': 'text/plain'});
+						res.write('Redirecting to Blogo...');
+						res.end();
+		
+						var urlParams = url.parse(req.url, true).query;
+
+						// if the request contains a code
+						if (urlParams.code) {
+							
+							var code = urlParams.code;
+
+							if (this.debugMode) {
+								console.debug('Received a code from Google server.');
+							}
+
+							// awaits the tokens using the code
+							const { tokens } = await args.authClient.getToken(code);
+
+							if (this.debugMode) {
+								console.debug('Received tokens from Google server.');
+							}
+							
+							// updates the tokens in the authenticator
+							args.authClient.setCredentials(tokens);
+
+							if (this.debugMode) {
+								console.debug('Applied tokens to the authenticator.');
+							}
+		
+							// resolves the promise for authorization
+							resolve(code);
+						}
+					} catch (error) {
+						console.error(error);
+						reject(error);
+					}	
+				});
+	
+				// starts the listener in the 
+				httpListener.listen(this.appConf.listener_port);
+				httpListener.setTimeout(500);
+				if (this.debugMode) {
+					console.debug('Listening for authorization confirmation from Google.');
 				}
+			} catch (error) {
+				reject(error);
+			}
+		});
 
+		// resolution action for the authorization promise
+		await codePromise.then((code) => {
+			
+			// stops the listener
+			httpListener.close();
+			if (this.debugMode) {
+				console.debug('Closing the listener.');
+			}
+			
+			// calls the callback if specified
+			if (args.callback) {
+
+				// passes args into the callback if provided
+				if (args.data) {
+					if (this.debugMode) {
+						console.debug('Invoking the callback after authorization.');
+					}
+					args.data.err = null;
+					args.callback(args.data);
+				} else {
+					if (this.debugMode) {
+						console.debug('Invoking the callback after authorization.');
+					}
+					args.callback({
+						err: null
+					});
+				}
+			}
+
+
+		}, (err) => {
+			if (args.callback) {
+				if (this.debugMode) {
+					console.debug('Invoking the callback after authorization failed.');
+				}
+				args.callback({
+					err: err
+				});
+			}
+		});
+	}
+
+	// returns the blog args from a specified URL
+	async getBlogByUrl(args) {
+
+		try {
+			const res = await args.blogAPI.blogs.getByUrl({
+				url: args.url
 			});
-			self.httpListener.listen(8080);
-			console.log('Waiting for authorization...');
-		});
 
-		await codePromise.then(function(code) {
-			if (data && callback) {
-				callback(self.blogAPI, data);
+			if (this.debugMode) {
+				console.debug('Received blog data from Google server.');
 			}
-			self.httpListener.close();
-		});
-	}
-
-	async publish(blogAPI, data) {
-
-		const status = await blogAPI.posts.insert({
-			blogId: data.blogId,
-			isDraft: data.isDraft,
-			resource: {
-				title: data.blogPost.title,
-				content: data.blogPost.content
+	
+			// calls the callback if provided
+			if (args.callback) {
+				if (this.debugMode) {
+					console.debug('Invoking the callback on getting blog data.');
+				}
+				args.callback(res);
 			}
-		});
 
-		console.log('Published the blog post.');
-		if (data.callback) {
-			data.callback(status);
+			return res.args;
+		} catch (error) {
+			console.error(error);
 		}
-		return status.data;
-
 	}
 
+	// publish a blog
+	async publish(args) {
+
+		if (this.debugMode) {
+			console.debug('Publishing the post to the blog.');
+		}
+
+		const status = await args.blogAPI.posts.insert({
+			blogId: args.blogId,
+			isDraft: args.isDraft,
+			resource: {
+				title: args.blogPost.title,
+				content: args.blogPost.content
+			}
+		});
+
+		if (this.debugMode) {
+			console.debug('Blog publishing completed.');
+		}
+
+		// calls the callback if provided
+		if (args.callback) {
+			if (this.debugMode) {
+				console.debug('Invoking the callback after publish.');
+			}
+			args.callback(status);
+		}
+
+		return status.args;
+
+	}
 
 }
 
