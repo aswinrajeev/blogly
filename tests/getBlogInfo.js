@@ -4,7 +4,7 @@
 const {google} = require('googleapis');
 
 /* configurations for the client authentication for google apis. exports client_id, secret and api_key */
-const api_creds = require('../configs/googleapi'); // file not included as part of the source.
+const api_creds = require('../server/configs/googleapi'); // file not included as part of the source.
 
 // Each API may support multiple version. With this sample, we're getting
 // v3 of the blogger API, and using an API key to authenticate.
