@@ -7,6 +7,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class BlogareaComponent implements OnInit {
 
+  /* blog attributes */
+  //TODO: Change this to a single object
+  
+  blogData = "";
+  blogTitle = "";
+
   constructor() { }
 
   ngOnInit() {

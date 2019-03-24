@@ -12,6 +12,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { SidepanelComponent } from './components/sidepanel/sidepanel.component';
 import { FootbarComponent } from './components/footbar/footbar.component';
 import { BlogareaComponent } from './components/blogarea/blogarea.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { BlogareaComponent } from './components/blogarea/blogarea.component';
     BrowserModule,
     AppRoutingModule,
     NgbModule,
-    QuillModule
+    FormsModule,
+    QuillModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]
