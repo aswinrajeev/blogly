@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Blog } from 'client/app/models/blog';
-import { BlogService } from 'client/app/services/blog.service';
+import { BlogService } from 'client/app/services/blogservice/blog.service';
 
 @Component({
   selector: 'app-blogarea',
