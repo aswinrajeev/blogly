@@ -1,5 +1,6 @@
 const { app, BrowserWindow } =  require('electron');
 const { ipcMain, WebContents } = require('electron');
+const { MessagingService } = require('./app/messaging_service');
 
 class MainWindow {
 
@@ -27,6 +28,9 @@ class MainWindow {
 		this.mainWindow.once('ready-to-show', () => {
 			this.mainWindow.show();
 		});
+
+		// Initialize the messaging service
+		this.messenger = new MessagingService(ipcMain, WebContents);
 
 	}
 	
