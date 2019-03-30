@@ -1,6 +1,9 @@
 const { app, BrowserWindow } =  require('electron');
 const { ipcMain, WebContents } = require('electron');
 const { MessagingService } = require('./app/messaging_service');
+const { BlogService } = require('./app/blog_service');
+const { testBlogUrl } = require('./localconfigs/tests'); //temporary test configs
+
 
 class MainWindow {
 
@@ -30,7 +33,11 @@ class MainWindow {
 		});
 
 		// Initialize the messaging service
-		this.messenger = new MessagingService(ipcMain, WebContents);
+		this.messenger = new MessagingService(ipcMain, this.mainWindow.webContents);
+
+		// Register events for blogging services
+		this.blogservice = new BlogService(this.messenger, testBlogUrl);
+		this.blogservice.initialize();
 
 	}
 	

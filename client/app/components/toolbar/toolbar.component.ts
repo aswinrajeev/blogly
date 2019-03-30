@@ -13,8 +13,9 @@ export class ToolbarComponent implements OnInit {
   ngOnInit() {
   }
 
-  publishBlog() {
-    this.blogservice.publishBlog();
+  // pubish a blog
+  publishBlog(isDraft) {
+    this.blogservice.publishBlog(isDraft);
   }
 
 }

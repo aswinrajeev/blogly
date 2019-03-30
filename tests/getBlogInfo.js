@@ -23,6 +23,6 @@ blogger.blogs.getByUrl(params, (err, res) => {
     console.error(err);
     throw err;
   }
-  //console.log(res.data.posts);
+  
   console.log(`The blog url is ${res.data.id}. The total number of items is ${res.data.posts.totalItems}.`);
 });

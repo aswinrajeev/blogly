@@ -201,14 +201,26 @@ class BloggerAdapter {
 			console.debug('Publishing the post to the blog.');
 		}
 
-		const result = await args.blogAPI.posts.insert({
+		// compile the blogdata
+		var blogData = {
 			blogId: args.blogId,
 			isDraft: args.isDraft,
 			resource: {
 				title: args.blogPost.title,
 				content: args.blogPost.content
 			}
-		});
+		};
+
+		var result;
+		if (args.postId != null && args.postId.trim() != '') {
+			
+			// updates the post
+			blogData.postId = args.postId;
+			result = await args.blogAPI.posts.update(blogData);
+		} else {		
+			// insert the post
+			result = await args.blogAPI.posts.insert(blogData);
+		}
 
 		if (this.debugMode) {
 			console.debug('Blog publishing completed.');
