@@ -5,21 +5,21 @@
       <i class="material-icons md-18">note_add</i> 
   </button>
 
-    <!-- Save button -->
+  <!-- Save Button -->
+  <button class="btn btn-dark btn-sm" aria-label="Save">
+      <i class="material-icons md-18">save</i> 
+  </button>  
+
+  <!-- Publish dropdown button -->
   <div class="btn-group" ngbDropdown role="group">
-    <button class="btn btn-dark btn-sm" ngbDropdownToggle aria-label="Save blog">
-        <i class="material-icons md-18">save</i> 
+    <button class="btn btn-dark btn-sm" ngbDropdownToggle aria-label="Publish blog">
+        <i class="material-icons md-18">publish</i> 
     </button>
     <div class="dropdown-menu" ngbDropdownMenu>
-      <button ngbDropdownItem>Save local</button>
-      <button ngbDropdownItem>Save to drafts</button>
+      <button ngbDropdownItem (click)="publishBlog(false)">Publish to Blogger</button>
+      <button ngbDropdownItem (click)="publishBlog(true)">Save as draft</button>
     </div>
   </div>
-
-  <!-- Publish Button -->
-  <button class="btn btn-dark btn-sm" aria-label="Publish blog" (click)="publishBlog()">
-      <i class="material-icons md-18">publish</i> 
-  </button>  
 </div>
 
 
