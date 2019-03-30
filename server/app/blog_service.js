@@ -1,7 +1,7 @@
 const { BloggerAdapter } = require('./blogger_adapter.js');
 const { listener_port, listener_host } = require('../configs/conf');
 const { APIKeys } = require('../localconfigs/googleapi');
-const { app, BrowserWindow } =  require('electron');
+const { BrowserWindow } =  require('electron');
 
 /**
  * 
