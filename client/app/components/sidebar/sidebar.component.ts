@@ -18,7 +18,6 @@ export class SidebarComponent implements OnInit {
 
   // returns if the current item is the one selected or not
   isActiveItem(item) {
-    console.log("Current Item: " + this.navService.getCurrentPanel() + ", asked for " + item);
     return (this.navService.getCurrentPanel() == item);
   }
 

@@ -1,0 +1,38 @@
+@import '../../../styles/const_dark.scss';
+
+.postItem {
+	background-color: $app-background;
+	border: thin solid $panel-background;
+	padding: 8px;
+	margin-bottom: 2px;
+	cursor: pointer;
+}
+
+.postItem:hover, .postItem.active {
+	background-color: $app-second-background;
+}
+
+.filename-text{
+	background: none;
+	border: none;
+	border-radius: 0px;
+	color: $app-foreground;
+	width: 100%;
+	margin-top: 2px;
+	padding:0px;
+	font-size: 11px;
+	padding: 5px;
+	height: 15px;
+}
+
+.post-title {
+	font-size: 14px;
+	color: $app-foreground;
+	width:100%;
+}
+
+.post-contents {
+	font-size: 10px;
+	color: $app-second-foreground;
+	width:100%;
+}

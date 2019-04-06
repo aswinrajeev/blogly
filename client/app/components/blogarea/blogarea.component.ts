@@ -15,7 +15,6 @@ export class BlogareaComponent implements OnInit {
 
   ngOnInit() {
     this.blogData = this.blogService.getBlogData();
-    this.blogService.fetchPostList();
   }
 
   // returns the blog data

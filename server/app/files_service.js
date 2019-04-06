@@ -8,6 +8,8 @@ class FileSystemService {
 		this.appConf = this.appDir  + path.sep +  "config.json";
 		this.blogsDir = app.getPath('documents') + path.sep + 'Blogly'; //set default blogs document dir
 		this.conf = null;
+		this.indexFileName = ".blog.index";
+
 	}
 
 	// load the configurations for the application
@@ -85,23 +87,79 @@ class FileSystemService {
 		});
 	}
 
-	// get the list of blogs saved in the blogs directory
-	getPostsList() {
+	// creates / overwrites the indexing data
+	indexPostsFiles() {
 		var blogs = [];
-		fs.readdirSync(this.blogsDir).forEach((file) => {
-			var filenameParts = file.split('.');
-			if (filenameParts[filenameParts.length - 1] == "post") {
-				var blogPost = {};
+		var blogIndex = {};
+		var count = 0;
 
-				var post = JSON.parse(fs.readFileSync(this.blogsDir + path.sep + file, "utf8"));
-				
-				blogPost.title = post.title;
-				blogPost.content = post.content.slice(0, 25);
-				blogPost.file = file;
-				blogs.push(blogPost);
-			}
-		});
-		return blogs;
+		var indexData = {};
+		var currTime = Math.floor(Date.now());
+
+		try {
+			fs.readdirSync(this.blogsDir).forEach((file) => {
+				var filenameParts = file.split('.');
+				if (filenameParts[filenameParts.length - 1] == "post") {
+	
+					try {
+						var blogPost = new Object();
+		
+						var post = JSON.parse(fs.readFileSync(this.blogsDir + path.sep + file, "utf8"));
+						
+						blogPost.title = post.title;
+						blogPost.postId = post.id;
+						blogPost.content = post.content.slice(0, 100);
+						blogPost.filename = file;
+		
+						var timestamp = 'p_' + currTime;
+						currTime = currTime + 1;
+
+						blogPost.itemId = timestamp;
+		
+						blogIndex[timestamp] = blogPost;
+						blogs.push(timestamp);
+		
+						count = count + 1;
+					} catch (error) {
+						console.debug('Error in reading the blog data');
+					}
+				}
+			});
+	
+			indexData.index = blogIndex;
+			indexData.posts = blogs;
+			indexData.count = count;
+	
+			fs.writeFileSync(this.blogsDir + path.sep + this.indexFileName, JSON.stringify(indexData), "utf8");
+		} catch (error) {
+			console.error('Error in indexing the posts.');
+		}
+
+		return indexData;
+
+	}
+
+	// reads the post details from the index and returns the list
+	getPostsList() {
+		
+		var indexData = {};
+
+		try {
+			var content = fs.readFileSync(this.blogsDir + path.sep + this.indexFileName, "utf8");
+			indexData = JSON.parse(content);
+		} catch (error) {
+			console.error('Error in reading indices. Regenerating the indices...', error);
+			indexData = this.indexPostsFiles();
+		}
+
+		var posts = [];
+		indexData.posts.forEach(itemId => {
+			posts.push(indexData.index[itemId]);
+		})
+
+		return posts;
+
+
 	}
 
 

@@ -9,7 +9,7 @@ export class BlogService {
 
 	// blog object data holder
   blog: BlogPost;
-  postsList:[];
+  postsList:BlogPost[];
 
   constructor(private _messenger: MessagingService) {}
 
@@ -46,15 +46,30 @@ export class BlogService {
   }
 
   // returns the posts list
-  getPostList():[] {
+  getPostList():BlogPost[] {
     return this.postsList;
   }
 
   // retrieves the list of posts in the posts directory
-  fetchPostList(){
-    this._messenger.request('fetchposts', null, (data:any) => {
-      this.postsList = data;
-      console.log(data);
+  fetchPostList(callback){
+    this._messenger.request('fetchposts', null, (result:any) => {
+      var posts:BlogPost[] = new Array<BlogPost>();
+      var post;
+
+      if (result != null) {
+        result.forEach(data => {
+          post = new BlogPost();
+          post.postId = data.postId;
+          post.title = data.title;
+          post.content = data.content;
+          post.file = data.filename;
+
+          posts.push(post);
+        });
+      }
+
+      this.postsList = posts;
+      callback(posts);
     });
   }
 }

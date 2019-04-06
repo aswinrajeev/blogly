@@ -14,7 +14,6 @@ import { FootbarComponent } from './components/footbar/footbar.component';
 import { BlogareaComponent } from './components/blogarea/blogarea.component';
 import { FormsModule } from '@angular/forms';
 import { PostlistComponent } from './components/postlist/postlist.component';
-import { PostitemComponent } from './components/postitem/postitem.component';
 
 import { RouterModule, Routes } from '@angular/router';
 
@@ -34,8 +33,7 @@ const routes: Routes = [
     SidepanelComponent,
     FootbarComponent,
     BlogareaComponent,
-    PostlistComponent,
-    PostitemComponent
+    PostlistComponent
   ],
   imports: [
     BrowserModule,
@@ -44,8 +42,8 @@ const routes: Routes = [
     FormsModule,
     QuillModule.forRoot(),
     RouterModule.forRoot(
-      routes,
-      { enableTracing: true } // <-- debugging purposes only
+      routes
+      //, { enableTracing: true } // <-- debugging purposes only
     )
   ],
   providers: [],
