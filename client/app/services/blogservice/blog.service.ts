@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Blog } from 'client/app/models/blog';
+import { BlogPost } from 'client/app/models/blogpost';
 import { MessagingService } from '../messagingservice/messaging.service';
 
 @Injectable({
@@ -8,15 +8,16 @@ import { MessagingService } from '../messagingservice/messaging.service';
 export class BlogService {
 
 	// blog object data holder
-  blog: Blog;
+  blog: BlogPost;
+  postsList:[];
 
   constructor(private _messenger: MessagingService) {}
 
   // returns the blog data
-  getBlogData(): Blog {
+  getBlogData(): BlogPost {
     
     //return the blog object if exist, else initialize and return
-    return this.blog ? this.blog : new Blog();
+    return this.blog ? this.blog : new BlogPost();
   }
 
   // set the blog post id
@@ -25,7 +26,7 @@ export class BlogService {
   }
 
   // set blog data to the service
-  setBlogData(blog:Blog) {
+  setBlogData(blog:BlogPost) {
     this.blog = blog;
   }
 
@@ -42,5 +43,18 @@ export class BlogService {
       alert('Blg has been published');
     }, null);
 
+  }
+
+  // returns the posts list
+  getPostList():[] {
+    return this.postsList;
+  }
+
+  // retrieves the list of posts in the posts directory
+  fetchPostList(){
+    this._messenger.request('fetchposts', null, (data:any) => {
+      this.postsList = data;
+      console.log(data);
+    });
   }
 }

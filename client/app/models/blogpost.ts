@@ -1,4 +1,4 @@
-export class Blog {
+export class BlogPost {
 	title: String = "";
 	content: String = "";
 	postId: String = null;

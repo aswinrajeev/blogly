@@ -13,6 +13,7 @@ class FileSystemService {
 	// load the configurations for the application
 	initalize() {
 		this.conf = this.readConfigs();
+		this.blogsDir = this.conf.blogsDir;
 	}
 
 	// first-time initialize all pre-requisites
@@ -36,6 +37,8 @@ class FileSystemService {
 		} catch (error) {
 			console.error("Cannot create the configuration file.");
 		}
+
+
 	}
 
 	// returns the configuratins
@@ -73,6 +76,36 @@ class FileSystemService {
 			return null;
 		}
 	}
+
+	// sets the messenger
+	setMessenger(messenger) {
+		this.messenger = messenger;
+		this.messenger.respond('fetchposts', (data) => {
+			return this.getPostsList();
+		});
+	}
+
+	// get the list of blogs saved in the blogs directory
+	getPostsList() {
+		var blogs = [];
+		fs.readdirSync(this.blogsDir).forEach((file) => {
+			var filenameParts = file.split('.');
+			if (filenameParts[filenameParts.length - 1] == "post") {
+				var blogPost = {};
+
+				var post = JSON.parse(fs.readFileSync(this.blogsDir + path.sep + file, "utf8"));
+				
+				blogPost.title = post.title;
+				blogPost.content = post.content.slice(0, 25);
+				blogPost.file = file;
+				blogs.push(blogPost);
+			}
+		});
+		return blogs;
+	}
+
+
+
 }
 
 module.exports.FileSystemService = FileSystemService;

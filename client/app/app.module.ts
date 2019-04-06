@@ -13,6 +13,18 @@ import { SidepanelComponent } from './components/sidepanel/sidepanel.component';
 import { FootbarComponent } from './components/footbar/footbar.component';
 import { BlogareaComponent } from './components/blogarea/blogarea.component';
 import { FormsModule } from '@angular/forms';
+import { PostlistComponent } from './components/postlist/postlist.component';
+import { PostitemComponent } from './components/postitem/postitem.component';
+
+import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [
+  {
+    path: "",
+    component: PostlistComponent,
+    outlet: "sidepanel"
+  }
+]
 
 @NgModule({
   declarations: [
@@ -21,14 +33,20 @@ import { FormsModule } from '@angular/forms';
     SidebarComponent,
     SidepanelComponent,
     FootbarComponent,
-    BlogareaComponent
+    BlogareaComponent,
+    PostlistComponent,
+    PostitemComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     NgbModule,
     FormsModule,
-    QuillModule.forRoot()
+    QuillModule.forRoot(),
+    RouterModule.forRoot(
+      routes,
+      { enableTracing: true } // <-- debugging purposes only
+    )
   ],
   providers: [],
   bootstrap: [AppComponent]

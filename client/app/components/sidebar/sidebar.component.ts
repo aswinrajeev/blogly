@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { NavigationStart, Router } from '@angular/router';
+import { NavigationService } from 'client/app/services/navigationservice/navigation.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -7,9 +9,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SidebarComponent implements OnInit {
 
-  constructor() { }
+  constructor(private router:Router, private navService: NavigationService) { 
+
+  }
 
   ngOnInit() {
+  }
+
+  // returns if the current item is the one selected or not
+  isActiveItem(item) {
+    console.log("Current Item: " + this.navService.getCurrentPanel() + ", asked for " + item);
+    return (this.navService.getCurrentPanel() == item);
   }
 
 }
