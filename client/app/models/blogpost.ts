@@ -1,9 +1,11 @@
 export class BlogPost {
 	title: String = "";
 	content: String = "";
-	postId: String = null;
+	miniContent: String = "";
+	postId: String = null; //for blog id at blogger
 	postURL: String = null;
-	itemId:number;
+	itemId:number; // for internal id
+	isSaved:boolean;
 
 	file: String = null;
 
@@ -13,6 +15,11 @@ export class BlogPost {
 		this.postId = null;
 		this.file = "undefined";
 		this.itemId = Math.floor(Date.now());
+		this.isSaved = false;
+	}
+
+	updateMiniContent() {
+		this.miniContent = this.content != null ? this.content.slice(0, 100) : "";
 	}
 
 }

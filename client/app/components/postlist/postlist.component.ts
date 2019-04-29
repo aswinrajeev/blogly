@@ -11,22 +11,43 @@ export class PostlistComponent implements OnInit {
 
   postList:BlogPost[];
 
-  constructor(private postService:BlogService) { }
+  constructor(private postService:BlogService) { 
+
+    this.postService.setNewPostAction(() => {
+      this.newPost();
+    });
+
+  }
 
   ngOnInit() {
     this.postService.fetchPostList((postList) => {
-      console.log(postList);
       this.postList = this.postService.getPostList();
-      console.log(this.postList);
       if (this.postList.length == 0) {
         var post = new BlogPost();
+        this.postList.unshift(post);
         this.postService.setBlogData(post);
       }
     });
   }
 
+  // fetches the list of all posts in the workspace
   getPostList() {
     return this.postList;
+  }
+
+  // fetches complete data for a selected post
+  viewPost(post) {
+    console.log(post.title);
+    this.postService.setPost(post, function() {
+
+    });
+  }
+
+  // creates a new post
+  newPost() {
+    var post = new BlogPost();
+    this.postList.unshift(post);
+    this.postService.setBlogData(post);
   }
 
 }

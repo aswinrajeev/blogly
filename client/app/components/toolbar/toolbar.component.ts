@@ -18,4 +18,9 @@ export class ToolbarComponent implements OnInit {
     this.blogservice.publishBlog(isDraft);
   }
 
+  // creates a new blog post
+  newPost() {
+    this.blogservice.newPost();
+  }
+
 }

@@ -1,6 +1,6 @@
 <!-- <app-postitem *ngFor="let post of getPostList()" ></app-postitem> -->
-<div class="postItem" *ngFor="let post of getPostList()">
+<div class="postItem" *ngFor="let post of getPostList()" (click)="viewPost(post)">
 	<span class="post-title">{{post.title}}</span><br/>
-	<span class="post-contents">{{post.content}}</span>
-	<input type="text" class="form-control filename-text" [(ngModel)]="post.file"/>
+	<span class="post-contents">{{post.miniContent}}</span>
+	<!-- <input type="text" class="form-control filename-text" [(ngModel)]="post.file"/> -->
 </div>

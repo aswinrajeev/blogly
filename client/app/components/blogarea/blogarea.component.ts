@@ -9,22 +9,20 @@ import { BlogService } from 'client/app/services/blogservice/blog.service';
 })
 export class BlogareaComponent implements OnInit {
 
-  blogData: BlogPost;
-
   constructor(private blogService: BlogService) { }
 
   ngOnInit() {
-    this.blogData = this.blogService.getBlogData();
+    
   }
 
   // returns the blog data
   getBlogData(): BlogPost {
-    return this.blogData;
+    return this.blogService.getBlogData();
   }
 
   // invoked when the blog data is changed
   contentChanged(event) {
-    this.blogService.setBlogData(this.blogData);
+   // this.blogService.setBlogData(this.blogData);
   }
 
 }

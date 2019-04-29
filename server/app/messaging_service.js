@@ -87,7 +87,7 @@ class MessagingService {
 	respond(channel, action) {
 		//Create a listener for the channel
 		let that = this;
-		this.listenOnce(channel, function(payload, channel, event) {
+		this.listen(channel, function(payload, channel, event) {
 			let result = action(payload, event); //Call the response provider
 			that.send(channel, result);
 		}, null);

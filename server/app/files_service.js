@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const h2p = require('html2plaintext');
 
 class FileSystemService {
 
@@ -9,7 +10,6 @@ class FileSystemService {
 		this.blogsDir = app.getPath('documents') + path.sep + 'Blogly'; //set default blogs document dir
 		this.conf = null;
 		this.indexFileName = ".blog.index";
-
 	}
 
 	// load the configurations for the application
@@ -85,6 +85,10 @@ class FileSystemService {
 		this.messenger.respond('fetchposts', (data) => {
 			return this.getPostsList();
 		});
+
+		this.messenger.respond('fetchFullPost', (data) => {
+			return this.fetchPostData(data.filename);
+		});
 	}
 
 	// creates / overwrites the indexing data
@@ -108,7 +112,7 @@ class FileSystemService {
 						
 						blogPost.title = post.title;
 						blogPost.postId = post.id;
-						blogPost.content = post.content.slice(0, 100);
+						blogPost.miniContent = h2p(post.content).slice(0, 100);
 						blogPost.filename = file;
 		
 						var timestamp = 'p_' + currTime;
@@ -145,6 +149,7 @@ class FileSystemService {
 		var indexData = {};
 
 		try {
+			indexData = this.indexPostsFiles(); //TODO: Remove this
 			var content = fs.readFileSync(this.blogsDir + path.sep + this.indexFileName, "utf8");
 			indexData = JSON.parse(content);
 		} catch (error) {
@@ -158,8 +163,23 @@ class FileSystemService {
 		})
 
 		return posts;
+	}
 
+	// reads the post file for a post and return the complete data
+	fetchPostData(file) {
+		var postData;
 
+		try {
+			var content = fs.readFileSync(this.blogsDir + path.sep + file, "utf8");
+			postData = JSON.parse(content);
+
+			// add filename on to the data
+			postData.file = file;
+		} catch (error) {
+			console.error('Error in reading the post file.', error);
+		}
+
+		return postData;
 	}
 
 

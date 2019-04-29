@@ -8,8 +8,9 @@ import { MessagingService } from '../messagingservice/messaging.service';
 export class BlogService {
 
 	// blog object data holder
-  blog: BlogPost;
+  blogPost: BlogPost;
   postsList:BlogPost[];
+  newFun: Function;
 
   constructor(private _messenger: MessagingService) {}
 
@@ -17,17 +18,17 @@ export class BlogService {
   getBlogData(): BlogPost {
     
     //return the blog object if exist, else initialize and return
-    return this.blog ? this.blog : new BlogPost();
+    return this.blogPost ? this.blogPost : new BlogPost();
   }
 
   // set the blog post id
   setPostId(id:String):void {
-    this.blog.postId = id;
+    this.blogPost.postId = id;
   }
 
   // set blog data to the service
   setBlogData(blog:BlogPost) {
-    this.blog = blog;
+    this.blogPost = blog;
   }
 
   // publish a blog post
@@ -61,8 +62,9 @@ export class BlogService {
           post = new BlogPost();
           post.postId = data.postId;
           post.title = data.title;
-          post.content = data.content;
+          post.miniContent = data.miniContent;
           post.file = data.filename;
+          post.isSaved = true;
 
           posts.push(post);
         });
@@ -72,4 +74,41 @@ export class BlogService {
       callback(posts);
     });
   }
+
+  // sets the selected post as the active blog and renders it to the editor
+  setPost(post:BlogPost, callback) {
+    if (post.isSaved) {
+      this._messenger.request('fetchFullPost', {filename: post.file}, (result) => {
+        var post: BlogPost;
+  
+        console.log(result);
+  
+        if (result != null) {
+          post = new BlogPost();
+          post.content = result.content;
+          post.title = result.title;
+          post.itemId = result.itemId;
+          post.postId = result.postId
+          post.file = result.file;
+          post.isSaved = true;
+          this.blogPost = post;
+        }
+  
+      });
+    } else {
+      this.blogPost = post;
+    }
+    callback();
+  }
+
+  // sets a function to be invoked when new button is pressed
+  setNewPostAction(fun) {
+    this.newFun = fun;
+  }
+
+  // invokes the new post action
+  newPost() {
+    this.newFun();
+  }
+
 }
