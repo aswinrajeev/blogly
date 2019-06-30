@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BlogService } from 'client/app/services/blogservice/blog.service';
 import { BlogPost } from 'client/app/models/blogpost';
 
@@ -11,7 +11,7 @@ export class PostlistComponent implements OnInit {
 
   postList:BlogPost[];
 
-  constructor(private postService:BlogService) { 
+  constructor(private postService:BlogService, private cdr : ChangeDetectorRef) { 
 
     this.postService.setNewPostAction(() => {
       this.newPost();
@@ -27,6 +27,9 @@ export class PostlistComponent implements OnInit {
         this.postList.unshift(post);
         this.postService.setBlogData(post);
       }
+
+      // force update on the UI
+      this.cdr.detectChanges();
     });
   }
 
@@ -38,8 +41,10 @@ export class PostlistComponent implements OnInit {
   // fetches complete data for a selected post
   viewPost(post) {
     console.log(post.title);
-    this.postService.setPost(post, function() {
+    this.postService.setPost(post, () => {
 
+      // force update on the UI.
+      this.cdr.detectChanges();
     });
   }
 

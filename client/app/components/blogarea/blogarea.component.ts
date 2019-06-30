@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BlogPost } from 'client/app/models/blogpost';
 import { BlogService } from 'client/app/services/blogservice/blog.service';
 
@@ -9,10 +9,12 @@ import { BlogService } from 'client/app/services/blogservice/blog.service';
 })
 export class BlogareaComponent implements OnInit {
 
-  constructor(private blogService: BlogService) { }
+  constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { }
 
   ngOnInit() {
-    
+    this.blogService.postUpdated.on('postUpdated', () => {
+      this.cdr.detectChanges();
+    })
   }
 
   // returns the blog data

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BlogPost } from 'client/app/models/blogpost';
 import { MessagingService } from '../messagingservice/messaging.service';
+import { EventEmitter } from 'events';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,9 @@ export class BlogService {
   blogPost: BlogPost;
   postsList:BlogPost[];
   newFun: Function;
+
+  // event emitter for tracking post changes
+  postUpdated: EventEmitter = new EventEmitter();
 
   constructor(private _messenger: MessagingService) {}
 
@@ -24,11 +28,13 @@ export class BlogService {
   // set the blog post id
   setPostId(id:String):void {
     this.blogPost.postId = id;
+    this.postUpdated.emit("postUpdated");
   }
 
   // set blog data to the service
   setBlogData(blog:BlogPost) {
     this.blogPost = blog;
+    this.postUpdated.emit
   }
 
   // publish a blog post
@@ -93,12 +99,19 @@ export class BlogService {
           post.isSaved = true;
           this.blogPost = post;
         }
+        
+        // emit a post updated event
+        this.postUpdated.emit("postUpdated");
+        callback();
   
       });
     } else {
       this.blogPost = post;
+
+      // emit a post updated event
+      this.postUpdated.emit("postUpdated");
+      callback();
     }
-    callback();
   }
 
   // sets a function to be invoked when new button is pressed
