@@ -26,6 +26,8 @@ export class PostlistComponent implements OnInit {
         var post = new BlogPost();
         this.postList.unshift(post);
         this.postService.setBlogData(post);
+      } else {
+        this.viewPost(this.postList[0]);
       }
 
       // force update on the UI
@@ -43,8 +45,6 @@ export class PostlistComponent implements OnInit {
     console.log(post.title);
     this.postService.setPost(post, () => {
 
-      // force update on the UI.
-      this.cdr.detectChanges();
     });
   }
 

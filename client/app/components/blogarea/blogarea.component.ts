@@ -24,7 +24,8 @@ export class BlogareaComponent implements OnInit {
 
   // invoked when the blog data is changed
   contentChanged(event) {
-   // this.blogService.setBlogData(this.blogData);
+    //update the mini content
+    this.blogService.getBlogData().updateMiniContent();
   }
 
 }

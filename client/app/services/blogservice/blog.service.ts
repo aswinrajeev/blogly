@@ -28,13 +28,11 @@ export class BlogService {
   // set the blog post id
   setPostId(id:String):void {
     this.blogPost.postId = id;
-    this.postUpdated.emit("postUpdated");
   }
 
   // set blog data to the service
   setBlogData(blog:BlogPost) {
     this.blogPost = blog;
-    this.postUpdated.emit
   }
 
   // publish a blog post
@@ -85,12 +83,10 @@ export class BlogService {
   setPost(post:BlogPost, callback) {
     if (post.isSaved) {
       this._messenger.request('fetchFullPost', {filename: post.file}, (result) => {
-        var post: BlogPost;
   
         console.log(result);
   
         if (result != null) {
-          post = new BlogPost();
           post.content = result.content;
           post.title = result.title;
           post.itemId = result.itemId;

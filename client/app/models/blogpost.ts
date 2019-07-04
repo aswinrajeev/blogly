@@ -22,4 +22,7 @@ export class BlogPost {
 		this.miniContent = this.content != null ? this.content.slice(0, 100) : "";
 	}
 
+	markDirty(isDirty: boolean) {
+		this.isSaved = !isDirty;
+	}
 }
