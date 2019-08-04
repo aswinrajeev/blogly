@@ -22,10 +22,16 @@ export class BlogareaComponent implements OnInit {
     return this.blogService.getBlogData();
   }
 
+  // mark the post as dirty
+  markChanged() {
+    this.blogService.getBlogData().markDirty(true);
+  }
+
   // invoked when the blog data is changed
   contentChanged(event) {
     //update the mini content
     this.blogService.getBlogData().updateMiniContent();
+    this.markChanged();
   }
 
 }

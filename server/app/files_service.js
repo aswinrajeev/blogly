@@ -89,6 +89,10 @@ class FileSystemService {
 		this.messenger.respond('fetchFullPost', (data) => {
 			return this.fetchPostData(data.filename);
 		});
+
+		this.messenger.respond('savePost', (data) => {
+			return this.savePost(data.filename, data.postData);
+		})
 	}
 
 	// creates / overwrites the indexing data
@@ -180,6 +184,26 @@ class FileSystemService {
 		}
 
 		return postData;
+	}
+
+	// writes the post data to the corresponding file
+	savePost(filename, post) {
+
+		var postData = {};
+		var result = {status: 'ok'};
+		postData.content = post.content;
+		postData.title = post.title;
+		postData.itemId = post.itemId;
+		postData.postId = post.postId
+		postData.file = post.file;
+		postData.postURL = post.postURL;
+		fs.writeFileSync(this.blogsDir + path.sep + filename, JSON.stringify(postData));
+
+		// TODO: Update the cache also
+
+		result.filename = filename;
+
+		return result;
 	}
 
 

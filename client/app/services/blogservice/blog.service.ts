@@ -64,7 +64,6 @@ export class BlogService {
       if (result != null) {
         result.forEach(data => {
           post = new BlogPost();
-          post.postId = data.postId;
           post.title = data.title;
           post.miniContent = data.miniContent;
           post.file = data.filename;
@@ -91,6 +90,7 @@ export class BlogService {
           post.title = result.title;
           post.itemId = result.itemId;
           post.postId = result.postId
+          post.postURL = result.postURL;
           post.file = result.file;
           post.isSaved = true;
           this.blogPost = post;
@@ -108,6 +108,20 @@ export class BlogService {
       this.postUpdated.emit("postUpdated");
       callback();
     }
+  }
+
+  // saves the blog post
+  saveCurrentPost() {
+    var post = this.blogPost;
+    this._messenger.request('savePost', {
+      filename: post.file,
+      postData: post.getAsPost()
+    }, (result) => {
+      if (result != null && result.status == 'ok') {
+        post.file = result.filename;
+        post.markDirty(false);
+      }
+    });
   }
 
   // sets a function to be invoked when new button is pressed

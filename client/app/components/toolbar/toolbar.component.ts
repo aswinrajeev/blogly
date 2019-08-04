@@ -23,4 +23,9 @@ export class ToolbarComponent implements OnInit {
     this.blogservice.newPost();
   }
 
+  // saves a post
+  savePost() {
+    this.blogservice.saveCurrentPost();
+  }
+
 }

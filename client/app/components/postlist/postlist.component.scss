@@ -35,4 +35,14 @@
 	font-size: 10px;
 	color: $app-second-foreground;
 	width:100%;
+	line-height: 1.5;
+    display: block;
+}
+
+.post-delete {
+	position: absolute;
+	right: 0px;
+	padding: 5px;
+	padding-top: 2px;
+	font-size: 10px;
 }
