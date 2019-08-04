@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Blog } from 'client/app/models/blog';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { BlogPost } from 'client/app/models/blogpost';
 import { BlogService } from 'client/app/services/blogservice/blog.service';
 
 @Component({
@@ -9,20 +9,29 @@ import { BlogService } from 'client/app/services/blogservice/blog.service';
 })
 export class BlogareaComponent implements OnInit {
 
-	blogData: Blog;
-
-  constructor(private blogService: BlogService) { }
+  constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { }
 
   ngOnInit() {
-	this.blogData = this.blogService.getBlogData();
+    this.blogService.postUpdated.on('postUpdated', () => {
+      this.cdr.detectChanges();
+    })
   }
 
-  getBlogData():Blog {
-	  return this.blogData;
+  // returns the blog data
+  getBlogData(): BlogPost {
+    return this.blogService.getBlogData();
   }
 
+  // mark the post as dirty
+  markChanged() {
+    this.blogService.getBlogData().markDirty(true);
+  }
+
+  // invoked when the blog data is changed
   contentChanged(event) {
-	this.blogService.setBlogData(this.blogData);
+    //update the mini content
+    this.blogService.getBlogData().updateMiniContent();
+    this.markChanged();
   }
 
 }

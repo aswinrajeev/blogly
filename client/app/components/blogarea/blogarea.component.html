@@ -1,2 +1,2 @@
-<input type="text" class="form-control title-text" placeholder="Blog Title" [(ngModel)]="blogData.title"/>
-<quill-editor format="html" [(ngModel)]="blogData.content" (blur)="updateBlogData()" (onContentChanged)="contentChanged($event)"></quill-editor>
+<input type="text" class="form-control title-text" placeholder="Blog Title" [(ngModel)]="getBlogData().title" (ngModelChange)="markChanged()"/>
+<quill-editor format="html" [(ngModel)]="getBlogData().content" (blur)="updateBlogData()" (onContentChanged)="contentChanged($event)"></quill-editor>

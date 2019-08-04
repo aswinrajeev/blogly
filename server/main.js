@@ -36,17 +36,20 @@ class MainWindow {
 			// load the compiled index.html file
 			this.mainWindow.loadFile('./out/client/blogly/index.html');
 	
-			// display the window once ready
-			this.mainWindow.once('ready-to-show', () => {
-				this.mainWindow.show();
-			});
-	
 			// initialize the messaging service
 			this.messenger = new MessagingService(ipcMain, this.mainWindow.webContents);
 	
 			// register events for blogging services
 			this.blogservice = new BlogService(this.messenger, testBlogUrl);
 			this.blogservice.initialize();
+
+			this.fservice.setMessenger(this.messenger);
+
+			// display the window once ready
+			this.mainWindow.once('ready-to-show', () => {
+				this.mainWindow.show();
+			});
+
 		} catch (error) {
 			console.error(error);
 		}
