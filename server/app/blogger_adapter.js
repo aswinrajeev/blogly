@@ -6,7 +6,6 @@ const url = require('url');
  * Adapter for interfacing the application with Blogger.
  * 
  * @author Aswin Rajeev
- * 
  */
 class BloggerAdapter {
 
@@ -23,6 +22,8 @@ class BloggerAdapter {
 			args.apiConf.client_secret,
 			`http://${this.appConf.listener_host}:${this.appConf.listener_port}`
 		);
+
+		this.tokens = null;
 
 		// event handler for the token update
 		this.authClient.on('tokens', (tokens) => {
@@ -42,27 +43,45 @@ class BloggerAdapter {
 		}
 	}
 	
-	// returns the API authenticator
+	/**
+	 * Returns the API auth client
+	 */
 	getAuth() {
 		return this.authClient;
 	}
 
-	// returns the blogger API 
+	/**
+	 * Returns the blogger API
+	 */
 	getBloggerAPI() {
 		return this.blogAPI;
 	}
 
-	// generates an authorization URL for the user
+	/**
+	 * Returns the tokens
+	 */
+	getTokens() {
+		return this.tokens;
+	}
+
+	/**
+	 * Generates an authorization URL for the user
+	 */	
 	generateAuthUrl() {
 		return this.authClient.generateAuthUrl({
 			access_type: 'offline',
 			scope: [
-				'https://www.googleapis.com/auth/blogger'
+				'https://www.googleapis.com/auth/blogger',
+				'https://www.googleapis.com/auth/photoslibrary.appendonly',
+				'https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata'
 			]
 		});
 	}
 
-	// listens for a callback from the google authorization service with the authorization code
+	/**
+	 * Listens for a callback from the google authorization service with the authorization code
+	 * @param {*} args - parameters passed into the callback
+	 */
 	awaitAuthorization(args) {
 		var httpListener;
 
@@ -100,6 +119,9 @@ class BloggerAdapter {
 							if (this.debugMode) {
 								console.debug('Received tokens from Google server.');
 							}
+
+							// saves the tokens
+							this.tokens = tokens;
 							
 							// updates the tokens in the authenticator
 							args.authClient.setCredentials(tokens);
@@ -172,7 +194,10 @@ class BloggerAdapter {
 		return codePromise;
 	}
 
-	// returns the blog args from a specified URL
+	/**
+	 * Returns the blog args from a specified URL
+	 * @param {*} args - parameters passed on to the callback
+	 */
 	async getBlogByUrl(args) {
 
 		const result = await args.blogAPI.blogs.getByUrl({
@@ -194,7 +219,10 @@ class BloggerAdapter {
 		return result.data;
 	}
 
-	// publish a blog
+	/**
+	 * Publishes a blog
+	 * @param {*} args - blog data
+	 */
 	async publish(args) {
 
 		if (this.debugMode) {

@@ -1,4 +1,5 @@
 const { BloggerAdapter } = require('./blogger_adapter.js');
+const { PhotosAdapter } = require('./google_photos_adapter.js');
 const { listener_port, listener_host } = require('../configs/conf');
 const { APIKeys } = require('../localconfigs/googleapi');
 const { BrowserWindow } =  require('electron');
@@ -14,6 +15,8 @@ class BlogService {
 		this.messenger = messenger;
 		this.blogUrl = blogUrl;
 		this.fs = fileSystem;
+		this.photos = null;
+		this.blogger = null;
 	}
 
 	/**
@@ -30,6 +33,11 @@ class BlogService {
 			}, 
 			debugMode: false
 		});
+
+		this.photos = new PhotosAdapter({
+			apiConf: new APIKeys(),
+			debugMode: false
+		})
 
 		this.initializeService();
 	}
@@ -108,6 +116,13 @@ class BlogService {
 		});
 
 		promise.then(() => {
+
+			// initializes the Photos API using the tokens
+			var tokens = this.blogger.getTokens();
+			this.photos.initialize({
+				tokens:tokens.access_token
+			});
+
 			// get the details of the blog
 			this.blogger.getBlogByUrl({
 				blogAPI: this.blogger.getBloggerAPI(),
@@ -121,6 +136,21 @@ class BlogService {
 	}
 
 	/**
+	 * Reads the google photos blogly album id from config.
+	 * If no config item present, create an album and then stores the config.
+	 */
+	async getOrCreatePhotoAlbum() {
+		var albumId = this.fs.getConfigProperty('blogly-album');
+
+		if (albumId == null) {
+			albumId = await this.photos.createBloglyAlbum();
+			this.fs.setConfigProperty('blogly-album', albumId, true);
+		}
+
+		return albumId;
+	}
+
+	/**
 	 * Publishes the blog post, post auth
 	 * 
 	 * @param {*} blogId - id corresponding to the blog, as returned by the Google auth service
@@ -129,7 +159,13 @@ class BlogService {
 	 * @param {*} isDraft - if to be saved as draft
 	 * @param {*} postId - post id for an existing blog post
 	 */
-	publishPostData(blogId, title, contents, isDraft, postId) {
+	async publishPostData(blogId, title, contents, isDraft, postId) {
+
+		// TODO: do this only if images are present in the blog post.
+		var albumId = await this.getOrCreatePhotoAlbum();
+
+		console.log("Album ID is " + albumId);
+
 		this.blogger.publish({
 			blogAPI: this.blogger.getBloggerAPI(),
 			authClient: this.blogger.getAuth(),
