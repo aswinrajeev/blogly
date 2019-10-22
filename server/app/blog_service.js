@@ -3,6 +3,7 @@ const { PhotosAdapter } = require('./google_photos_adapter.js');
 const { listener_port, listener_host } = require('../configs/conf');
 const { APIKeys } = require('../localconfigs/googleapi');
 const { BrowserWindow } =  require('electron');
+const { DOMParser } = require('xmldom');
 
 /**
  * Handler for all blog related functionalities. 
@@ -151,7 +152,8 @@ class BlogService {
 	}
 
 	/**
-	 * Publishes the blog post, post auth
+	 * Publishes the blog post, post auth.
+	 * Also adds any images in the post to Google Photos Blogly album
 	 * 
 	 * @param {*} blogId - id corresponding to the blog, as returned by the Google auth service
 	 * @param {*} title - title of the blog post
@@ -161,11 +163,8 @@ class BlogService {
 	 */
 	async publishPostData(blogId, title, contents, isDraft, postId) {
 
-		// TODO: do this only if images are present in the blog post.
-		var albumId = await this.getOrCreatePhotoAlbum();
-
-		console.log("Album ID is " + albumId);
-
+		await this.uploadAllImages(contents);
+		
 		this.blogger.publish({
 			blogAPI: this.blogger.getBloggerAPI(),
 			authClient: this.blogger.getAuth(),
@@ -179,6 +178,33 @@ class BlogService {
 		}).then((result) => {
 			this.messenger.send('published', result);
 		})
+	}
+
+	async uploadAllImages(content) {
+		var dom = new DOMParser().parseFromString("<div>" + content + "</div>", "text/xml");
+		var images = dom.getElementsByTagName('img');
+		var imgData;
+
+		if (images.length > 0 ) {
+			var albumId = await this.getOrCreatePhotoAlbum();
+			for(var i = 0; i < images.length; i++) {
+				if (images[i].attributes != null && images[i].attributes.getNamedItem('src') != null) {
+					imgData = images[i].attributes.getNamedItem('src').nodeValue;
+					if (imgData != null && imgData.substring(0, 5) == 'data:') {
+						var link = await this.uploadImage(imgData, albumId);
+						content.replace(imgData, link);
+					}
+				}
+			}
+		}
+
+	}
+
+	async uploadImage(imageData, albumId) {
+		var type = imageData.substring(11, imageData.indexOf(";base64"));
+		var fileDetails = await this.fs.saveImage(imageData, type);
+
+		await this.photos.uploadImage(albumId, fileDetails.imageFileName, fileDetails.path);
 	}
 }
 

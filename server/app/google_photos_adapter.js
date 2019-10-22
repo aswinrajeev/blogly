@@ -39,8 +39,11 @@ class PhotosAdapter {
 	 */
 	async createBloglyAlbum() {
 		var res = await this.photos.albums.create('Blogly Album');
-		console.log(res);
 		return res.id;
+	}
+
+	async uploadImage(albumId, file, path) {
+		await this.photos.mediaItems.upload(albumId, file, path, "description");
 	}
 
 }

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const h2p = require('html2plaintext');
+const base64util = require('based-blob');
 
 /**
  * @author Aswin Rajeev
@@ -13,6 +14,7 @@ class FileSystemService {
 
 		this.BLOGLY_FILE_EXTN = "blogly";
 		this.INDEX_FILE_NAME = ".blogly.index";
+		this.imageIndex = 0;
 
 		// define the file system properties and initializes the required properties.
 		this.appDir = app.getPath('appData') + path.sep + "blogly"; //define the app dir
@@ -82,6 +84,19 @@ class FileSystemService {
 	 */
 	getFilePath(filename) {
 		return this.blogsDir + path.sep + filename;
+	}
+
+	getTemplPath() {
+		try {
+			var temp =  this.blogsDir + path.sep + "_temp";
+			if (!fs.existsSync(temp)) {
+				fs.mkdirSync(temp);
+			}
+			return temp;
+		} catch (error) {
+			console.error("Error creating temp directory.", error);
+			throw error;
+		}
 	}
 
 	/**
@@ -304,6 +319,22 @@ class FileSystemService {
 		return result;
 	}
 
+	async saveImage(imageData, type) {
+		var imageFilename;
+		var tempPath = this.getTemplPath();
+
+		var fileContents = Buffer.from(imageData.substring(imageData.indexOf(";base64") + ";base64,".length, imageData.length -1),"base64");
+		//const blob = base64util.toBlob(imageData.substring(imageData.indexOf(";base64") + ";base64,".length, imageData.length -1));
+		
+		imageFilename = 'img_' + this.imageIndex++ + "." + type;
+		var fullFileName = tempPath + path.sep + imageFilename;
+		fs.writeFileSync(fullFileName, fileContents);
+
+		return {
+			imageFileName: imageFilename,
+			path: fullFileName
+		}
+	}
 
 
 }
