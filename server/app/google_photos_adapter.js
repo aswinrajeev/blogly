@@ -1,7 +1,4 @@
-const { google } = require('googleapis');
 const Photos = require('googlephotos');
-const http = require('http');
-const url = require('url');
 
 /**
  * Adapter for interfacing the application with Google Photos.
@@ -43,7 +40,8 @@ class PhotosAdapter {
 	}
 
 	async uploadImage(albumId, file, path) {
-		await this.photos.mediaItems.upload(albumId, file, path, "description");
+		var resp = await this.photos.mediaItems.upload(albumId, file, path, "description");
+		return resp.newMediaItemResults[0].mediaItem.productUrl;
 	}
 
 }

@@ -72,8 +72,7 @@ class BloggerAdapter {
 			access_type: 'offline',
 			scope: [
 				'https://www.googleapis.com/auth/blogger',
-				'https://www.googleapis.com/auth/photoslibrary.appendonly',
-				'https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata'
+				'https://www.googleapis.com/auth/drive.file'
 			]
 		});
 	}
@@ -114,7 +113,7 @@ class BloggerAdapter {
 							}
 
 							// awaits the tokens using the code
-							const { tokens } = await args.authClient.getToken(code);
+							const { tokens } = await this.authClient.getToken(code);
 
 							if (this.debugMode) {
 								console.debug('Received tokens from Google server.');
@@ -124,7 +123,7 @@ class BloggerAdapter {
 							this.tokens = tokens;
 							
 							// updates the tokens in the authenticator
-							args.authClient.setCredentials(tokens);
+							this.authClient.setCredentials(tokens);
 
 							if (this.debugMode) {
 								console.debug('Applied tokens to the authenticator.');

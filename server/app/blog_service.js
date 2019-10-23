@@ -1,5 +1,6 @@
 const { BloggerAdapter } = require('./blogger_adapter.js');
 const { PhotosAdapter } = require('./google_photos_adapter.js');
+const {GoogleDriveAdapter} = require('./google_drive_adapter.js');
 const { listener_port, listener_host } = require('../configs/conf');
 const { APIKeys } = require('../localconfigs/googleapi');
 const { BrowserWindow } =  require('electron');
@@ -35,10 +36,14 @@ class BlogService {
 			debugMode: false
 		});
 
-		this.photos = new PhotosAdapter({
-			apiConf: new APIKeys(),
+		this.drive = new GoogleDriveAdapter({
+			apiConf: new APIKeys(), 
+			appConf: {
+				listener_port: listener_port,
+				listener_host: listener_host
+			}, 
 			debugMode: false
-		})
+		});
 
 		this.initializeService();
 	}
@@ -120,8 +125,9 @@ class BlogService {
 
 			// initializes the Photos API using the tokens
 			var tokens = this.blogger.getTokens();
-			this.photos.initialize({
-				tokens:tokens.access_token
+
+			this.drive.initialize({
+				tokens: tokens
 			});
 
 			// get the details of the blog
@@ -141,11 +147,11 @@ class BlogService {
 	 * If no config item present, create an album and then stores the config.
 	 */
 	async getOrCreatePhotoAlbum() {
-		var albumId = this.fs.getConfigProperty('blogly-album');
+		var albumId = this.fs.getConfigProperty('blogly-dir');
 
 		if (albumId == null) {
-			albumId = await this.photos.createBloglyAlbum();
-			this.fs.setConfigProperty('blogly-album', albumId, true);
+			albumId = await this.drive.createFolder('Blogly');
+			this.fs.setConfigProperty('blogly-dir', albumId, true);
 		}
 
 		return albumId;
@@ -203,8 +209,10 @@ class BlogService {
 	async uploadImage(imageData, albumId) {
 		var type = imageData.substring(11, imageData.indexOf(";base64"));
 		var fileDetails = await this.fs.saveImage(imageData, type);
+		var imageStream = this.fs.getFileReadStream(fileDetails.path);
+		var res = await this.drive.uploadImage(albumId, fileDetails.imageFileName, imageStream, type);
 
-		await this.photos.uploadImage(albumId, fileDetails.imageFileName, fileDetails.path);
+		return fileDetails.path;
 	}
 }
 

@@ -336,6 +336,9 @@ class FileSystemService {
 		}
 	}
 
+	getFileReadStream(file) {
+		return fs.createReadStream(file);
+	}
 
 }
 
