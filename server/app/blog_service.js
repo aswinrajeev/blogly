@@ -1,10 +1,10 @@
 const { BloggerAdapter } = require('./blogger_adapter.js');
-const { PhotosAdapter } = require('./google_photos_adapter.js');
 const {GoogleDriveAdapter} = require('./google_drive_adapter.js');
 const { listener_port, listener_host } = require('../configs/conf');
 const { APIKeys } = require('../localconfigs/googleapi');
 const { BrowserWindow } =  require('electron');
 const { DOMParser } = require('xmldom');
+const { dialog } = require('electron')
 
 /**
  * Handler for all blog related functionalities. 
@@ -84,9 +84,18 @@ class BlogService {
 	 * @param {*} postId - post id, if available.
 	 */
 	publishBlogPost(blogURL, title, contents, isDraft, postId) {
-		this.seekAuthorization(blogURL, (result) => {
-			this.publishPostData(result.id, title, contents, isDraft, postId);
-		});
+		try {
+			this.seekAuthorization(blogURL, (result) => {
+				this.publishPostData(result.id, title, contents, isDraft, postId);
+			});
+		} catch (error) {
+			dialog.showMessageBox({
+				type: 'error',
+				title: 'Error',
+				message: 'Error in uploading',
+				detail: 'The blog post could not be uploaded due to a technical glitch.'
+			});
+		}
 	}
 
 	/**
@@ -143,8 +152,8 @@ class BlogService {
 	}
 
 	/**
-	 * Reads the google photos blogly album id from config.
-	 * If no config item present, create an album and then stores the config.
+	 * Reads the google drive blogly directory id from config.
+	 * If no config item present, create a directory and then stores the config.
 	 */
 	async getOrCreatePhotoAlbum() {
 		var albumId = this.fs.getConfigProperty('blogly-dir');
@@ -169,7 +178,8 @@ class BlogService {
 	 */
 	async publishPostData(blogId, title, contents, isDraft, postId) {
 
-		await this.uploadAllImages(contents);
+		// upload all images to Google Drive and replace the data with the image URL.
+		var updatedContents = await this.uploadAllImages(contents);
 		
 		this.blogger.publish({
 			blogAPI: this.blogger.getBloggerAPI(),
@@ -179,15 +189,27 @@ class BlogService {
 			postId: postId,
 			blogPost: {
 				title: title,
-				content: contents
+				content: updatedContents
 			}
 		}).then((result) => {
-			this.messenger.send('published', result);
+			dialog.showMessageBox({
+				type: 'info',
+				title: 'Done',
+				message: 'Blog post published.',
+				detail: 'The blog post has been successfully published to your blog' + (isDraft ? ' as a draft' : '') + '.'
+			});
 		})
 	}
 
+	/**
+	 * Extracts each of the images in the blog post and uploads them to Google Drive. 
+	 * Then the base64 data is replaced with the image URL.
+	 * @param {*} content 
+	 */
 	async uploadAllImages(content) {
-		var dom = new DOMParser().parseFromString("<div>" + content + "</div>", "text/xml");
+
+		// convert the HTML content into DOM
+		var dom = new DOMParser().parseFromString(content, "text/xml");
 		var images = dom.getElementsByTagName('img');
 		var imgData;
 
@@ -196,23 +218,40 @@ class BlogService {
 			for(var i = 0; i < images.length; i++) {
 				if (images[i].attributes != null && images[i].attributes.getNamedItem('src') != null) {
 					imgData = images[i].attributes.getNamedItem('src').nodeValue;
+					// if image is base64 data
 					if (imgData != null && imgData.substring(0, 5) == 'data:') {
+						// uploads the image
 						var link = await this.uploadImage(imgData, albumId);
-						content.replace(imgData, link);
+
+						// updates the image src with the drive url
+						images[i].attributes.getNamedItem('src').value = link;
 					}
 				}
 			}
 		}
 
+		return dom.toString();
 	}
 
+	/**
+	 * Uploads an image to Google Drive.
+	 * 
+	 * @param {*} imageData 
+	 * @param {*} albumId 
+	 */
 	async uploadImage(imageData, albumId) {
+		
+		// extracts the image type
 		var type = imageData.substring(11, imageData.indexOf(";base64"));
+
+		// saves the file to disk for uploading
 		var fileDetails = await this.fs.saveImage(imageData, type);
 		var imageStream = this.fs.getFileReadStream(fileDetails.path);
-		var res = await this.drive.uploadImage(albumId, fileDetails.imageFileName, imageStream, type);
 
-		return fileDetails.path;
+		//uploads the image to Google drive and gets its URL
+		var image = await this.drive.uploadImage(albumId, fileDetails.imageFileName, imageStream, type);
+
+		return image.link;
 	}
 }
 

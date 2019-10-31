@@ -325,8 +325,8 @@ class FileSystemService {
 
 		var fileContents = Buffer.from(imageData.substring(imageData.indexOf(";base64") + ";base64,".length, imageData.length -1),"base64");
 		//const blob = base64util.toBlob(imageData.substring(imageData.indexOf(";base64") + ";base64,".length, imageData.length -1));
-		
-		imageFilename = 'img_' + this.imageIndex++ + "." + type;
+		var currTime = Math.floor(Date.now());
+		imageFilename = 'img_' + currTime + "." + type;
 		var fullFileName = tempPath + path.sep + imageFilename;
 		fs.writeFileSync(fullFileName, fileContents);
 
