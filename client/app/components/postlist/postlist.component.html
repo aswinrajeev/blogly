@@ -1,6 +1,6 @@
 <!-- <app-postitem *ngFor="let post of getPostList()" ></app-postitem> -->
 <div class="postItem" *ngFor="let post of getPostList()" (click)="viewPost(post)">
-	<span class="post-delete"><i class="material-icons md-15">delete</i></span>
+	<span class="post-delete"><i class="material-icons md-18">delete</i></span>
 	<span class="post-title">{{post.title}}{{post.isSaved ? '' : '*'}}</span><br/>
 	<span class="post-contents">{{post.miniContent}}</span>
 	<!-- <input type="text" class="form-control filename-text" [(ngModel)]="post.file"/> -->
