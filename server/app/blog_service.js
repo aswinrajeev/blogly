@@ -55,10 +55,15 @@ class BlogService {
 
 		// blog service related listeners
 		this.messenger.listen('publishblog', (data) => {
-			this.publishBlogPost(this.blogUrl, data._title, data._content, false, data._postId);
+			try {
+				this.fs.savePost(data.filename, data.postData);
+			} catch (error) {
+				console.error('Error in saving the blog post.', error);
+			}
+			this.publishBlogPost(this.blogUrl, data.postData, data.filename, false);
 		});
 		this.messenger.listen('publishdraft', (data) => {
-			this.publishBlogPost(this.blogUrl, data._title, data._content, true, data._postId);
+			this.publishBlogPost(this.blogUrl, data.postData, data.filename, true);
 		});
 
 		// file system service relared listeners
@@ -83,10 +88,11 @@ class BlogService {
 	 * @param {*} isDraft - flag to specify if the post is to be published as draft
 	 * @param {*} postId - post id, if available.
 	 */
-	publishBlogPost(blogURL, title, contents, isDraft, postId) {
+	publishBlogPost(blogURL, postData, fileName, isDraft) {
+		
 		try {
 			this.seekAuthorization(blogURL, (result) => {
-				this.publishPostData(result.id, title, contents, isDraft, postId);
+				this.publishPostData(result.id, postData, fileName, isDraft);
 			});
 		} catch (error) {
 			dialog.showMessageBox({
@@ -176,10 +182,17 @@ class BlogService {
 	 * @param {*} isDraft - if to be saved as draft
 	 * @param {*} postId - post id for an existing blog post
 	 */
-	async publishPostData(blogId, title, contents, isDraft, postId) {
+	async publishPostData(blogId, postData, fileName, isDraft) {
+
+		var title = postData.title;
+		var contents = postData.content;
+		var postId = postData.postId;
 
 		// upload all images to Google Drive and replace the data with the image URL.
 		var updatedContents = await this.uploadAllImages(contents);
+
+		postData.contents = updatedContents;
+		this.fs.savePost(fileName, postData);
 		
 		this.blogger.publish({
 			blogAPI: this.blogger.getBloggerAPI(),

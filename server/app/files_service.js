@@ -316,7 +316,7 @@ class FileSystemService {
 		// TODO: Update the cache as well. Remove the next line to generate the full cache.
 		this.indexPosts();
 
-		return result;
+		//return result;
 	}
 
 	async saveImage(imageData, type) {

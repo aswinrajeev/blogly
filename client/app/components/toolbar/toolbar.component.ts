@@ -11,6 +11,8 @@ export class ToolbarComponent implements OnInit {
   constructor(private blogservice: BlogService) { }
 
   ngOnInit() {
+
+    this.toggleEditor();
   }
 
   // pubish a blog
@@ -26,6 +28,10 @@ export class ToolbarComponent implements OnInit {
   // saves a post
   savePost() {
     this.blogservice.saveCurrentPost();
+  }
+
+  toggleEditor() {
+    this.blogservice.setHTMLEditor(!this.blogservice.isHTMLEditor());
   }
 
 }

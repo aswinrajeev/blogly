@@ -13,6 +13,8 @@ export class BlogService {
   postsList:BlogPost[];
   newFun: Function;
 
+  htmlEditor: boolean = true;
+
   // event emitter for tracking post changes
   postUpdated: EventEmitter = new EventEmitter();
 
@@ -23,6 +25,14 @@ export class BlogService {
     
     //return the blog object if exist, else initialize and return
     return this.blogPost ? this.blogPost : new BlogPost();
+  }
+
+  isHTMLEditor() {
+    return this.htmlEditor;
+  }
+
+  setHTMLEditor(isHTML:boolean) {
+    this.htmlEditor = isHTML;
   }
 
   // set the blog post id
@@ -37,10 +47,16 @@ export class BlogService {
 
   // publish a blog post
   publishBlog(isDraft) {
+    var post = this.getBlogData();
+    var postObj = {
+      fileName: post.file,
+      postData: post.getAsPost()
+    };
+
     if (isDraft) {
-      this._messenger.send('publishdraft', this.getBlogData());
+      this._messenger.send('publishdraft', postObj);
     } else {
-      this._messenger.send('publishblog', this.getBlogData());
+      this._messenger.send('publishblog', postObj);
     }
 
     this._messenger.listenOnce('published', (result) => {
