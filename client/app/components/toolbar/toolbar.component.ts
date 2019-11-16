@@ -30,8 +30,14 @@ export class ToolbarComponent implements OnInit {
     this.blogservice.saveCurrentPost();
   }
 
+  // switches between HTML editor and RT editor
   toggleEditor() {
     this.blogservice.setHTMLEditor(!this.blogservice.isHTMLEditor());
+  }
+
+  // returns if the current editor is HTML editor
+  isHTMLEditor() {
+    return this.blogservice.isHTMLEditor();
   }
 
 }

@@ -54,16 +54,11 @@ class BlogService {
 	initializeService() {
 
 		// blog service related listeners
-		this.messenger.listen('publishblog', (data) => {
-			try {
-				this.fs.savePost(data.filename, data.postData);
-			} catch (error) {
-				console.error('Error in saving the blog post.', error);
-			}
-			this.publishBlogPost(this.blogUrl, data.postData, data.filename, false);
+		this.messenger.respond('publishblog', async (data) => {
+			return await this.publishBlogPost(this.blogUrl, data.postData, data.fileName, false);
 		});
-		this.messenger.listen('publishdraft', (data) => {
-			this.publishBlogPost(this.blogUrl, data.postData, data.filename, true);
+		this.messenger.respond('publishdraft', async (data) => {
+			return await this.publishBlogPost(this.blogUrl, data.postData, data.fileName, true);
 		});
 
 		// file system service relared listeners
@@ -74,7 +69,8 @@ class BlogService {
 			return this.fs.fetchPostData(data.filename);
 		});
 		this.messenger.respond('savePost', (data) => {
-			return this.fs.savePost(data.filename, data.postData);
+			var fileName = this.fs.savePost(data.filename, data.postData);
+			return fileName;
 		})
 
 	}
@@ -83,16 +79,22 @@ class BlogService {
 	 * Publishes a post after authorizing with the user.
 	 * 
 	 * @param {*} blogURL - url of the blog
-	 * @param {*} title - title of the blog post
-	 * @param {*} contents - blog post contents
+	 * @param {*} postData - the data encompassing the blog post
+	 * @param {*} fileName - the file name for the blog post
 	 * @param {*} isDraft - flag to specify if the post is to be published as draft
-	 * @param {*} postId - post id, if available.
 	 */
-	publishBlogPost(blogURL, postData, fileName, isDraft) {
+	async publishBlogPost(blogURL, postData, fileName, isDraft) {
+
+		// save the blog post before publishing
+		try {
+			fileName = this.fs.savePost(fileName, postData);
+		} catch (error) {
+			console.error('Error in saving the blog post.', error);
+		}
 		
 		try {
-			this.seekAuthorization(blogURL, (result) => {
-				this.publishPostData(result.id, postData, fileName, isDraft);
+			this.seekAuthorization(blogURL, async (result) => {
+				return await this.publishPostData(result.id, postData, fileName, isDraft);
 			});
 		} catch (error) {
 			dialog.showMessageBox({
@@ -177,10 +179,9 @@ class BlogService {
 	 * Also adds any images in the post to Google Photos Blogly album
 	 * 
 	 * @param {*} blogId - id corresponding to the blog, as returned by the Google auth service
-	 * @param {*} title - title of the blog post
-	 * @param {*} contents - contents of the blog post
+	 * @param {*} postData - the data encompassing the blog post
+	 * @param {*} fileName - the file name for the blog post
 	 * @param {*} isDraft - if to be saved as draft
-	 * @param {*} postId - post id for an existing blog post
 	 */
 	async publishPostData(blogId, postData, fileName, isDraft) {
 
@@ -189,10 +190,10 @@ class BlogService {
 		var postId = postData.postId;
 
 		// upload all images to Google Drive and replace the data with the image URL.
-		var updatedContents = await this.uploadAllImages(contents);
+		var updatedContents = await this.uploadAllRawImages(contents);
 
-		postData.contents = updatedContents;
-		this.fs.savePost(fileName, postData);
+		postData.content = updatedContents;
+		fileName = this.fs.savePost(fileName, postData);
 		
 		this.blogger.publish({
 			blogAPI: this.blogger.getBloggerAPI(),
@@ -205,12 +206,18 @@ class BlogService {
 				content: updatedContents
 			}
 		}).then((result) => {
+
+			postData.postId = result.id;
+			postData.postURL = result.url;
+
 			dialog.showMessageBox({
 				type: 'info',
 				title: 'Done',
 				message: 'Blog post published.',
 				detail: 'The blog post has been successfully published to your blog' + (isDraft ? ' as a draft' : '') + '.'
 			});
+
+			return postData;
 		})
 	}
 
@@ -219,7 +226,7 @@ class BlogService {
 	 * Then the base64 data is replaced with the image URL.
 	 * @param {*} content 
 	 */
-	async uploadAllImages(content) {
+	async uploadAllRawImages(content) {
 
 		// convert the HTML content into DOM
 		var dom = new DOMParser().parseFromString(content, "text/xml");

@@ -287,11 +287,29 @@ class FileSystemService {
 	}
 
 	/**
+	 * Generates a filename based on the title.
+	 * @param {*} title 
+	 */
+	generateFileName(title) {
+		var fileName = title.replace(" ", "_");
+		var index = 1;
+
+		fileName = fileName.length > 8 ? fileName.substring(0, 15) : fileName;
+
+		// continue incrementing the number till no files with the same name found
+		while (fs.existsSync(this.getFilePath(fileName) + '.' + this.BLOGLY_FILE_EXTN )) {
+			fileName = fileName + ++index;
+		}
+
+		return fileName + '.' + this.BLOGLY_FILE_EXTN;
+	}
+
+	/**
 	 * Writes the post data into the file specified by filename.
-	 * @param {*} filename - filename for the file to which the post data is to be written
+	 * @param {*} fileName - filename for the file to which the post data is to be written
 	 * @param {*} post - the post data 
 	 */
-	savePost(filename, post) {
+	savePost(fileName, post) {
 
 		var postData = {};
 		postData.content = post.content;
@@ -301,14 +319,14 @@ class FileSystemService {
 		postData.file = post.file;
 		postData.postURL = post.postURL;
 
-		if (filename == null) {
-			console.error('Filename is null.');
-			return null;
-		}
-
 		try {
+
+			// generates the file name if not specified
+			if (fileName == null || fileName == 'undefined') {
+				fileName = this.generateFileName(postData.title);
+			}
 			// writes the post data into the file
-			fs.writeFileSync(this.getFilePath(filename), JSON.stringify(postData));
+			fs.writeFileSync(this.getFilePath(fileName), JSON.stringify(postData));
 		} catch (error) {
 			console.error('Unable to write the post data to file.', error);
 		}
@@ -316,7 +334,7 @@ class FileSystemService {
 		// TODO: Update the cache as well. Remove the next line to generate the full cache.
 		this.indexPosts();
 
-		//return result;
+		return fileName;
 	}
 
 	async saveImage(imageData, type) {

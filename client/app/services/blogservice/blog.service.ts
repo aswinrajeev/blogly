@@ -27,12 +27,14 @@ export class BlogService {
     return this.blogPost ? this.blogPost : new BlogPost();
   }
 
+  // returns if the current editor is HTML editor
   isHTMLEditor() {
-    return this.htmlEditor;
+    return !this.htmlEditor;
   }
 
+  // sets the current editor as HTML if isHTML is true
   setHTMLEditor(isHTML:boolean) {
-    this.htmlEditor = isHTML;
+    this.htmlEditor = !isHTML;
   }
 
   // set the blog post id

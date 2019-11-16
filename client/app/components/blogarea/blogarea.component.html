@@ -1,5 +1,5 @@
 <input type="text" class="form-control title-text" placeholder="Blog Title" [(ngModel)]="getBlogData().title" (ngModelChange)="markChanged()"/>
-<quill-editor format="html" [hidden]="!isHTMLEditor()" [(ngModel)]="getBlogData().content" (blur)="updateBlogData()" (onContentChanged)="contentChanged($event)"></quill-editor>
+<quill-editor format="html" [hidden]="isHTMLEditor()" [(ngModel)]="getBlogData().content" (blur)="updateBlogData()" (onContentChanged)="contentChanged($event)"></quill-editor>
 <div ace-editor
        #editor
        [(text)]="getBlogData().content"
@@ -9,5 +9,5 @@
        [readOnly]="false"
        [autoUpdateContent]="true"
        (textChanged)="contentChanged($event)"
-       [hidden]="isHTMLEditor()"
+       [hidden]="!isHTMLEditor()"
        style="position: absolute; top:45px; bottom: 30px; left: 0px; right:0px; overflow: auto;"></div>

@@ -9,7 +9,10 @@
   <button class="btn btn-dark btn-sm" aria-label="Save" (click)="savePost()">
       <i class="material-icons md-18">save</i> 
   </button>  
+</div>
 
+<!-- Publish and import from Blogger-->
+<div class="toolbar-group">  
   <!-- Publish dropdown button -->
   <div class="btn-group" ngbDropdown role="group">
     <button class="btn btn-dark btn-sm" ngbDropdownToggle aria-label="Publish blog">
@@ -22,9 +25,10 @@
   </div>
 </div>
 
+<!--E ditor controls-->
 <div class="toolbar-group">
   <!-- Toggle HTML Editor Button -->
-  <button class="btn btn-dark btn-sm" aria-label="Toggle HTML Editor" (click)="toggleEditor()">
-   <i class="material-icons md-18">save</i> 
+  <button [className]="'btn btn-dark btn-sm' + (isHTMLEditor() ? ' active' : '')" aria-label="Toggle HTML Editor" (click)="toggleEditor()">
+   <i class="material-icons md-18">code</i> 
   </button>  
 </div>

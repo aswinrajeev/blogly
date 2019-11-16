@@ -37,14 +37,15 @@ export class BlogareaComponent implements OnInit {
 
   // invoked when the blog data is changed
   contentChanged(event) {
-    //update the mini content
+    // updates the mini content
     this.blogService.getBlogData().updateMiniContent();
     this.markChanged();
   }
 
   ngAfterViewInit() {
     setTimeout(() => {
-      this.blogService.setHTMLEditor(true);
+      // switch to RT Editor only after 500 ms, since Ace editor would need to initialize
+      this.blogService.setHTMLEditor(false);
     }, 500)
   }
 
