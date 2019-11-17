@@ -15,6 +15,8 @@ import { BlogareaComponent } from './components/blogarea/blogarea.component';
 import { FormsModule } from '@angular/forms';
 import { PostlistComponent } from './components/postlist/postlist.component';
 
+import { AceEditorModule } from 'ng2-ace-editor';
+
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
@@ -40,6 +42,7 @@ const routes: Routes = [
     AppRoutingModule,
     NgbModule,
     FormsModule,
+    AceEditorModule,
     QuillModule.forRoot(),
     RouterModule.forRoot(
       routes

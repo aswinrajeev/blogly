@@ -21,4 +21,10 @@ export class SidebarComponent implements OnInit {
     return (this.navService.getCurrentPanel() == item);
   }
 
+  // sets the active panel
+  setActiveItem(item) {
+    this.navService.setCurrentPanel(item);
+    this.navService.setPanelHidden(false);
+  }
+
 }

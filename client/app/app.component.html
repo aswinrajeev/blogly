@@ -1,7 +1,7 @@
 <app-toolbar class="app-toolbar"></app-toolbar>
 <div class="app-container">
 	<app-sidebar class="app-sidebar"></app-sidebar>
-	<app-sidepanel class="app-sidepanel" style="z-index: 6;"></app-sidepanel>
-	<app-blogarea class="app-blogarea"></app-blogarea>
+	<app-sidepanel class="app-sidepanel" style="z-index: 6;" [hidden]="isClosed()"></app-sidepanel>
+	<app-blogarea class="app-blogarea" [ngStyle]="{'left': isClosed() ? '45px' : '325px'}"></app-blogarea>
 <div>
 <app-footbar class="app-footer"></app-footbar>

@@ -17,6 +17,10 @@ class MainWindow {
 		this.mainWindow = null;
 		this.fsService = null;
 
+		// app configs
+		this.configs = new Object();
+		this.blogUrl = null;
+
 		//register async initialization of the application window.
 		app.on('ready', this.initializeApp);
 	}
@@ -34,6 +38,8 @@ class MainWindow {
 			// initialize the file system service
 			this.fsService = new FileSystemService(app);
 			this.fsService.initalize();
+
+			this.blogUrl = this.fsService.getConfigProperty("blog-url");
 	
 			// initialize a new window
 			this.mainWindow = new BrowserWindow({ 
@@ -52,7 +58,7 @@ class MainWindow {
 			this.messenger = new MessagingService(ipcMain, this.mainWindow.webContents);
 	
 			// register events for blogging services
-			this.blogservice = new BlogService(this.messenger, testBlogUrl, this.fsService);
+			this.blogservice = new BlogService(this.messenger, this.blogUrl, this.fsService);
 			this.blogservice.initialize();
 
 			this.fsService.setMessenger(this.messenger);

@@ -48,6 +48,12 @@ export class PostlistComponent implements OnInit {
     });
   }
 
+  // deletes a post
+  deletePost(post:BlogPost) {
+    console.log('Deleting ' + post.itemId);
+    this.postService.deletePost(post);
+  }
+
   // creates a new post
   newPost() {
     var post = new BlogPost();

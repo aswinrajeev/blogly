@@ -88,7 +88,7 @@ class FileSystemService {
 
 	getTemplPath() {
 		try {
-			var temp =  this.blogsDir + path.sep + "_temp";
+			var temp =  this.appDir + path.sep + "_temp";
 			if (!fs.existsSync(temp)) {
 				fs.mkdirSync(temp);
 			}
@@ -211,6 +211,10 @@ class FileSystemService {
 						var timestamp = 'p_' + currTime;
 						currTime = currTime + 1;
 						blogPost.itemId = timestamp;
+						
+						// rewrite the post data with itemId
+						post.itemId = timestamp;
+						this.savePost(file, post);
 		
 						blogIndex[timestamp] = blogPost;
 						blogs.push(timestamp);
@@ -245,7 +249,7 @@ class FileSystemService {
 		var indexData = {};
 
 		try {
-			indexData = this.indexPosts(); //TODO: Remove this
+			//indexData = this.indexPosts(); //TODO: Remove this
 
 			// reads content of the index file
 			var content = fs.readFileSync(this.getIndexFile(), "utf8");
@@ -261,6 +265,52 @@ class FileSystemService {
 		})
 
 		return posts;
+	}
+
+	/**
+	 * Deletes the post from the index data and from the file system
+	 * @param {*} itemId - id of the blog post to be deleted
+	 */
+	deletePost(itemId) {
+		var indexData;
+		var postData;
+		var file;
+
+		try {
+			// reads content of the index file
+			var content = fs.readFileSync(this.getIndexFile(), "utf8");
+			indexData = JSON.parse(content);
+		} catch (error) {
+			console.error('Error in reading indices. Regenerating the indices...', error);
+		}
+		try {	
+			if (indexData != null) {
+				postData = indexData.index[itemId];
+				file = postData.filename;
+	
+				// delete the entry from the index
+				delete indexData.index[itemId];
+				indexData.posts.splice(indexData.posts.indexOf(itemId), 1);
+	
+				try {
+					// delete the physical file
+					if (file != null && file.trim() != ''){
+						fs.unlinkSync(this.getFilePath(file));
+					}
+				} catch (error) {
+					console.error('Could not delete the blog post file.', error);
+				}
+
+				// writes the index data into the index file
+				fs.writeFileSync(this.getIndexFile(), JSON.stringify(indexData), "utf8");
+				
+				return true;
+			}
+			return false;
+		} catch (error) {
+			console.error('Could not delete the blog post.', error);
+			throw error;
+		}
 	}
 
 	/**
@@ -287,11 +337,29 @@ class FileSystemService {
 	}
 
 	/**
+	 * Generates a filename based on the title.
+	 * @param {*} title 
+	 */
+	generateFileName(title) {
+		var fileName = title.split(' ').join('_');
+		var index = 1;
+
+		fileName = fileName.length > 8 ? fileName.substring(0, 15) : fileName;
+
+		// continue incrementing the number till no files with the same name found
+		while (fs.existsSync(this.getFilePath(fileName) + '.' + this.BLOGLY_FILE_EXTN )) {
+			fileName = fileName + ++index;
+		}
+
+		return fileName + '.' + this.BLOGLY_FILE_EXTN;
+	}
+
+	/**
 	 * Writes the post data into the file specified by filename.
-	 * @param {*} filename - filename for the file to which the post data is to be written
+	 * @param {*} fileName - filename for the file to which the post data is to be written
 	 * @param {*} post - the post data 
 	 */
-	savePost(filename, post) {
+	savePost(fileName, post) {
 
 		var postData = {};
 		postData.content = post.content;
@@ -300,23 +368,65 @@ class FileSystemService {
 		postData.postId = post.postId
 		postData.file = post.file;
 		postData.postURL = post.postURL;
-
-		if (filename == null) {
-			console.error('Filename is null.');
-			return null;
+		
+		// sets the itemId if found to be null
+		if (postData.itemId == null || postData.itemId.trim() == '' ) {
+			var currTime = Math.floor(Date.now());
+			var timestamp = 'p_' + currTime;
+			postData.itemId = timestamp;
 		}
 
 		try {
+
+			// generates the file name if not specified
+			if (fileName == null || fileName == 'undefined') {
+				fileName = this.generateFileName(postData.title);
+			}
+			postData.file = fileName;
+
 			// writes the post data into the file
-			fs.writeFileSync(this.getFilePath(filename), JSON.stringify(postData));
+			fs.writeFileSync(this.getFilePath(fileName), JSON.stringify(postData));
 		} catch (error) {
 			console.error('Unable to write the post data to file.', error);
 		}
 
-		// TODO: Update the cache as well. Remove the next line to generate the full cache.
-		this.indexPosts();
+		try {
+			var indexContents = fs.readFileSync(this.getIndexFile(), "utf8");
+			if (indexContents != null && indexContents.trim() != '') {
+				var indexData = JSON.parse(indexContents);
+				var blogPost = indexData.index[postData.itemId];
+				if (blogPost == null) {
+					blogPost = indexData.index[postData.itemId] = new Object();	
+				}
 
-		return result;
+				blogPost.title = postData.title;
+				blogPost.postId = postData.postId;
+				blogPost.miniContent = h2p(postData.content).slice(0, 100); //updates only the mini-content. The original content is retrieved later.
+				blogPost.filename = fileName;
+
+				// add post itemId to the index posts
+				var posts = indexData.posts;
+				if (posts == null) {
+					posts = indexData.posts = [];
+				}
+				if (posts.indexOf(postData.itemId) < 0) {
+					posts.push(postData.itemId);
+				}
+			
+				fs.writeFileSync(this.getIndexFile(), JSON.stringify(indexData));
+			}
+			return {
+				fileName: fileName,
+				data: postData,
+				status: 200
+			};
+		} catch (error) {
+			console.error('Error in reading indices. Regenerating the indices...', error);
+			return {
+				status: 0
+			}
+		}
+
 	}
 
 	async saveImage(imageData, type) {

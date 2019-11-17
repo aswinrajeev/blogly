@@ -10,16 +10,25 @@
 
 .btn-dark {
     background-color: $panel-background;
+    color: $app-second-foreground;
     border: none;
+}
+
+.btn-dark:not(:disabled):not(.disabled).active:focus, 
+.btn-dark:not(:disabled):not(.disabled):active:focus, 
+.show>.btn-dark.dropdown-toggle:focus,
+.btn:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .dropdown-menu {
     background-color: $panel-background;
-    color: $app-foreground;
+    color: $app-second-foreground;
 }
 
 .dropdown-item {
-    color: $app-foreground;
+    color: $app-second-foreground;
     padding-top: 0px;
     padding-bottom: 0px;
     font-size: 12px;
@@ -28,4 +37,5 @@
 
 .dropdown-item:hover {
     background-color: $app-second-background;
+    color: $app-foreground;
 }

@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 export class NavigationService {
 
   currentPanel: String;
+  panelHidden: boolean = false;
 
   constructor() { }
 
@@ -16,4 +17,15 @@ export class NavigationService {
   setCurrentPanel(currentPanel:String) {
     this.currentPanel = currentPanel;
   }
+
+  // returns if panel is hidden
+  isPanelHidden() {
+    return this.panelHidden;
+  }
+
+  // sets panel hidden attribute
+  setPanelHidden(close:boolean) {
+    this.panelHidden = close;
+  }
+
 }

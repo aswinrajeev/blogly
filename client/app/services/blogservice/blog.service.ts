@@ -13,6 +13,8 @@ export class BlogService {
   postsList:BlogPost[];
   newFun: Function;
 
+  htmlEditor: boolean = true;
+
   // event emitter for tracking post changes
   postUpdated: EventEmitter = new EventEmitter();
 
@@ -23,6 +25,19 @@ export class BlogService {
     
     //return the blog object if exist, else initialize and return
     return this.blogPost ? this.blogPost : new BlogPost();
+  }
+
+  // returns if the current editor is HTML editor
+  isHTMLEditor() {
+    return !this.htmlEditor;
+  }
+
+  // sets the current editor as HTML if isHTML is true
+  setHTMLEditor(isHTML:boolean) {
+    this.htmlEditor = !isHTML;
+
+    // emit a post updated event
+    this.postUpdated.emit("postUpdated");
   }
 
   // set the blog post id
@@ -37,17 +52,28 @@ export class BlogService {
 
   // publish a blog post
   publishBlog(isDraft) {
+    var post = this.getBlogData();
+    var postObj = {
+      fileName: post.file,
+      postData: post.getAsPost()
+    };
+
+    // listens for a confirmation from the server
+    this._messenger.listen('published', (result, channel, post) => {
+      if (result.status == 200) {
+        this.getBlogData().setPostURL(result.data.postURL);
+        this.getBlogData().setPostId(result.data.postId);
+        this.getBlogData().setContent(result.data.content);
+        this.blogPost = this.getBlogData();
+      }
+    }, post);
+
     if (isDraft) {
-      this._messenger.send('publishdraft', this.getBlogData());
+      this._messenger.send('publishdraft', postObj);
     } else {
-      this._messenger.send('publishblog', this.getBlogData());
+      this._messenger.send('publishblog', postObj);
     }
-
-    this._messenger.listenOnce('published', (result) => {
-      this.setPostId(result.id);
-      alert('Blg has been published');
-    }, null);
-
+    
   }
 
   // returns the posts list
@@ -65,6 +91,7 @@ export class BlogService {
         result.forEach(data => {
           post = new BlogPost();
           post.title = data.title;
+          post.itemId = data.itemId;
           post.miniContent = data.miniContent;
           post.file = data.filename;
           post.isSaved = true;
@@ -75,6 +102,23 @@ export class BlogService {
 
       this.postsList = posts;
       callback(posts);
+    });
+  }
+
+  // deletes a post
+  deletePost(post:BlogPost) {
+    this._messenger.listenOnce('deleted' + post.itemId, (result) => {
+      console.log(result);
+      if (result.status == 200) {
+        this.postsList.splice(this.postsList.indexOf(post));
+
+        // emit a post updated event
+        this.postUpdated.emit("postUpdated");
+      }
+    }, {});
+
+    this._messenger.send('deletePost', {
+      itemId: post.itemId
     });
   }
 
@@ -117,8 +161,11 @@ export class BlogService {
       filename: post.file,
       postData: post.getAsPost()
     }, (result) => {
-      if (result != null && result.status == 'ok') {
+      if (result != null && result.status == 200) {
         post.file = result.filename;
+        this.blogPost.setContent(result.data.content);
+        this.blogPost.setItemId(result.data.itemId);
+        this.blogPost.setFile(result.data.file);
         post.markDirty(false);
       }
     });

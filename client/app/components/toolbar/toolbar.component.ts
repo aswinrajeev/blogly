@@ -11,6 +11,8 @@ export class ToolbarComponent implements OnInit {
   constructor(private blogservice: BlogService) { }
 
   ngOnInit() {
+
+    this.toggleEditor();
   }
 
   // pubish a blog
@@ -26,6 +28,16 @@ export class ToolbarComponent implements OnInit {
   // saves a post
   savePost() {
     this.blogservice.saveCurrentPost();
+  }
+
+  // switches between HTML editor and RT editor
+  toggleEditor() {
+    this.blogservice.setHTMLEditor(!this.blogservice.isHTMLEditor());
+  }
+
+  // returns if the current editor is HTML editor
+  isHTMLEditor() {
+    return this.blogservice.isHTMLEditor();
   }
 
 }
