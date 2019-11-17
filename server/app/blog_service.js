@@ -91,8 +91,8 @@ class BlogService {
 				title: 'Confirm'
 			}, result => {
 				if (result == 0) {
-					this.fs.deletePost(itemId);
-					this.messenger.send('deleted' + itemId, {status:status ? 200 : 0});
+					var status = this.fs.deletePost(itemId);
+					this.messenger.send('deleted' + itemId, {status:(status ? 200 : 0)});
 				}
 			})
 		} catch (error) {

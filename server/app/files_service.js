@@ -261,7 +261,9 @@ class FileSystemService {
 
 		var posts = [];
 		indexData.posts.forEach(itemId => {
-			posts.push(indexData.index[itemId]);
+			var post =indexData.index[itemId];
+			post.itemId = itemId;
+			posts.push(post);
 		})
 
 		return posts;
@@ -291,7 +293,10 @@ class FileSystemService {
 				// delete the entry from the index
 				delete indexData.index[itemId];
 				indexData.posts.splice(indexData.posts.indexOf(itemId), 1);
-	
+				
+				// writes the index data into the index file
+				fs.writeFileSync(this.getIndexFile(), JSON.stringify(indexData), "utf8");
+
 				try {
 					// delete the physical file
 					if (file != null && file.trim() != ''){
@@ -301,9 +306,6 @@ class FileSystemService {
 					console.error('Could not delete the blog post file.', error);
 				}
 
-				// writes the index data into the index file
-				fs.writeFileSync(this.getIndexFile(), JSON.stringify(indexData), "utf8");
-				
 				return true;
 			}
 			return false;
@@ -410,7 +412,7 @@ class FileSystemService {
 					posts = indexData.posts = [];
 				}
 				if (posts.indexOf(postData.itemId) < 0) {
-					posts.push(postData.itemId);
+					posts.splice(0, 0, postData.itemId);
 				}
 			
 				fs.writeFileSync(this.getIndexFile(), JSON.stringify(indexData));

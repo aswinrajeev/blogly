@@ -110,16 +110,30 @@ export class BlogService {
     this._messenger.listenOnce('deleted' + post.itemId, (result) => {
       console.log(result);
       if (result.status == 200) {
-        this.postsList.splice(this.postsList.indexOf(post));
+        this.postsList.splice(this.postsList.indexOf(post), 1);
+
+        if (post.itemId == this.getBlogData().itemId && this.postsList.length > 0) {
+          this.setPost(this.postsList[0], () => {
+            // emit a post updated event
+            this.postUpdated.emit("postUpdated");
+          });
+        }
 
         // emit a post updated event
         this.postUpdated.emit("postUpdated");
       }
     }, {});
 
-    this._messenger.send('deletePost', {
-      itemId: post.itemId
-    });
+    if (post.file != null && post.file.trim() != '') {
+      this._messenger.send('deletePost', {
+        itemId: post.itemId
+      });
+    } else {
+      // call the deleted event
+      this._messenger.invoke('deleted' + post.itemId, {
+        status: 200
+      }, {});
+    } 
   }
 
   // sets the selected post as the active blog and renders it to the editor
@@ -167,6 +181,9 @@ export class BlogService {
         this.blogPost.setItemId(result.data.itemId);
         this.blogPost.setFile(result.data.file);
         post.markDirty(false);
+
+        // emit a post updated event
+        this.postUpdated.emit("postUpdated");
       }
     });
   }

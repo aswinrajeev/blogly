@@ -99,6 +99,11 @@ export class MessagingService {
 		});
 	}
 
+	// invokes a listener/listenOnce method
+	invoke(channel: string, args, event) {
+		this.__callback(channel, args, event);
+	}
+
 	//Request for a response through a specified channel
 	request(channel: string, payload, action) {
 		//Create a listener for the channel

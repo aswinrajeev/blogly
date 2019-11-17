@@ -247,6 +247,7 @@ class BloggerAdapter {
 		var result;
 		if (args.postId != null && args.postId.trim() != '') {
 			
+			// TODO: Check if the post still exists, otherwise post as new
 			// updates the post
 			blogData.postId = args.postId;
 			result = await args.blogAPI.posts.update(blogData);

@@ -4,6 +4,7 @@ const { MessagingService } = require('./app/messaging_service');
 const { BlogService } = require('./app/blog_service');
 const { testBlogUrl } = require('./localconfigs/tests'); //temporary test configs
 const { FileSystemService } = require('./app/files_service');
+const { systemPreferences } = require('electron');
 
 /**
  * @author Aswin Rajeev
@@ -67,6 +68,14 @@ class MainWindow {
 			this.mainWindow.once('ready-to-show', () => {
 				this.mainWindow.show();
 			});
+
+			// subscribe to the system preferences
+			systemPreferences.subscribeNotification(
+				'AppleInterfaceThemeChangedNotification',
+				function theThemeHasChanged () {
+					console.log('The theme has been changed to ' + systemPreferences.isDarkMode() ? 'dark' : 'light');
+				}
+			)
 
 		} catch (error) {
 			console.error(error);

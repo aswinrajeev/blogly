@@ -5,16 +5,18 @@ export class BlogPost {
 	private _file: String;
 	private _postId: String; //for blog id at blogger
 	private _postURL: String;
-	private _itemId:number; // for internal id
+	private _itemId:string; // for internal id
 	private _isSaved:boolean;
 
 	constructor() {
+		var currTime = Math.floor(Date.now());
+
 		this._title = "Untitled";
 		this._content = "";
 		this._postId = null;
 		this._postURL = null;
 		this._file = null;
-		this._itemId = null;
+		this._itemId = 'p_' + currTime;
 		this._isSaved = false;
 	}
 
