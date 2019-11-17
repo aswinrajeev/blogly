@@ -5,7 +5,7 @@
        [(text)]="getBlogData().content"
        [mode]="'html'"
        [theme]="'gruvbox'"
-       [options]="{printMargin: false, wrap: true}"
+       [options]="{printMargin: false, wrap: true, foldStyle: 'markbegin'}"
        [readOnly]="false"
        [autoUpdateContent]="true"
        (textChanged)="contentChanged($event)"
