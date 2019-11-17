@@ -69,3 +69,6 @@ out
 
 #Confidential configs
 localconfigs
+
+#dist folder
+dist

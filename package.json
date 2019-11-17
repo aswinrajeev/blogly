@@ -7,6 +7,14 @@
     "type": "git",
     "url": "git+https://github.com/aswinrajeev/blogly.git"
   },
+  "build" : {
+    "appId": "com.aswinsblog.blogly",
+    "productName":"Blogly",
+    "mac": {
+      "darkModeSupport": true,
+      "category": "public.app-category.photography"
+    }
+  },
   "keywords": [
     "Blogly",
     "blogger",
@@ -28,7 +36,9 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "private": true,
   "dependencies": {
@@ -61,6 +71,7 @@
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
+    "electron-builder": "^21.2.0",
     "@angular-devkit/build-angular": "~0.13.0",
     "@angular/cli": "~7.3.1",
     "@angular/compiler-cli": "~7.2.0",
