@@ -13,8 +13,8 @@ export class BlogPost {
 		this._content = "";
 		this._postId = null;
 		this._postURL = null;
-		this._file = "undefined";
-		this._itemId = Math.floor(Date.now());
+		this._file = null;
+		this._itemId = null;
 		this._isSaved = false;
 	}
 
@@ -22,7 +22,10 @@ export class BlogPost {
 		return this._title;
 	}
 	set title(title: String) {
-		if (this._title !== title && this._title != null) {
+		this.setTitle(title);
+	}
+	setTitle(title:String) {
+		if (this._title !== title) {
 			this.markDirty(true);
 			this._title = title;
 		}
@@ -32,7 +35,10 @@ export class BlogPost {
 		return this._content;
 	}
 	set content(content) {
-		if (this._content !== content && this._content != null) {
+		this.setContent(content)
+	}
+	setContent(content) {
+		if (this._content !== content) {
 			this.markDirty(true);
 			this._content = content;
 		}
@@ -42,7 +48,10 @@ export class BlogPost {
 		return this._postId;
 	}
 	set postId(postId) {
-		if (this._postId !== postId && this._postId != null) {
+		this.setPostId(postId);
+	}
+	setPostId(postId) {
+		if (this._postId !== postId) {
 			this.markDirty(true);
 			this._postId = postId;
 		}
@@ -52,7 +61,10 @@ export class BlogPost {
 		return this._file;
 	}
 	set file(file) {
-		if (this._file !== file && this._file != null) {
+		this.setFile(file);
+	}
+	setFile(file) {
+		if (this._file !== file) {
 			this.markDirty(true);
 			this._file = file;
 		}
@@ -62,7 +74,10 @@ export class BlogPost {
 		return this._itemId;
 	}
 	set itemId(itemId) {
-		if (this._itemId !== itemId && this._itemId != null) {
+		this.setItemId(itemId);
+	}
+	setItemId(itemId) {
+		if (this._itemId !== itemId) {
 			this.markDirty(true);
 			this._itemId = itemId;
 		}
@@ -72,7 +87,10 @@ export class BlogPost {
 		return this._miniContent;
 	}
 	set miniContent(miniContent) {
-		if (this._miniContent !== miniContent && this._miniContent != null) {
+		this.setMiniContent(miniContent);
+	}
+	setMiniContent(miniContent) {
+		if (this._miniContent !== miniContent) {
 			this.markDirty(true);
 			this._miniContent = miniContent;
 		}
@@ -82,7 +100,10 @@ export class BlogPost {
 		return this._postURL;
 	}
 	set postURL(postURL) {
-		if (this._postURL !== postURL && this._postURL !== null) {
+		this.setPostURL(postURL);
+	}
+	setPostURL(postURL) {
+		if (this._postURL !== postURL) {
 			this.markDirty(true);
 			this._postURL = postURL;
 		}
@@ -92,7 +113,10 @@ export class BlogPost {
 		return this._isSaved;
 	}
 	set isSaved(isSaved) {
-		if (this._isSaved !== isSaved && this._isSaved !== null) {
+		this.setSaved(isSaved);
+	}
+	setSaved(isSaved) {
+		if (this._isSaved !== isSaved) {
 			this._isSaved = isSaved;
 		}
 	}

@@ -144,6 +144,12 @@ class BloggerAdapter {
 				if (this.debugMode) {
 					console.debug('Listening for authorization confirmation from Google.');
 				}
+
+				// stops the server automatically if no response received within 2 mins
+				setTimeout(() => {
+					httpListener.close()
+				}, 120000);
+
 			} catch (error) {
 				reject(error);
 			}

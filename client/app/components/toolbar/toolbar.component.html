@@ -4,6 +4,11 @@
   <button class="btn btn-dark btn-sm" aria-label="New blog" (click)="newPost()">
       <i class="material-icons md-18">note_add</i> 
   </button>
+  
+  <!-- Open Button -->
+  <button class="btn btn-dark btn-sm" aria-label="Import from file">
+      <i class="material-icons md-18">folder_open</i> 
+  </button> 
 
   <!-- Save Button -->
   <button class="btn btn-dark btn-sm" aria-label="Save" (click)="savePost()">
@@ -13,6 +18,11 @@
 
 <!-- Publish and import from Blogger-->
 <div class="toolbar-group">  
+  <!-- Import Button -->
+  <button class="btn btn-dark btn-sm" aria-label="Import from Blogger">
+      <i class="material-icons md-18">get_app</i> 
+  </button> 
+
   <!-- Publish dropdown button -->
   <div class="btn-group" ngbDropdown role="group">
     <button class="btn btn-dark btn-sm" ngbDropdownToggle aria-label="Publish blog">

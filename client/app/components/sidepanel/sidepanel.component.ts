@@ -28,4 +28,9 @@ export class SidepanelComponent implements OnInit {
   ngOnInit() {
   }
 
+  // closes the panel
+  close() {
+   this.navService.setPanelHidden(true);
+  }
+
 }

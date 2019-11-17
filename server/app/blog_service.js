@@ -55,10 +55,10 @@ class BlogService {
 
 		// blog service related listeners
 		this.messenger.respond('publishblog', async (data) => {
-			return await this.publishBlogPost(this.blogUrl, data.postData, data.fileName, false);
+			return this.publishBlogPost(this.blogUrl, data.postData, data.fileName, false);
 		});
 		this.messenger.respond('publishdraft', async (data) => {
-			return await this.publishBlogPost(this.blogUrl, data.postData, data.fileName, true);
+			return this.publishBlogPost(this.blogUrl, data.postData, data.fileName, true);
 		});
 
 		// file system service relared listeners
@@ -69,10 +69,35 @@ class BlogService {
 			return this.fs.fetchPostData(data.filename);
 		});
 		this.messenger.respond('savePost', (data) => {
-			var fileName = this.fs.savePost(data.filename, data.postData);
-			return fileName;
+			var savedData = this.fs.savePost(data.filename, data.postData);
+			return savedData;
+		})
+		this.messenger.listen('deletePost', (data) => {
+			var status = this.deleteBlogPost(data.itemId);
 		})
 
+	}
+
+	/**
+	 * Deletes the post from the index data and from the file system
+	 * @param {*} itemId - id of the blog post to be deleted
+	 */
+	deleteBlogPost(itemId) {
+		try {
+			dialog.showMessageBox ({
+				type: 'info',
+				buttons: ['Delete', 'Cancel'],
+				message: 'Are you sure to delete the post?',
+				title: 'Confirm'
+			}, result => {
+				if (result == 0) {
+					this.fs.deletePost(itemId);
+					this.messenger.send('deleted' + itemId, {status:status ? 200 : 0});
+				}
+			})
+		} catch (error) {
+			console.error('Error in deleting the blog post.', error);
+		}
 	}
 
 	/**
@@ -83,18 +108,20 @@ class BlogService {
 	 * @param {*} fileName - the file name for the blog post
 	 * @param {*} isDraft - flag to specify if the post is to be published as draft
 	 */
-	async publishBlogPost(blogURL, postData, fileName, isDraft) {
+	publishBlogPost(blogURL, postData, fileName, isDraft) {
 
 		// save the blog post before publishing
 		try {
-			fileName = this.fs.savePost(fileName, postData);
+			var savedData = this.fs.savePost(fileName, postData);
+			fileName = savedData.fileName;
+			postData = savedData.data;
 		} catch (error) {
 			console.error('Error in saving the blog post.', error);
 		}
 		
 		try {
 			this.seekAuthorization(blogURL, async (result) => {
-				return await this.publishPostData(result.id, postData, fileName, isDraft);
+				return  this.publishPostData(result.id, postData, fileName, isDraft);
 			});
 		} catch (error) {
 			dialog.showMessageBox({
@@ -193,7 +220,9 @@ class BlogService {
 		var updatedContents = await this.uploadAllRawImages(contents);
 
 		postData.content = updatedContents;
-		fileName = this.fs.savePost(fileName, postData);
+		var savedData = this.fs.savePost(fileName, postData);
+		fileName = savedData.fileName;
+		postData = savedData.data;
 		
 		this.blogger.publish({
 			blogAPI: this.blogger.getBloggerAPI(),
@@ -210,14 +239,21 @@ class BlogService {
 			postData.postId = result.id;
 			postData.postURL = result.url;
 
+			// saves the post
+			var savedData = this.fs.savePost(fileName, postData);
+			postData = savedData.data;
+
+			this.messenger.send('published', {
+				status: 200,
+				data: postData
+			});
+
 			dialog.showMessageBox({
 				type: 'info',
 				title: 'Done',
 				message: 'Blog post published.',
 				detail: 'The blog post has been successfully published to your blog' + (isDraft ? ' as a draft' : '') + '.'
 			});
-
-			return postData;
 		})
 	}
 
