@@ -12,7 +12,10 @@
     "productName":"Blogly",
     "mac": {
       "darkModeSupport": true,
-      "category": "public.app-category.photography"
+      "category": "public.app-category.photography",
+      "extendInfo": {
+        "com.apple.security.network.server": true
+      }
     }
   },
   "keywords": [
