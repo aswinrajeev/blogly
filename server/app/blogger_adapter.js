@@ -131,6 +131,8 @@ class BloggerAdapter {
 		
 							// resolves the promise for authorization
 							resolve(code);
+						} else {
+							resolve();
 						}
 					} catch (error) {
 						console.error(error);
@@ -151,6 +153,7 @@ class BloggerAdapter {
 				}, 120000);
 
 			} catch (error) {
+				console.error('Error in authorization', error);
 				reject(error);
 			}
 		});
@@ -172,14 +175,14 @@ class BloggerAdapter {
 					if (this.debugMode) {
 						console.debug('Invoking the callback after authorization.');
 					}
-					args.data.err = null;
+					args.data.err = code ? null : 'failed';
 					args.callback(args.data);
 				} else {
 					if (this.debugMode) {
 						console.debug('Invoking the callback after authorization.');
 					}
 					args.callback({
-						err: null
+						err: code ? null : 'failed'
 					});
 				}
 			}
@@ -189,6 +192,15 @@ class BloggerAdapter {
 			if (args.callback) {
 				if (this.debugMode) {
 					console.debug('Invoking the callback after authorization failed.');
+				}
+				args.callback({
+					err: err
+				});
+			}
+		}).catch((err) => {
+			if (args.callback) {
+				if (this.debugMode) {
+					console.debug('Blogger authorization failed.');
 				}
 				args.callback({
 					err: err

@@ -246,25 +246,31 @@ class FileSystemService {
 	 */
 	fetchPostsList() {
 		
-		var indexData = {};
+		var posts = [];
 
 		try {
-			//indexData = this.indexPosts(); //TODO: Remove this
-
-			// reads content of the index file
-			var content = fs.readFileSync(this.getIndexFile(), "utf8");
-			indexData = JSON.parse(content);
+			var indexData = {};
+	
+			try {
+				//indexData = this.indexPosts(); //TODO: Remove this
+	
+				// reads content of the index file
+				var content = fs.readFileSync(this.getIndexFile(), "utf8");
+				indexData = JSON.parse(content);
+			} catch (error) {
+				console.error('Error in reading indices. Regenerating the indices...', error);
+				indexData = this.indexPosts();
+			}
+	
+			indexData.posts.forEach(itemId => {
+				var post =indexData.index[itemId];
+				post.itemId = itemId;
+				posts.push(post);
+			})
 		} catch (error) {
-			console.error('Error in reading indices. Regenerating the indices...', error);
-			indexData = this.indexPosts();
+			console.error('Unable to fetch the blog posts.', error);
 		}
-
-		var posts = [];
-		indexData.posts.forEach(itemId => {
-			var post =indexData.index[itemId];
-			post.itemId = itemId;
-			posts.push(post);
-		})
+		
 
 		return posts;
 	}
@@ -285,6 +291,7 @@ class FileSystemService {
 		} catch (error) {
 			console.error('Error in reading indices. Regenerating the indices...', error);
 		}
+		
 		try {	
 			if (indexData != null) {
 				postData = indexData.index[itemId];

@@ -59,7 +59,7 @@ class MainWindow {
 			this.messenger = new MessagingService(ipcMain, this.mainWindow.webContents);
 	
 			// register events for blogging services
-			this.blogservice = new BlogService(this.messenger, this.blogUrl, this.fsService);
+			this.blogservice = new BlogService(this.messenger, this.blogUrl, this.fsService, this.mainWindow);
 			this.blogservice.initialize();
 
 			this.fsService.setMessenger(this.messenger);

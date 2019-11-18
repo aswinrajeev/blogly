@@ -13,12 +13,13 @@ const { dialog } = require('electron')
  */
 class BlogService {
 
-	constructor(messenger, blogUrl, fileSystem) {
+	constructor(messenger, blogUrl, fileSystem, mainWindow) {
 		this.messenger = messenger;
 		this.blogUrl = blogUrl;
 		this.fs = fileSystem;
 		this.photos = null;
 		this.blogger = null;
+		this.mainWindow = mainWindow;
 	}
 
 	/**
@@ -121,7 +122,12 @@ class BlogService {
 		
 		try {
 			this.seekAuthorization(blogURL, async (result) => {
-				return  this.publishPostData(result.id, postData, fileName, isDraft);
+				if (result != null && result.error == null) {
+					return  this.publishPostData(result.id, postData, fileName, isDraft);
+				} else {
+					console.error('Unable to authorize.');
+					return;
+				}
 			});
 		} catch (error) {
 			dialog.showMessageBox({
@@ -146,7 +152,7 @@ class BlogService {
 			width: 370,
 			title: 'Authorize',
 			modal: true,
-			minimizable: false,
+			parent: this.mainWindow,
 			fullscreenable: false,
 			show: false
 		})
@@ -170,19 +176,26 @@ class BlogService {
 			// initializes the Photos API using the tokens
 			var tokens = this.blogger.getTokens();
 
-			this.drive.initialize({
-				tokens: tokens
-			});
-
-			// get the details of the blog
-			this.blogger.getBlogByUrl({
-				blogAPI: this.blogger.getBloggerAPI(),
-				authClient: this.blogger.getAuth(),
-				url: blogUrl
-			}).then((result) => {
+			//TODO: handle if token is null
+			if (tokens) {
+				this.drive.initialize({
+					tokens: tokens
+				});
+	
+				// get the details of the blog
+				this.blogger.getBlogByUrl({
+					blogAPI: this.blogger.getBloggerAPI(),
+					authClient: this.blogger.getAuth(),
+					url: blogUrl
+				}).then((result) => {
+					window.close();
+					callback(result);
+				})
+			} else {
 				window.close();
-				callback(result);
-			})
+				callback(null);
+			}
+
 		})
 	}
 
@@ -216,45 +229,50 @@ class BlogService {
 		var contents = postData.content;
 		var postId = postData.postId;
 
-		// upload all images to Google Drive and replace the data with the image URL.
-		var updatedContents = await this.uploadAllRawImages(contents);
-
-		postData.content = updatedContents;
-		var savedData = this.fs.savePost(fileName, postData);
-		fileName = savedData.fileName;
-		postData = savedData.data;
-		
-		this.blogger.publish({
-			blogAPI: this.blogger.getBloggerAPI(),
-			authClient: this.blogger.getAuth(),
-			blogId: blogId,
-			isDraft: isDraft,
-			postId: postId,
-			blogPost: {
-				title: title,
-				content: updatedContents
-			}
-		}).then((result) => {
-
-			postData.postId = result.id;
-			postData.postURL = result.url;
-
-			// saves the post
+		try {
+			// upload all images to Google Drive and replace the data with the image URL.
+			var updatedContents = await this.uploadAllRawImages(contents);
+	
+			postData.content = updatedContents;
 			var savedData = this.fs.savePost(fileName, postData);
+			fileName = savedData.fileName;
 			postData = savedData.data;
+			
+			this.blogger.publish({
+				blogAPI: this.blogger.getBloggerAPI(),
+				authClient: this.blogger.getAuth(),
+				blogId: blogId,
+				isDraft: isDraft,
+				postId: postId,
+				blogPost: {
+					title: title,
+					content: updatedContents
+				}
+			}).then((result) => {
+	
+				postData.postId = result.id;
+				postData.postURL = result.url;
+	
+				// saves the post
+				var savedData = this.fs.savePost(fileName, postData);
+				postData = savedData.data;
+	
+				this.messenger.send('published', {
+					status: 200,
+					data: postData
+				});
+	
+				dialog.showMessageBox({
+					type: 'info',
+					title: 'Done',
+					message: 'Blog post published.',
+					detail: 'The blog post has been successfully published to your blog' + (isDraft ? ' as a draft' : '') + '.'
+				});
+			})
+		} catch (error) {
+			console.error('Unable to publish the blog post.', error);
+		}
 
-			this.messenger.send('published', {
-				status: 200,
-				data: postData
-			});
-
-			dialog.showMessageBox({
-				type: 'info',
-				title: 'Done',
-				message: 'Blog post published.',
-				detail: 'The blog post has been successfully published to your blog' + (isDraft ? ' as a draft' : '') + '.'
-			});
-		})
 	}
 
 	/**
