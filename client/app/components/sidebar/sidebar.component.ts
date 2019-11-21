@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
 import { NavigationService } from 'client/app/services/navigationservice/navigation.service';
 
 @Component({
@@ -9,7 +8,7 @@ import { NavigationService } from 'client/app/services/navigationservice/navigat
 })
 export class SidebarComponent implements OnInit {
 
-  constructor(private router:Router, private navService: NavigationService) { 
+  constructor(private navService: NavigationService) { 
 
   }
 

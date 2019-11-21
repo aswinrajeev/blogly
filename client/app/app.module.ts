@@ -14,18 +14,11 @@ import { FootbarComponent } from './components/footbar/footbar.component';
 import { BlogareaComponent } from './components/blogarea/blogarea.component';
 import { FormsModule } from '@angular/forms';
 import { PostlistComponent } from './components/postlist/postlist.component';
+import { SettingsComponent } from './components/settings/settings.component';
 
 import { AceEditorModule } from 'ng2-ace-editor';
 
-import { RouterModule, Routes } from '@angular/router';
-
-const routes: Routes = [
-  {
-    path: "",
-    component: PostlistComponent,
-    outlet: "sidepanel"
-  }
-]
+import { SidepaleholderDirective } from './directives/sidepaleholder.directive';
 
 @NgModule({
   declarations: [
@@ -35,7 +28,9 @@ const routes: Routes = [
     SidepanelComponent,
     FootbarComponent,
     BlogareaComponent,
-    PostlistComponent
+    PostlistComponent,
+    SettingsComponent,
+    SidepaleholderDirective
   ],
   imports: [
     BrowserModule,
@@ -44,10 +39,10 @@ const routes: Routes = [
     FormsModule,
     AceEditorModule,
     QuillModule.forRoot(),
-    RouterModule.forRoot(
-      routes
-      //, { enableTracing: true } // <-- debugging purposes only
-    )
+  ],
+  entryComponents: [
+    PostlistComponent, 
+    SettingsComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

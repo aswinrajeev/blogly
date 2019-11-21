@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { EventEmitter } from 'events';
 
 @Injectable({
   providedIn: 'root'
@@ -7,6 +8,7 @@ export class NavigationService {
 
   currentPanel: String;
   panelHidden: boolean = false;
+  panelUpdated: EventEmitter = new EventEmitter();
 
   constructor() { }
 
@@ -16,6 +18,7 @@ export class NavigationService {
 
   setCurrentPanel(currentPanel:String) {
     this.currentPanel = currentPanel;
+    this.panelUpdated.emit('panelUpdated', currentPanel);
   }
 
   // returns if panel is hidden

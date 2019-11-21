@@ -44,8 +44,8 @@ class MainWindow {
 	
 			// initialize a new window
 			this.mainWindow = new BrowserWindow({ 
-				width: this.fsService.getConfigProperty('width'), 
-				height: this.fsService.getConfigProperty('height'), 
+				width: this.fsService.getConfigProperty('windowWidth'), 
+				height: this.fsService.getConfigProperty('windowHeight'), 
 				minHeight: 618,
 				minWidth: 1080,
 				show: false,
