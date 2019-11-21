@@ -12,6 +12,8 @@ class FileSystemService {
 
 	constructor(app) {
 
+		this.app = app;5
+
 		this.BLOGLY_FILE_EXTN = "blogly";
 		this.INDEX_FILE_NAME = ".blogly.index";
 		this.imageIndex = 0;
@@ -47,7 +49,10 @@ class FileSystemService {
 		};
 
 		// initializes the blog directory as Blogly folder in documents.
-		conf.blogsDir = app.getPath('documents') + path.sep + 'Blogly';
+		this.blogsDir = this.app.getPath('documents') + path.sep + 'Blogly';
+
+		conf.blogsDir = this.blogsDir;
+		conf.blogs = [];
 
 		try {
 

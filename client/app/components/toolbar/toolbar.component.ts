@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { Blog } from 'client/app/models/blog';
 
 @Component({
   selector: 'app-toolbar',
@@ -13,6 +14,11 @@ export class ToolbarComponent implements OnInit {
   ngOnInit() {
 
     this.toggleEditor();
+    this.blogservice.fetchBlogs();
+  }
+
+  getBlogs():Blog[] {
+    return this.blogservice.getBlogs();
   }
 
   // pubish a blog

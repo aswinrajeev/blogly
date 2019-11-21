@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BlogPost } from 'client/app/models/blogpost';
 import { MessagingService } from '../messagingservice/messaging.service';
 import { EventEmitter } from 'events';
+import { Blog } from 'client/app/models/blog';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ export class BlogService {
 	// blog object data holder
   blogPost: BlogPost;
   postsList:BlogPost[];
+  blogs: Blog[] = [];
   newFun: Function;
 
   htmlEditor: boolean = true;
@@ -103,6 +105,20 @@ export class BlogService {
       this.postsList = posts;
       callback(posts);
     });
+  }
+
+  // retrieves the list of blogs saved
+  fetchBlogs() {
+    this._messenger.request('fetchBlogList', null, (result) => {
+      result.blogs.forEach(blog => {
+        this.blogs.push(new Blog(blog.name, blog.url, blog.postId));
+      });
+    });
+  }
+
+  // gets the blogs
+  getBlogs():Blog[] {
+    return this.blogs;
   }
 
   // deletes a post

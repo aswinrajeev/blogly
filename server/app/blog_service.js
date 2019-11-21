@@ -69,6 +69,9 @@ class BlogService {
 		this.messenger.respond('fetchFullPost', (data) => {
 			return this.fs.fetchPostData(data.filename);
 		});
+		this.messenger.respond('fetchBlogList', () => {
+			return this.getBlogsList();
+		});
 		this.messenger.respond('savePost', (data) => {
 			var savedData = this.fs.savePost(data.filename, data.postData);
 			return savedData;
@@ -77,6 +80,24 @@ class BlogService {
 			var status = this.deleteBlogPost(data.itemId);
 		})
 
+	}
+
+	/**
+	 * Fetches the list of the blogs from the configs
+	 */
+	getBlogsList() {
+		var blogs = this.fs.getConfigProperty('blogs') ;
+		var blogList;
+		if (blogs != null && blogs.length > 0) {
+			blogList = blogs;
+		} else {
+			blogList =  [];
+		}
+
+		return {
+			status: 200,
+			blogs: blogList
+		}
 	}
 
 	/**
