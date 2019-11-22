@@ -24,3 +24,38 @@
 	right: 0px;
 	overflow: scroll;
 }
+
+.panel {
+	border: solid thin;
+	border-color: $panel-outline-color;
+	border-radius: 3px;
+	width: 260px;
+	font-size: 12px;
+	margin: 8px;
+}
+
+.panel-heading {
+	font-weight: bold;
+	border-bottom: thin solid;
+	border-color: $panel-outline-color;
+	box-shadow: -2px 2px 20px -8px rgba(0,0,0,0.8);
+	background-color: $app-second-background;
+	padding: 5px;
+}
+
+.panel-body {
+	padding: 5px;
+}
+
+.panel-textbox {
+	background-color: $panel-background;
+	color: $app-foreground;
+    border: thin;
+    height: 27px;
+    width: 210px;
+}
+
+.panel p {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
