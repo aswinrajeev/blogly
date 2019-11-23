@@ -16,7 +16,8 @@ export class BlogareaComponent implements OnInit {
   constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { }
 
   ngOnInit() {
-    this.blogService.postUpdated.on('postUpdated', () => {
+    // listens for any updates to posts
+    this.blogService.updateListener.on('postUpdated', () => {
       this.cdr.detectChanges();
     })
   }
@@ -26,6 +27,7 @@ export class BlogareaComponent implements OnInit {
     return this.blogService.getBlogData();
   }
 
+  // returns if the current editor is HTML editor
   isHTMLEditor():boolean {
     return this.blogService.isHTMLEditor();
   }
@@ -42,6 +44,7 @@ export class BlogareaComponent implements OnInit {
     this.markChanged();
   }
 
+  // initialize the view elements
   ngAfterViewInit() {
     setTimeout(() => {
       // switch to RT Editor only after 500 ms, since Ace editor would need to initialize

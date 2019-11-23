@@ -80,6 +80,10 @@ class BlogService {
 			var status = this.deleteBlogPost(data.itemId);
 		})
 
+		this.messenger.respond('selectDir', () => {
+			return this.selectDir();
+		})
+
 	}
 
 	/**
@@ -87,11 +91,17 @@ class BlogService {
 	 */
 	getBlogsList() {
 		var blogs = this.fs.getConfigProperty('blogs') ;
-		var blogList;
+		var blogList = [];
+		var blog;
 		if (blogs != null && blogs.length > 0) {
-			blogList = blogs;
-		} else {
-			blogList =  [];
+			blogs.forEach(blogObj => {
+				blog = new Object();
+				blog.name = blogObj.name;
+				blog.url = blogObj.url;
+				blog.id = blogObj.id;
+
+				blogList.push(blog);
+			});
 		}
 
 		return {
@@ -326,6 +336,16 @@ class BlogService {
 		}
 
 		return dom.toString();
+	}
+
+	/**
+	 * Opens a select directory dialog and returns the selected dir path
+	 */
+	selectDir() {
+		var path = dialog.showOpenDialog({
+			properties: ['openDirectory']
+		});
+		return path;
 	}
 
 	/**

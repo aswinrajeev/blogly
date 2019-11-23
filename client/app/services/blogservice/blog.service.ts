@@ -12,13 +12,14 @@ export class BlogService {
 	// blog object data holder
   blogPost: BlogPost;
   postsList:BlogPost[];
-  blogs: Blog[] = [];
+  blogs: Blog[];
   newFun: Function;
+  workspaceDir:String;
 
   htmlEditor: boolean = true;
 
   // event emitter for tracking post changes
-  postUpdated: EventEmitter = new EventEmitter();
+  updateListener: EventEmitter = new EventEmitter();
 
   constructor(private _messenger: MessagingService) {}
 
@@ -39,7 +40,7 @@ export class BlogService {
     this.htmlEditor = !isHTML;
 
     // emit a post updated event
-    this.postUpdated.emit("postUpdated");
+    this.updateListener.emit("postUpdated");
   }
 
   // set the blog post id
@@ -110,6 +111,9 @@ export class BlogService {
   // retrieves the list of blogs saved
   fetchBlogs() {
     this._messenger.request('fetchBlogList', null, (result) => {
+      if (this.blogs == null) {
+        this.blogs = [];
+      }
       result.blogs.forEach(blog => {
         this.blogs.push(new Blog(blog.name, blog.url, blog.postId));
       });
@@ -131,12 +135,12 @@ export class BlogService {
         if (post.itemId == this.getBlogData().itemId && this.postsList.length > 0) {
           this.setPost(this.postsList[0], () => {
             // emit a post updated event
-            this.postUpdated.emit("postUpdated");
+            this.updateListener.emit("postUpdated");
           });
         }
 
         // emit a post updated event
-        this.postUpdated.emit("postUpdated");
+        this.updateListener.emit("postUpdated");
       }
     }, {});
 
@@ -171,7 +175,7 @@ export class BlogService {
         }
         
         // emit a post updated event
-        this.postUpdated.emit("postUpdated");
+        this.updateListener.emit("postUpdated");
         callback();
   
       });
@@ -179,7 +183,7 @@ export class BlogService {
       this.blogPost = post;
 
       // emit a post updated event
-      this.postUpdated.emit("postUpdated");
+      this.updateListener.emit("postUpdated");
       callback();
     }
   }
@@ -199,10 +203,20 @@ export class BlogService {
         post.markDirty(false);
 
         // emit a post updated event
-        this.postUpdated.emit("postUpdated");
+        this.updateListener.emit("postUpdated");
       }
     });
   }
+
+  // requests for a select dir dialog and returns the selected path to worspace path
+  selectWorkspaceDir() {
+    this._messenger.request('selectDir', null, (dir) => {
+      this.workspaceDir = dir;
+      this.updateListener.emit('settingsUpdated');
+    })
+  }
+
+
 
   // sets a function to be invoked when new button is pressed
   setNewPostAction(fun) {

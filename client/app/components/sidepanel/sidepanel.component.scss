@@ -32,6 +32,7 @@
 	width: 260px;
 	font-size: 12px;
 	margin: 8px;
+	margin-bottom: 10px;
 }
 
 .panel-heading {
@@ -52,10 +53,47 @@
 	color: $app-foreground;
     border: thin;
     height: 27px;
-    width: 210px;
+	width: 210px;
+	padding-left: 7px;
+	padding-right: 7px;
 }
 
 .panel p {
 	margin-top: 10px;
 	margin-bottom: 5px;
+}
+
+.listItem {
+	background-color: $app-background;
+	border: thin solid $panel-background;
+	padding: 4px;
+	margin-bottom: 2px;
+	position: relative;
+}
+
+.listItem:hover {
+	background-color: $app-second-background;
+}
+
+.listItem .listItem-title {
+	font-size: 14px;
+	color: $app-foreground;
+	width:100%;
+}
+
+.listItem .listItem-contents {
+	font-size: 10px;
+	color: $app-second-foreground;
+	width:100%;
+	line-height: 1.5;
+    display: block;
+}
+
+.listItem-delete {
+	position: absolute;
+	right: 0px;
+	padding: 5px;
+	padding-top: 2px;
+	font-size: 10px;
+	cursor: pointer;
 }

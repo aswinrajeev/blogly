@@ -1,26 +1,34 @@
+<!-- General settings -->
 <div class="panel">
   <div class="panel-heading">General Settings</div>
   <div class="panel-body">
     <p>Workspace directory</p>
-    <input class="panel-textbox"/>
-    <button class="btn btn-dark btn-sm" aria-label="New blog" style="margin-top: -2px;">
+    <input class="panel-textbox" disabled [ngModel]="getWorkspaceDir()"/>
+    <button class="btn btn-dark btn-sm" aria-label="New blog" style="margin-top: -2px;" (click)="selectWorkspaceDir()">
       <i class="material-icons md-18">note_add</i> 
     </button>
-    <p>Rebuild index</p>
+    <p>Build / rebuild index</p>
     <button class="btn btn-dark btn-sm" aria-label="New blog">
-      Rebuild
+      Build Index
     </button>
   </div>
 </div>
 
+<!-- Blogger integration settings -->
 <div class="panel">
   <div class="panel-heading">Blogger Settings</div>
   <div class="panel-body">
     <p>Connect new blog</p>
-    <input class="panel-textbox"/>
-    <button class="btn btn-dark btn-sm" aria-label="New blog">
+    <input class="panel-textbox" placeholder="Blog URL (https://www.aswinsblog.com)" style="width: 240px;margin-bottom: 5px;"/>
+    <input class="panel-textbox" placeholder="Alias (eg. Aswin's Blog)"/>
+    <button class="btn btn-dark btn-sm" aria-label="New blog" style="margin-top: -2px;">
       <i class="material-icons md-18">note_add</i> 
     </button>
     <p>Connected blogs</p>
+    <div class="listItem" *ngFor="let blog of getBlogsList()">
+      <span class="listItem-delete"><i class="material-icons md-18">delete</i></span>
+      <span class="listItem-title">Aswin's Blog</span><br/>
+	    <span class="listItem-contents">https://www.aswinsblog.com</span>
+    </div>
   </div>
 </div>
