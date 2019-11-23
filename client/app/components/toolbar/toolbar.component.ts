@@ -14,7 +14,7 @@ export class ToolbarComponent implements OnInit {
   ngOnInit() {
 
     this.toggleEditor();
-    this.blogservice.fetchBlogs();
+    this.blogservice.fetchConfigurations();
   }
 
   getBlogs():Blog[] {
@@ -22,8 +22,8 @@ export class ToolbarComponent implements OnInit {
   }
 
   // pubish a blog
-  publishBlog(isDraft) {
-    this.blogservice.publishBlog(isDraft);
+  publishBlog(blog, isDraft) {
+    this.blogservice.publishBlog(blog, isDraft);
   }
 
   // creates a new blog post

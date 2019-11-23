@@ -110,18 +110,21 @@ class FileSystemService {
 	readConfigs() {
 
 		try {
+			if (!fs.existsSync(this.appConf)) {
+				try {
+					// do a first-time initialization, and returns the initial configuration
+					var conf = this.initializeConfig();
+					return conf;
+				} catch (error) {
+					console.error("Cannot create the configuration file.", error);
+					throw error;
+				}
+			}
+
 			// reads the configurations for the app directory and returns the configuration
 			return JSON.parse(fs.readFileSync(this.appConf));
 		} catch (error) {
 			console.debug("Unable to load the conf file.")
-			try {
-				// do a first-time initialization, and returns the initial configuration
-				var conf = this.initializeConfig();
-				return conf;
-			} catch (error) {
-				console.error("Cannot create the configuration file.", error);
-				throw error;
-			}
 		}
 	}
 
@@ -170,6 +173,12 @@ class FileSystemService {
 		if (writeConf == true) {
 			this.saveConfigs(this.conf);
 		}
+	}
+
+	saveConfigForNextStart(key, value) {
+		var conf = this.readConfigs();
+		conf[key] = value;
+		this.saveConfigs(conf);
 	}
 
 	/**

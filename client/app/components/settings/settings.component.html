@@ -7,10 +7,12 @@
     <button class="btn btn-dark btn-sm" aria-label="New blog" style="margin-top: -2px;" (click)="selectWorkspaceDir()">
       <i class="material-icons md-18">note_add</i> 
     </button>
-    <p>Build / rebuild index</p>
+    <!-- <p>Build / rebuild index</p>
     <button class="btn btn-dark btn-sm" aria-label="New blog">
       Build Index
-    </button>
+    </button> -->
+    <br/><br/>
+    <span style="color: orange;"><b>*</b> requires a restart to take effect</span>
   </div>
 </div>
 
@@ -19,16 +21,16 @@
   <div class="panel-heading">Blogger Settings</div>
   <div class="panel-body">
     <p>Connect new blog</p>
-    <input class="panel-textbox" placeholder="Blog URL (https://www.aswinsblog.com)" style="width: 240px;margin-bottom: 5px;"/>
-    <input class="panel-textbox" placeholder="Alias (eg. Aswin's Blog)"/>
-    <button class="btn btn-dark btn-sm" aria-label="New blog" style="margin-top: -2px;">
+    <input class="panel-textbox" placeholder="Blog URL (https://www.aswinsblog.com)" [(ngModel)]="blogUrl" style="width: 240px;margin-bottom: 5px;"/>
+    <input class="panel-textbox" placeholder="Alias (eg. Aswin's Blog)" [(ngModel)]="blogName"/>
+    <button class="btn btn-dark btn-sm" aria-label="New blog" style="margin-top: -2px;" (click)="addNewBlog()">
       <i class="material-icons md-18">note_add</i> 
     </button>
     <p>Connected blogs</p>
     <div class="listItem" *ngFor="let blog of getBlogsList()">
-      <span class="listItem-delete"><i class="material-icons md-18">delete</i></span>
-      <span class="listItem-title">Aswin's Blog</span><br/>
-	    <span class="listItem-contents">https://www.aswinsblog.com</span>
+      <span class="listItem-delete"><i class="material-icons md-18" (click)="deleteBlog(blog)">delete</i></span>
+      <span class="listItem-title">{{blog.name}}</span><br/>
+	    <span class="listItem-contents">{{blog.url}}</span>
     </div>
   </div>
 </div>

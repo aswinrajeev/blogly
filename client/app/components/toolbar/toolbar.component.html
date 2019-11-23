@@ -26,7 +26,7 @@
       </button>
       <div class="dropdown-menu" ngbDropdownMenu>
           <button disabled="true" [hidden]="getBlogs() != null && getBlogs().length > 0" ngbDropdownItem>(No blogs defined)</button>
-          <button ngbDropdownItem *ngFor="let blog of getBlogs()" (click)="publishBlog(false)">Import from {{blog.name}} </button>
+          <button ngbDropdownItem *ngFor="let blog of getBlogs()">Import from {{blog.name}} </button>
       </div>
     </div>
 
@@ -37,7 +37,7 @@
     </button>
     <div class="dropdown-menu" ngbDropdownMenu>
       <button disabled="true" [hidden]="getBlogs() != null && getBlogs().length > 0" ngbDropdownItem>(No blogs defined)</button>
-      <button ngbDropdownItem *ngFor="let blog of getBlogs()" (click)="publishBlog(false)">Draft to {{blog.name}} </button>
+      <button ngbDropdownItem *ngFor="let blog of getBlogs()" (click)="publishBlog(blog, false)">Draft to {{blog.name}} </button>
     </div>
   </div>
 
@@ -50,7 +50,7 @@
       <!-- <button ngbDropdownItem (click)="publishBlog(false)">Publish to Blogger</button>
       <button ngbDropdownItem (click)="publishBlog(true)">Save as draft</button> -->
       <button disabled="true" [hidden]="getBlogs() != null && getBlogs().length > 0" ngbDropdownItem>(No blogs defined)</button>
-      <button ngbDropdownItem *ngFor="let blog of getBlogs()" (click)="publishBlog(false)">Publish to {{blog.name}} </button>
+      <button ngbDropdownItem *ngFor="let blog of getBlogs()" (click)="publishBlog(blog, false)">Publish to {{blog.name}} </button>
     </div>
   </div>
 </div>

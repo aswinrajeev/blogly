@@ -54,10 +54,11 @@ export class BlogService {
   }
 
   // publish a blog post
-  publishBlog(isDraft) {
+  publishBlog(blog:Blog, isDraft) {
     var post = this.getBlogData();
     var postObj = {
       fileName: post.file,
+      blog: blog.getAsBlog(),
       postData: post.getAsPost()
     };
 
@@ -109,14 +110,19 @@ export class BlogService {
   }
 
   // retrieves the list of blogs saved
-  fetchBlogs() {
-    this._messenger.request('fetchBlogList', null, (result) => {
-      if (this.blogs == null) {
-        this.blogs = [];
+  fetchConfigurations() {
+    this._messenger.request('fetchConfs', null, (result) => {
+      if (result.status == 200) {
+        this.workspaceDir = result.workspace;
+        if (this.blogs == null) {
+          this.blogs = [];
+        }
+        result.blogs.forEach(blog => {
+          this.blogs.push(new Blog(blog.name, blog.url, blog.postId));
+        });
+      } else {
+        console.error("Unable to fetch the configurations.");
       }
-      result.blogs.forEach(blog => {
-        this.blogs.push(new Blog(blog.name, blog.url, blog.postId));
-      });
     });
   }
 
@@ -216,7 +222,16 @@ export class BlogService {
     })
   }
 
-
+  deleteBlog(blog:Blog) {
+    this._messenger.listenOnce('blogDeleted', (result) => {
+      if (result.status == 200) {
+        this.blogs.splice(this.blogs.indexOf(blog), 1);
+        this.updateListener.emit('settingsUpdated');
+      }
+    }, blog.getAsBlog());
+    
+    this._messenger.send('deleteBlog', blog.getAsBlog());
+  }
 
   // sets a function to be invoked when new button is pressed
   setNewPostAction(fun) {
@@ -226,6 +241,18 @@ export class BlogService {
   // invokes the new post action
   newPost() {
     this.newFun();
+  }
+
+  addBlog(alias: String, url: String) {
+    var blog:Blog = new Blog(alias, url, null);
+    this._messenger.listen('blogAdded', (result) => {
+      if (result.status == 200) {
+        var blog:Blog = new Blog(result.blog.name, result.blog.url, result.blog.blogId);
+        this.blogs.push(blog);
+        this.updateListener.emit('settingsUpdated');
+      }
+    }, null);
+    this._messenger.send('newBlog', blog.getAsBlog());
   }
 
 }

@@ -10,6 +10,8 @@ import { Blog } from 'client/app/models/blog';
 export class SettingsComponent implements OnInit {
 
   worspaceDir:String;
+  blogName:String;
+  blogUrl:String;
 
   constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { }
 
@@ -33,6 +35,16 @@ export class SettingsComponent implements OnInit {
   // prompts a directory selection dialog and updates the workspace variable
   selectWorkspaceDir() {
     this.blogService.selectWorkspaceDir();
+  }
+
+  addNewBlog() {
+    this.blogService.addBlog(this.blogName, this.blogUrl);
+    this.blogUrl = '';
+    this.blogName = '';
+  }
+
+  deleteBlog(blog) {
+    this.blogService.deleteBlog(blog);
   }
 
 

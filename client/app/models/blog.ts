@@ -39,4 +39,13 @@ export class Blog {
 		this._url = url;
 	}
 
+	// returns the blog as a JSON object
+	getAsBlog() {
+		var blog = {};
+		blog['blogId'] = this.blogId;
+		blog['name'] = this.name;
+		blog['url'] = this.url;
+
+		return blog;
+	}
 }

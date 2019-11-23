@@ -56,10 +56,14 @@ class BlogService {
 
 		// blog service related listeners
 		this.messenger.respond('publishblog', async (data) => {
-			return this.publishBlogPost(this.blogUrl, data.postData, data.fileName, false);
+			if (data != null && data.blog != null) {
+				return this.publishBlogPost(data.blog.url, data.postData, data.fileName, false);
+			}
 		});
 		this.messenger.respond('publishdraft', async (data) => {
-			return this.publishBlogPost(this.blogUrl, data.postData, data.fileName, true);
+			if (data != null && data.blog != null) {
+				return this.publishBlogPost(data.blog.url, data.postData, data.fileName, true);
+			}
 		});
 
 		// file system service relared listeners
@@ -69,8 +73,8 @@ class BlogService {
 		this.messenger.respond('fetchFullPost', (data) => {
 			return this.fs.fetchPostData(data.filename);
 		});
-		this.messenger.respond('fetchBlogList', () => {
-			return this.getBlogsList();
+		this.messenger.respond('fetchConfs', () => {
+			return this.getConfigurations();
 		});
 		this.messenger.respond('savePost', (data) => {
 			var savedData = this.fs.savePost(data.filename, data.postData);
@@ -84,13 +88,22 @@ class BlogService {
 			return this.selectDir();
 		})
 
+		this.messenger.listen('newBlog', (blog) => {
+			this.addNewBlog(blog);
+		})
+
+		this.messenger.listen('deleteBlog', (blog) => {
+			this.deleteBlog(blog);
+		})
+
 	}
 
 	/**
 	 * Fetches the list of the blogs from the configs
 	 */
-	getBlogsList() {
+	getConfigurations() {
 		var blogs = this.fs.getConfigProperty('blogs') ;
+		var workspaceDir = this.fs.getConfigProperty('blogsDir');
 		var blogList = [];
 		var blog;
 		if (blogs != null && blogs.length > 0) {
@@ -98,7 +111,7 @@ class BlogService {
 				blog = new Object();
 				blog.name = blogObj.name;
 				blog.url = blogObj.url;
-				blog.id = blogObj.id;
+				blog.blogId = blogObj.blogId;
 
 				blogList.push(blog);
 			});
@@ -106,7 +119,85 @@ class BlogService {
 
 		return {
 			status: 200,
-			blogs: blogList
+			blogs: blogList,
+			workspace: workspaceDir
+		}
+	}
+
+	/**
+	 * Inserts the blog into the blogs list and return the blog
+	 * @param {*} blog 
+	 */
+	addNewBlog(blog) {
+		try {
+			console.log(blog);
+			var blogI;
+			var blogs = this.fs.getConfigProperty('blogs');
+
+			for (var i =0 ; i < blogs.length; i++) {
+				blogI = blogs[i];
+				if (blogI.url == blog.url) {
+
+					dialog.showMessageBox({
+						type: 'error',
+						title: 'Error',
+						message: 'Blog is already connected',
+						detail: 'The blog has already been connected. It cannot be added more than once.'
+					});
+
+					this.messenger.send('blogAdded', {
+						status: 1
+					});
+					return;
+				}
+			}
+
+			blogs.push(blog);
+			this.fs.setConfigProperty('blogs', blogs, true);
+
+			this.messenger.send('blogAdded', {
+				status: 200,
+				blog: blog
+			});
+
+		} catch (error) {
+			console.error("Could not connect the blog", error);
+			this.messenger.send('blogAdded', {
+				status: 0
+			});
+		}
+	}
+
+	/**
+	 * deletes a blog from conencted blogs
+	 *  */
+	deleteBlog(blog) {
+		try {
+
+			var blogObj = {};
+			blogObj.blogId = blog.blogId ? blog.blogId : null; //intentionally done to keep null. This will help in comparison
+			blogObj.name = blog.name;
+			blogObj.url = blog.url;
+			var blogI;
+
+			var blogs = this.fs.getConfigProperty('blogs');
+			for (var i =0 ; i < blogs.length; i++) {
+				blogI = blogs[i];
+				if (blogI.url == blog.url) {
+					blogs.splice(i, 1);
+					this.fs.setConfigProperty('blogs', blogs, true);
+					this.messenger.send('blogDeleted', {
+						status: 200
+					});
+
+					return;
+				}
+			}
+
+		} catch (error) {
+			this.messenger.send('blogDeleted', {
+				status: 0
+			});
 		}
 	}
 
@@ -345,6 +436,13 @@ class BlogService {
 		var path = dialog.showOpenDialog({
 			properties: ['openDirectory']
 		});
+
+		try {
+			this.fs.saveConfigForNextStart('blogsDir', path);
+		} catch (error) {
+			console.error('Unable to save the workspace path.', error);
+		}
+
 		return path;
 	}
 
@@ -368,6 +466,7 @@ class BlogService {
 
 		return image.link;
 	}
+	
 }
 
 module.exports.BlogService = BlogService;
