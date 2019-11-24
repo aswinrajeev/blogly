@@ -89,7 +89,7 @@ export class BlogService {
   fetchPostList(callback){
     this._messenger.request('fetchposts', null, (result:any) => {
       var posts:BlogPost[] = new Array<BlogPost>();
-      var post;
+      var post: BlogPost;
 
       if (result != null) {
         result.forEach(data => {
@@ -143,6 +143,8 @@ export class BlogService {
             // emit a post updated event
             this.updateListener.emit("postUpdated");
           });
+        } else if (this.postsList.length == 0) {
+          this.newFun();
         }
 
         // emit a post updated event
@@ -177,6 +179,7 @@ export class BlogService {
           post.postURL = result.postURL;
           post.file = result.file;
           post.isSaved = true;
+          post.tags = result.tags;
           this.blogPost = post;
         }
         

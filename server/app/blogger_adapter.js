@@ -252,7 +252,8 @@ class BloggerAdapter {
 			isDraft: args.isDraft,
 			resource: {
 				title: args.blogPost.title,
-				content: args.blogPost.content
+				content: args.blogPost.content,
+				labels: args.blogPost.tags
 			}
 		};
 

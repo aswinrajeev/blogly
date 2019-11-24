@@ -350,6 +350,7 @@ class BlogService {
 		var title = postData.title;
 		var contents = postData.content;
 		var postId = postData.postId;
+		var tags = postData.tags;
 
 		try {
 			// upload all images to Google Drive and replace the data with the image URL.
@@ -368,7 +369,8 @@ class BlogService {
 				postId: postId,
 				blogPost: {
 					title: title,
-					content: updatedContents
+					content: updatedContents,
+					tags: tags
 				}
 			}).then((result) => {
 	

@@ -7,6 +7,7 @@ export class BlogPost {
 	private _postURL: String;
 	private _itemId:string; // for internal id
 	private _isSaved:boolean;
+	private _tags:String[];
 
 	constructor() {
 		var currTime = Math.floor(Date.now());
@@ -18,6 +19,7 @@ export class BlogPost {
 		this._file = null;
 		this._itemId = 'p_' + currTime;
 		this._isSaved = false;
+		this._tags = [];
 	}
 
 	get title() {
@@ -123,6 +125,18 @@ export class BlogPost {
 		}
 	}
 
+	get tags() {
+		return this._tags;
+	}
+	set tags(tags) {
+		this.setTags(tags);
+	}
+	setTags(tags) {
+		if (this.tags !== tags) {
+			this._tags = tags;
+		}
+	}
+
 	// gets the post as a JSON object
 	getAsPost() {
 		var post = {};
@@ -131,6 +145,7 @@ export class BlogPost {
 		post['itemId'] = this._itemId;
 		post['postId'] = this._postId;
 		post['postURL'] = this._postURL;
+		post['tags'] = this._tags;
 
 		return post;
 	}

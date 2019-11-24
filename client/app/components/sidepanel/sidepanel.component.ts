@@ -3,6 +3,7 @@ import { NavigationService } from 'client/app/services/navigationservice/navigat
 import { SidepaleholderDirective } from 'client/app/directives/sidepaleholder.directive';
 import { PostlistComponent } from '../postlist/postlist.component';
 import { SettingsComponent } from '../settings/settings.component';
+import { BlogconfigsComponent } from '../blogconfigs/blogconfigs.component';
 
 @Component({
   selector: 'app-sidepanel',
@@ -42,6 +43,10 @@ export class SidepanelComponent implements OnInit {
       case 'settings':
         componentFactory = this.componentFactoryResolver.resolveComponentFactory(SettingsComponent);
         this.title = "Settings"
+        break;
+      case 'configs':
+        componentFactory = this.componentFactoryResolver.resolveComponentFactory(BlogconfigsComponent);
+        this.title = 'Post Configs';
         break;
     }
 

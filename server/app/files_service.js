@@ -353,7 +353,6 @@ class FileSystemService {
 			postData.file = file;
 		} catch (error) {
 			console.error('Error in reading the post file.', error);
-			throw error;
 		}
 
 		return postData;
@@ -391,6 +390,7 @@ class FileSystemService {
 		postData.postId = post.postId
 		postData.file = post.file;
 		postData.postURL = post.postURL;
+		postData.tags = post.tags;
 		
 		// sets the itemId if found to be null
 		if (postData.itemId == null || postData.itemId.trim() == '' ) {
