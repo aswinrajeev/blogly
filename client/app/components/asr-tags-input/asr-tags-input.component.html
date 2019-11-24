@@ -1,0 +1,8 @@
+<div class="tags-container">
+  <div class="tag" *ngFor="let tag  of tagsList">
+    <span>{{tag}}</span>
+    <span class="holder">&nbsp;</span>
+    <span class="remove-tag" (click)="removeTag(tag)">x</span>
+  </div>
+  <input placeholder="Type here..." class="tag-input" (keydown)="onKeyDown($event)" [(ngModel)]="tagInMaking" style="flex-grow: 1.5;"/>
+</div>

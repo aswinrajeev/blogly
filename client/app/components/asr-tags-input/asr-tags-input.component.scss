@@ -1,0 +1,51 @@
+@import '../../../styles/const_dark.scss';
+
+.tags-container {
+	background-color: $app-second-background;
+	padding: 5px;
+	margin: 5px;
+	overflow-x: auto;
+	overflow-y: scroll;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.tags-container .tag {
+	background-color: $app-background;
+	color: $app-foreground;
+	font-size: 12px;
+	padding: 1px;
+	padding-left: 4px;
+	padding-right: 4px;
+	margin: 2px;
+	border-radius: 2px;
+	flex-grow: 1;
+	float: left;
+	position: relative;
+}
+
+.tags-container .holder {
+	width: 10px;
+}
+
+.tags-container .remove-tag {
+	color: $app-second-foreground;
+	position: absolute;
+	right: 5px;
+	font-size: 12px;
+	font-weight: bold;
+	margin-left: 5px;
+	cursor: pointer;
+}
+
+.tags-container .remove-tag:hover {
+	color: $app-foreground;
+}
+
+.tags-container .tag-input {
+	background: transparent;
+	outline: none;
+	border: none;
+	color: $app-foreground;
+	font-size: 12px;
+}
