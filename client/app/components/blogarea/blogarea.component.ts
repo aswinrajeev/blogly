@@ -24,7 +24,7 @@ export class BlogareaComponent implements OnInit {
 
   // returns the blog data
   getBlogData(): BlogPost {
-    return this.blogService.getBlogData();
+    return this.blogService.getPostData();
   }
 
   // returns if the current editor is HTML editor
@@ -34,13 +34,13 @@ export class BlogareaComponent implements OnInit {
 
   // mark the post as dirty
   markChanged() {
-    this.blogService.getBlogData().markDirty(true);
+    this.blogService.getPostData().markDirty(true);
   }
 
   // invoked when the blog data is changed
   contentChanged(event) {
     // updates the mini content
-    this.blogService.getBlogData().updateMiniContent();
+    this.blogService.getPostData().updateMiniContent();
     this.markChanged();
   }
 

@@ -4,6 +4,7 @@ import { SidepaleholderDirective } from 'client/app/directives/sidepaleholder.di
 import { PostlistComponent } from '../postlist/postlist.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { BlogconfigsComponent } from '../blogconfigs/blogconfigs.component';
+import { PostinfoComponent } from '../postinfo/postinfo.component';
 
 @Component({
   selector: 'app-sidepanel',
@@ -46,8 +47,12 @@ export class SidepanelComponent implements OnInit {
         break;
       case 'configs':
         componentFactory = this.componentFactoryResolver.resolveComponentFactory(BlogconfigsComponent);
-        this.title = 'Post Configs';
+        this.title = 'Post Configurations';
         break;
+      case 'postinfo':
+          componentFactory = this.componentFactoryResolver.resolveComponentFactory(PostinfoComponent);
+          this.title = 'Post Info';
+          break;
     }
 
     const viewRef = this.panelHolder.viewContainerRef;

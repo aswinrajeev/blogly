@@ -24,7 +24,7 @@ export class BlogService {
   constructor(private _messenger: MessagingService) {}
 
   // returns the blog data
-  getBlogData(): BlogPost {
+  getPostData(): BlogPost {
     
     //return the blog object if exist, else initialize and return
     return this.blogPost ? this.blogPost : new BlogPost();
@@ -49,13 +49,13 @@ export class BlogService {
   }
 
   // set blog data to the service
-  setBlogData(blog:BlogPost) {
+  setPostData(blog:BlogPost) {
     this.blogPost = blog;
   }
 
   // publish a blog post
   publishBlog(blog:Blog, isDraft) {
-    var post = this.getBlogData();
+    var post = this.getPostData();
     var postObj = {
       fileName: post.file,
       blog: blog.getAsBlog(),
@@ -65,10 +65,10 @@ export class BlogService {
     // listens for a confirmation from the server
     this._messenger.listen('published', (result, channel, post) => {
       if (result.status == 200) {
-        this.getBlogData().setPostURL(result.data.postURL);
-        this.getBlogData().setPostId(result.data.postId);
-        this.getBlogData().setContent(result.data.content);
-        this.blogPost = this.getBlogData();
+        this.getPostData().setPostURL(result.data.postURL);
+        this.getPostData().setPostId(result.data.postId);
+        this.getPostData().setContent(result.data.content);
+        this.blogPost = this.getPostData();
       }
     }, post);
 
@@ -138,7 +138,7 @@ export class BlogService {
       if (result.status == 200) {
         this.postsList.splice(this.postsList.indexOf(post), 1);
 
-        if (post.itemId == this.getBlogData().itemId && this.postsList.length > 0) {
+        if (post.itemId == this.getPostData().itemId && this.postsList.length > 0) {
           this.setPost(this.postsList[0], () => {
             // emit a post updated event
             this.updateListener.emit("postUpdated");

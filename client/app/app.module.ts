@@ -21,6 +21,7 @@ import { AceEditorModule } from 'ng2-ace-editor';
 import { SidepaleholderDirective } from './directives/sidepaleholder.directive';
 import { BlogconfigsComponent } from './components/blogconfigs/blogconfigs.component';
 import { AsrTagsInputComponent } from './components/asr-tags-input/asr-tags-input.component';
+import { PostinfoComponent } from './components/postinfo/postinfo.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { AsrTagsInputComponent } from './components/asr-tags-input/asr-tags-inpu
     SettingsComponent,
     BlogconfigsComponent,
     SidepaleholderDirective,
-    AsrTagsInputComponent
+    AsrTagsInputComponent,
+    PostinfoComponent
   ],
   imports: [
     BrowserModule,
@@ -47,7 +49,8 @@ import { AsrTagsInputComponent } from './components/asr-tags-input/asr-tags-inpu
   entryComponents: [
     PostlistComponent, 
     SettingsComponent,
-    BlogconfigsComponent
+    BlogconfigsComponent,
+    PostinfoComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

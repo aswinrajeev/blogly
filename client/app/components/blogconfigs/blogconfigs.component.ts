@@ -16,7 +16,7 @@ export class BlogconfigsComponent implements OnInit {
 
   // returns the blog data
   getBlogData(): BlogPost {
-    return this.blogService.getBlogData();
+    return this.blogService.getPostData();
   }
 
 }

@@ -23,7 +23,7 @@ export class PostlistComponent implements OnInit {
         if (this.postService.getPostList().length == 0) {
           var post = new BlogPost();
           this.postService.getPostList().unshift(post);
-          this.postService.setBlogData(post);
+          this.postService.setPostData(post);
         } else {
           this.viewPost(this.postService.getPostList()[0]);
         }
@@ -58,7 +58,7 @@ export class PostlistComponent implements OnInit {
   newPost() {
     var post = new BlogPost();
     this.postService.getPostList().unshift(post);
-    this.postService.setBlogData(this.postService.getPostList()[0]);
+    this.postService.setPostData(this.postService.getPostList()[0]);
   }
 
 }
