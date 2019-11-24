@@ -9,8 +9,6 @@ import { BlogPost } from 'client/app/models/blogpost';
 })
 export class PostlistComponent implements OnInit {
 
-  postList:BlogPost[];
-
   constructor(private postService:BlogService, private cdr : ChangeDetectorRef) { 
 
     this.postService.setNewPostAction(() => {
@@ -20,28 +18,30 @@ export class PostlistComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.postService.fetchPostList((postList) => {
-      this.postList = this.postService.getPostList();
-      if (this.postList.length == 0) {
-        var post = new BlogPost();
-        this.postList.unshift(post);
-        this.postService.setBlogData(post);
-      } else {
-        this.viewPost(this.postList[0]);
-      }
-
-      // force update on the UI
-      this.cdr.detectChanges();
-    });
+    if (this.postService.getPostList() == null || this.postService.getPostList().length == 0) {
+      this.postService.fetchPostList(() => {
+        if (this.postService.getPostList().length == 0) {
+          var post = new BlogPost();
+          this.postService.getPostList().unshift(post);
+          this.postService.setBlogData(post);
+        } else {
+          this.viewPost(this.postService.getPostList()[0]);
+        }
+  
+        // force update on the UI
+        this.cdr.detectChanges();
+      });
+    }
   }
 
   // fetches the list of all posts in the workspace
   getPostList() {
-    return this.postList;
+    return this.postService.getPostList();
   }
 
   // fetches complete data for a selected post
   viewPost(post) {
+    this.cdr.detectChanges();
     console.log(post.title);
     this.postService.setPost(post, () => {
 
@@ -57,8 +57,8 @@ export class PostlistComponent implements OnInit {
   // creates a new post
   newPost() {
     var post = new BlogPost();
-    this.postList.unshift(post);
-    this.postService.setBlogData(post);
+    this.postService.getPostList().unshift(post);
+    this.postService.setBlogData(this.postService.getPostList()[0]);
   }
 
 }
