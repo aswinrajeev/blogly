@@ -15,6 +15,23 @@ export class ToolbarComponent implements OnInit {
 
     this.toggleEditor();
     this.blogservice.fetchConfigurations();
+    this.blogservice.listenForMenuInvocation();
+
+    this.blogservice.menuListener.on('save', (args) => {
+      this.savePost();
+      this.blogservice.updateListener.emit('postUpdated');
+    });
+
+    this.blogservice.menuListener.on('new', (args) => {
+      this.newPost();
+      this.blogservice.updateListener.emit('postUpdated');
+    });
+
+    this.blogservice.menuListener.on('htmlEditor', (args) => {
+      this.toggleEditor();
+      this.blogservice.updateListener.emit("postUpdated");
+    });
+
   }
 
   getBlogs():Blog[] {

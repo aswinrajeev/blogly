@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationService } from 'client/app/services/navigationservice/navigation.service';
+import { BlogService } from 'client/app/services/blogservice/blog.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -8,11 +9,15 @@ import { NavigationService } from 'client/app/services/navigationservice/navigat
 })
 export class SidebarComponent implements OnInit {
 
-  constructor(private navService: NavigationService) { 
+  constructor(private navService: NavigationService, private blogService:BlogService) { 
 
   }
 
   ngOnInit() {
+    this.blogService.menuListener.on('showSettings', (args) => {
+      this.setActiveItem('settings');
+      this.blogService.updateListener.emit('panelUpdated');
+    });
   }
 
   // returns if the current item is the one selected or not

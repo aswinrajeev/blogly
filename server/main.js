@@ -1,9 +1,10 @@
-const { app, BrowserWindow } =  require('electron');
+const { app, Menu, BrowserWindow } =  require('electron');
 const { ipcMain, WebContents } = require('electron');
 const { MessagingService } = require('./app/messaging_service');
 const { BlogService } = require('./app/blog_service');
 const { testBlogUrl } = require('./localconfigs/tests'); //temporary test configs
 const { FileSystemService } = require('./app/files_service');
+const { MenuHandler } = require('./app/menu_handler');
 const { systemPreferences } = require('electron');
 
 /**
@@ -36,6 +37,9 @@ class MainWindow {
 		// get all cofigurations loaded
 		try {
 
+			this.menuHandler = new MenuHandler(Menu, app);
+			Menu.setApplicationMenu(this.menuHandler.getMenu());
+
 			// initialize the file system service
 			this.fsService = new FileSystemService(app);
 			this.fsService.initalize();
@@ -57,6 +61,7 @@ class MainWindow {
 	
 			// initialize the messaging service
 			this.messenger = new MessagingService(ipcMain, this.mainWindow.webContents);
+			this.menuHandler.setMessenger(this.messenger);
 	
 			// register events for blogging services
 			this.blogservice = new BlogService(this.messenger, this.blogUrl, this.fsService, this.mainWindow);

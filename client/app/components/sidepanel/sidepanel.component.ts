@@ -1,10 +1,11 @@
-import { Component, OnInit, ComponentFactoryResolver, ViewChild } from '@angular/core';
+import { Component, OnInit, ComponentFactoryResolver, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { NavigationService } from 'client/app/services/navigationservice/navigation.service';
 import { SidepaleholderDirective } from 'client/app/directives/sidepaleholder.directive';
 import { PostlistComponent } from '../postlist/postlist.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { BlogconfigsComponent } from '../blogconfigs/blogconfigs.component';
 import { PostinfoComponent } from '../postinfo/postinfo.component';
+import { BlogService } from 'client/app/services/blogservice/blog.service';
 
 @Component({
   selector: 'app-sidepanel',
@@ -16,7 +17,7 @@ export class SidepanelComponent implements OnInit {
   title = 'Panel';
   @ViewChild(SidepaleholderDirective) panelHolder : SidepaleholderDirective
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private navService: NavigationService) { 
+  constructor(private componentFactoryResolver: ComponentFactoryResolver, private navService: NavigationService, private cdr : ChangeDetectorRef, private blogService:BlogService) { 
     this.navService.panelUpdated.on('panelUpdated', (panel) => {
       this.setPanel(panel);
     });
@@ -24,6 +25,9 @@ export class SidepanelComponent implements OnInit {
 
   ngOnInit() {
     this.setPanel('posts');
+    this.blogService.updateListener.on('panelUpdated', () => {
+      this.cdr.detectChanges();
+    })
   }
 
   // closes the panel

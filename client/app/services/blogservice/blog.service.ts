@@ -20,8 +20,17 @@ export class BlogService {
 
   // event emitter for tracking post changes
   updateListener: EventEmitter = new EventEmitter();
+  menuListener: EventEmitter = new EventEmitter();
 
   constructor(private _messenger: MessagingService) {}
+
+  listenForMenuInvocation() {
+    this._messenger.listen('menuInvoked', (payload) => {
+      if (payload.action != null && payload.action != '') {
+        this.menuListener.emit(payload.action, payload.args);
+      }
+    }, null);
+  }
 
   // returns the blog data
   getPostData(): BlogPost {
