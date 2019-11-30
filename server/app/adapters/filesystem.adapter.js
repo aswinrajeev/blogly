@@ -15,7 +15,7 @@ class FileSystemAdapter {
 	 */
 	constructor(args) {
 
-		const defaultInstance = this.constructor.defaultInstance;
+		const defaultInstance = this.defaultInstance;
 		if (defaultInstance) {
 
 			if (defaultInstance.debugMode) {
@@ -31,18 +31,18 @@ class FileSystemAdapter {
 
 		this.constructor.defaultInstance = this;
 
-	}
+		/**
+		 * Returns the default instance of the class
+		 */
+		this.constructor.getDefaultInstance = function() {
+			const defaultInstance = this.defaultInstance;
+			if (defaultInstance == null) {
+				throw new Error('Class not initialized yet.');
+			}
 
-	/**
-	 * Returns the default instance of the class
-	 */
-	getDefaultInstance() {
-		const defaultInstance = this.constructor.defaultInstance;
-		if (defaultInstance == null) {
-			throw new Error('Class not initialized yet.');
+			return defaultInstance;
 		}
 
-		return defaultInstance;
 	}
 
 	/**

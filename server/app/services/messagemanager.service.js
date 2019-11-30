@@ -12,7 +12,7 @@ class MessageManagerService {
 	 */
 	constructor(args) {
 
-		const defaultInstance = this.constructor.defaultInstance;
+		const defaultInstance = this.defaultInstance;
 		if (defaultInstance) {
 
 			if (defaultInstance.debugMode) {
@@ -29,6 +29,18 @@ class MessageManagerService {
 		this.__singleTimeListeners = null;
 
 		this.constructor.defaultInstance = this;
+
+		/**
+		 * Returns the default instance of the class
+		 */
+		this.constructor.getDefaultInstance = function() {
+			const defaultInstance = this.defaultInstance;
+			if (defaultInstance == null) {
+				throw new Error('Class not initialized yet.');
+			}
+
+			return defaultInstance;
+		}
 	}
 
 	/**
