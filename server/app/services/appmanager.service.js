@@ -2,9 +2,12 @@ const path = require('path');
 const { FileSystemConstants, ApplicationConfigurations } = require('../../configs/conf');
 const { FileSystemAdapter } = require('../adapters/filesystem.adapter');
 const { MessageManagerService } = require('./messagemanager.service');
+const { BlogManagerService } = require('./blogmanager.service');
 
 /**
- * Handles the application operations and lifecycle.
+ * Manages the application operations and lifecycle.
+ * 
+ * @author Aswin Rajeev
  */
 class AppManagerService {
 	
@@ -13,7 +16,7 @@ class AppManagerService {
 	 */
 	constructor(args) {
 
-		const defaultInstance = this.constructor.defaultInstance;
+		const defaultInstance = this.defaultInstance;
 		if (defaultInstance) {
 
 			if (defaultInstance.debugMode) {
@@ -27,6 +30,7 @@ class AppManagerService {
 		this.debugMode = args.debugMode;
 		this.app = args.app;
 		this.blogsDir = null;
+		this.blogManger = null;
 		
 		// define the file system locations and initializes the required properties.
 		this.appDir = this.app.getPath(FileSystemConstants.APP_DIR) + path.sep + FileSystemConstants.BLOGLY_APP_DIR;
@@ -57,6 +61,18 @@ class AppManagerService {
 		}
 		
 		this.constructor.defaultInstance = this;
+
+		/**
+		 * Returns the default instance of the class
+		 */
+		this.constructor.getDefaultInstance = function() {
+			const defaultInstance = this.constructor.defaultInstance;
+			if (defaultInstance == null) {
+				throw new Error('Class not initialized yet.');
+			}
+
+			return defaultInstance;
+		}
 	}
 
 	/**
@@ -76,18 +92,6 @@ class AppManagerService {
 
 		return messenger;
 
-	}
-
-	/**
-	 * Returns the default instance of the class
-	 */
-	getDefaultInstance() {
-		const defaultInstance = this.constructor.defaultInstance;
-		if (defaultInstance == null) {
-			throw new Error('Class not initialized yet.');
-		}
-
-		return defaultInstance;
 	}
 
 	/**
@@ -140,8 +144,15 @@ class AppManagerService {
 
 	/**
 	 * Initializes the listener points for communication from the UI
+	 * Also initializes the secondary service points for listening to class specific events
 	 */
 	initializeListeners() {
+
+		// initializes the blog manager service
+		this.blogManger = new BlogManagerService({
+			debugMode: this.debugMode,
+		});
+
 		this.messageManager.respond('fetchConfs', () => {
 			return this.fetchUIConfigs();
 		});
@@ -157,28 +168,18 @@ class AppManagerService {
 		};
 
 		try {
-			var blogs = this.fileSystemAdapter.getConfigProperty('blogs');
+			// get workspace from the configs
 			var workspace = this.fileSystemAdapter.getConfigProperty('blogsDir');
 
-			var blogList = [];
-			var blog;
-			if (blogs != null && blogs.length > 0) {
-				blogs.forEach(blogObj => {
-					blog = new Object();
-					blog.name = blogObj.name;
-					blog.url = blogObj.url;
-					blog.blogId = blogObj.blogId;
-
-					blogList.push(blog);
-				});
-			}
+			// use blog manager service to fetch blogs from confs
+			var blogList = this.blogManger.getBlogsList();
 
 			result.blogs = blogList;
 			result.workspace = workspace;
 			result.status = 200;
 
 			return result;
-			
+
 		} catch (error) {
 			console.error('Could not fetch the UI configurations.', error);
 			return result;

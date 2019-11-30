@@ -1,7 +1,9 @@
 const { IpcMain, WebContents } = require('electron');
 
 /**
- * Handler for messaging services between the UI and the application.
+ * Manages the messaging services between the UI and the application.
+ * 
+ * @author Aswin Rajeev
  */
 class MessageManagerService {
 

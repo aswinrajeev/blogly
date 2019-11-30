@@ -1,12 +1,19 @@
 /**
  * Model class for Blog
+ * 
+ * @author Aswin Rajeev
  */
 class Blog {
 
-	constructor(name, url, blogId) {
-		this._blogId = blogId;
-		this._name = name;
-		this._url = url;
+	/**
+	 * Creates a blog object out of a JSON object
+	 * 
+	 * @param {*} blogObj 
+	 */
+	constructor(blogObj) {
+		this._name = blogObj.name;
+		this._url = blogObj.url;
+		this._blogId = blogObj.blogId;
 	}
 
 	get blogId() {
@@ -42,7 +49,7 @@ class Blog {
 	/**
 	 * returns the blog as a JSON object 
 	 * */
-	getAsBlog() {
+	toJSON() {
 		var blog = {};
 		blog['blogId'] = this.blogId;
 		blog['name'] = this.name;
