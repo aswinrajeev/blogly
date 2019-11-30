@@ -1,31 +1,48 @@
 const fs = require('fs');
-const path = require('path');
-const { FileSystemConstants } = require('../../configs/conf');
 
 /**
  * Adapter for file system operations.
- * Also handles the application configurations
+ * Also handles the application configurations.
  * 
  * @author Aswin Rajeev
  */
 class FileSystemAdapter {
 
 	/**
-	 * Constructor for FileSystemAdapter
+	 * Singleton constructor for FileSystemAdapter
 	 * 
 	 * @param {*} args 
 	 */
 	constructor(args) {
 
-		this.app = args.app;
-		this.debugMode = args.debugMode;
-		
-		// define the file system locations and initializes the required properties.
-		this.appDir = this.app.getPath(FileSystemConstants.APP_DIR) + path.sep + FileSystemConstants.BLOGLY_APP_DIR;
-		this.confFile = this.appDir  + path.sep +  CONFIG_FILE;
-		this.blogsDir = this.app.getPath(FileSystemConstants.DOCS_DIR) + path.sep + FileSystemConstants.BLOGLY_DIR;
+		const defaultInstance = this.constructor.defaultInstance;
+		if (defaultInstance) {
 
+			if (defaultInstance.debugMode) {
+				console.debug("Instance already exists. Ignoring the arguments.");
+			}
+
+			return defaultInstance;
+		} 
+			
 		this.configs = null;
+		this.debugMode = args.debugMode;
+		this.configFile = args.configFile;
+
+		this.constructor.defaultInstance = this;
+
+	}
+
+	/**
+	 * Returns the default instance of the class
+	 */
+	getDefaultInstance() {
+		const defaultInstance = this.constructor.defaultInstance;
+		if (defaultInstance == null) {
+			throw new Error('Class not initialized yet.');
+		}
+
+		return defaultInstance;
 	}
 
 	/**
@@ -59,57 +76,32 @@ class FileSystemAdapter {
 			this.__loadConfigs();
 		}
 
+		// sets the property value
 		this.configs[key] = value;
-
+		
 		// writes the configuration if required.
 		if (write) {
-			this.writeToFile(this.confFile, this.configs);
+			
+			// sets the updated timestamp
+			this.configs['timestamp'] = Math.floor(Date.now());
+
+			//writes into the config file
+			this.writeToFile(this.configFile, this.configs);
 		}
-	} 
+	}
 
 	/**
 	 * Loads the configurations from the file.
 	 * If not available, initialize the configurations.
 	 */
 	__loadConfigs() {
-		var configs = this.readFromFile(this.confFile, null);
+		var configs = this.readFromFile(this.configFile, null);
 
 		if (configs == null) {
-			var configs = this.__initializeConfig();
+			throw new Error("Error in loading configuratons.");
 		}
 
-		this.configs = configs;
-	}
-
-	/**
-	 * Initializes the configurations
-	 */
-	__initializeConfig() {
-
-		// initial window size
-		var conf = {
-			windowWidth: 1080, 
-			windowHeight: 640,
-		};
-
-		// initializes the blog directory as Blogly folder in documents.
-		conf.blogsDir = this.blogsDir;
-		conf.blogs = [];
-
-		try {
-
-			// creates the app directory and blog directory if those do not exist
-			this.createDir(this.appDir)
-			this.createDir(this.blogsDir);
-	
-			// store the conf into a config file in the user app dir
-			this.writeToFile(this.confFile, JSON.stringify(conf));
-
-			return conf;
-		} catch (error) {
-			console.error("Could not create the configuration file. Please check if the application has sufficient permissions to read/write in the application data directory.", error);
-			throw error;
-		}
+		this.configs = JSON.parse(configs);
 	}
 
 	/**
@@ -181,8 +173,6 @@ class FileSystemAdapter {
 			console.error("Could not read from file.", error);
 		}
 	}
-
-
 }
 
 module.exports.FileSystemAdapter = FileSystemAdapter;

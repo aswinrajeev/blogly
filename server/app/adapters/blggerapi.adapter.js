@@ -9,16 +9,41 @@ const { Permissions } = require('../../configs/conf');
 class BloggerAPIAdapter {
 
 	/**
-	 * Constructor for BloggerAPIAdapter
+	 * Singleton constructor for BloggerAPIAdapter
 	 * 
 	 * @param {*} args 
 	 */
 	constructor(args) {
+
+		const defaultInstance = this.constructor.defaultInstance;
+		if (defaultInstance) {
+
+			if (defaultInstance.debugMode) {
+				console.debug("Instance already exists. Ignoring the arguments.");
+			}
+
+			return defaultInstance;
+		}
+		
 		this.debugMode = args.debugMode;
 		
 		this.googleAPI = new GoogleAPIAdapter({
 			debugMode: this.debugMode
 		});
+
+		this.constructor.defaultInstance = this;
+	}
+
+	/**
+	 * Returns the default instance of the class
+	 */
+	getDefaultInstance() {
+		const defaultInstance = this.constructor.defaultInstance;
+		if (defaultInstance == null) {
+			throw new Error('Class not initialized yet.');
+		}
+
+		return defaultInstance;
 	}
 
 	/**

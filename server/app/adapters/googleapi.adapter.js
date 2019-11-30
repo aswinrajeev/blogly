@@ -9,13 +9,24 @@ const { APIKeys } = require('../../localconfigs/googleapi');
  */
 class GoogleAPIAdapter {
 
+	//TDOD: (Ref) https://stackoverflow.com/questions/1635800/javascript-best-singleton-pattern/6733919#6733919
+
 	/**
-	 * Constructor for GoogleAPIAdapter
+	 * Singleton constructor for GoogleAPIAdapter
 	 * 
 	 * @param {*} args 
 	 */
 	constructor(args) {
 
+		const defaultInstance = this.constructor.defaultInstance;
+		if (defaultInstance) {
+
+			if (defaultInstance.debugMode) {
+				console.debug("Instance already exists. Ignoring the arguments.");
+			}
+
+			return defaultInstance;
+		}
 		// Debug configurations
 		this.debugMode = args.debugMode;
 
@@ -55,6 +66,20 @@ class GoogleAPIAdapter {
 		if (this.debugMode) {
 			console.debug('Google API initialized.');
 		}
+
+		this.constructor.defaultInstance = this;
+	}
+
+	/**
+	 * Returns the default instance of the class
+	 */
+	getDefaultInstance() {
+		const defaultInstance = this.constructor.defaultInstance;
+		if (defaultInstance == null) {
+			throw new Error('Class not initialized yet.');
+		}
+
+		return defaultInstance;
 	}
 
 	/**

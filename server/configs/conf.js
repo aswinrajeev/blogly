@@ -2,36 +2,24 @@
  * Configurations for the application
  */
 
-class AuthListener {
-	constructor() {
-		this.LISTENER_PORT = 9080;
-		this.LISTENER_HOST = 'localhost';
-	}
-}
+module.exports.AuthListener = { };
+module.exports.AuthListener.LISTENER_PORT = 9080;
+module.exports.AuthListener.LISTENER_HOST = 'localhost';
 
-class Permissions {
-	constructor() {
-		this.BLOGGER_SCOPE = 'https://www.googleapis.com/auth/blogger',
-		this.DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
-	}
-}
+module.exports.Permissions = { };
+module.exports.Permissions.BLOGGER_SCOPE = 'https://www.googleapis.com/auth/blogger',
+module.exports.Permissions.DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
-class FileSystemConstants {
-	constructor() {
-		
-		this.APP_DIR = "appData";
-		this.DOCS_DIR = "documents"
+module.exports.FileSystemConstants = { };
+module.exports.FileSystemConstants.APP_DIR = "appData";
+module.exports.FileSystemConstants.DOCS_DIR = "documents"
+module.exports.FileSystemConstants.BLOGLY_APP_DIR = "blogly";
+module.exports.FileSystemConstants.CONFIG_FILE = "config.json";
+module.exports.FileSystemConstants.BLOGLY_FILE_EXTN = ".blogly";
+module.exports.FileSystemConstants.INDEX_FILE_NAME = ".blogly.index";
+module.exports.FileSystemConstants.BLOGLY_DIR = "Blogly";
 
-		this.BLOGLY_APP_DIR = "blogly";
-		this.CONFIG_FILE = "config.json";
-		this.BLOGLY_FILE_EXTN = ".blogly";
-		this.INDEX_FILE_NAME = ".blogly.index";
-
-		this.BLOGLY_DIR = "Blogly";
-
-	}
-}
-
-module.exports.AuthListener = AuthListener;
-module.exports.Permissions = Permissions;
-module.exports.FileSystemConstants = FileSystemConstants;
+module.exports.ApplicationConfigurations = { };
+module.exports.ApplicationConfigurations.MIN_WIDTH = 1080;
+module.exports.ApplicationConfigurations.MIN_HEIGHT = 618;
+module.exports.ApplicationConfigurations.BACKGROUND_COLOR = "rgb(55, 55, 55)";

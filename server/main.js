@@ -1,9 +1,6 @@
 const { app, Menu, BrowserWindow } =  require('electron');
 const { ipcMain, WebContents } = require('electron');
-const { MessagingService } = require('./app/messaging_service');
-const { BlogService } = require('./app/blog_service');
-const { testBlogUrl } = require('./localconfigs/tests'); //temporary test configs
-const { FileSystemService } = require('./app/files_service');
+const { AppManagerService } = require('./app/services/appmanager.service');
 const { MenuHandler } = require('./app/menu_handler');
 const { systemPreferences } = require('electron');
 
@@ -17,14 +14,15 @@ class MainWindow {
 
 	constructor() {
 		this.mainWindow = null;
-		this.fsService = null;
+		this.messageService = null;
+		this.menuHandler
+		this.appManager
 
-		// app configs
-		this.configs = new Object();
-		this.blogUrl = null;
 
 		//register async initialization of the application window.
-		app.on('ready', this.initializeApp);
+		app.on('ready', () => {
+			this.initializeApp()
+		});
 	}
 
 	/**
@@ -37,42 +35,11 @@ class MainWindow {
 		// get all cofigurations loaded
 		try {
 
-			this.menuHandler = new MenuHandler(Menu, app);
-			Menu.setApplicationMenu(this.menuHandler.getMenu());
+			// initialize app services
+			this.initializeAppServices();
 
-			// initialize the file system service
-			this.fsService = new FileSystemService(app);
-			this.fsService.initalize();
-
-			this.blogUrl = this.fsService.getConfigProperty("blog-url");
-	
-			// initialize a new window
-			this.mainWindow = new BrowserWindow({ 
-				width: this.fsService.getConfigProperty('windowWidth'), 
-				height: this.fsService.getConfigProperty('windowHeight'), 
-				minHeight: 618,
-				minWidth: 1080,
-				show: false,
-				backgroundColor: 'rgb(55, 55, 55)'
-			});
-	
-			// load the compiled index.html file
-			this.mainWindow.loadFile('./out/client/blogly/index.html');
-	
-			// initialize the messaging service
-			this.messenger = new MessagingService(ipcMain, this.mainWindow.webContents);
-			this.menuHandler.setMessenger(this.messenger);
-	
-			// register events for blogging services
-			this.blogservice = new BlogService(this.messenger, this.blogUrl, this.fsService, this.mainWindow);
-			this.blogservice.initialize();
-
-			this.fsService.setMessenger(this.messenger);
-
-			// display the window once ready
-			this.mainWindow.once('ready-to-show', () => {
-				this.mainWindow.show();
-			});
+			// creates the main window
+			this.createMainWindow();
 
 			// subscribe to the system preferences
 			systemPreferences.subscribeNotification(
@@ -85,7 +52,48 @@ class MainWindow {
 		} catch (error) {
 			console.error(error);
 		}
+	}
 
+	/**
+	 * Initializes all the application services
+	 */
+	initializeAppServices() {
+
+		// initializes menu handler
+		this.menuHandler = new MenuHandler(Menu, app);
+
+		// initialize app manager service
+		this.appManager = new AppManagerService({
+			app: app,
+			debugMode: true
+		});
+	}
+
+	/**
+	 * Creates the main window and displays it
+	 */
+	createMainWindow() {
+		// sets the application menu
+		Menu.setApplicationMenu(this.menuHandler.getMenu());
+		
+		// initialize a new window
+		var windowConfigs = this.appManager.getStartupConfigurations();
+		this.mainWindow = new BrowserWindow(windowConfigs);
+		
+		// initializes the message manager service
+		this.messageService = this.appManager.initilizeMessageManagerService(ipcMain, this.mainWindow.webContents);
+		this.menuHandler.setMessenger(this.messageService);
+		
+		// initializes the listeners for UI events
+		this.appManager.initializeListeners();
+
+		// load the compiled index.html file
+		this.mainWindow.loadFile('./out/client/blogly/index.html');
+
+		// display the window once ready
+		this.mainWindow.once('ready-to-show', () => {
+			this.mainWindow.show();
+		});
 	}
 	
 }
