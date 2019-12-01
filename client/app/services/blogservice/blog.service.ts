@@ -240,7 +240,7 @@ export class BlogService {
         this.blogs.splice(this.blogs.indexOf(blog), 1);
         this.updateListener.emit('settingsUpdated');
       }
-    }, blog.getAsBlog());
+    }, null);
     
     this._messenger.send('deleteBlog', blog.getAsBlog());
   }
@@ -257,7 +257,7 @@ export class BlogService {
 
   addBlog(alias: String, url: String) {
     var blog:Blog = new Blog(alias, url, null);
-    this._messenger.listen('blogAdded', (result) => {
+    this._messenger.listenOnce('blogAdded', (result) => {
       if (result.status == 200) {
         var blog:Blog = new Blog(result.blog.name, result.blog.url, result.blog.blogId);
         this.blogs.push(blog);

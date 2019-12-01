@@ -47,7 +47,13 @@ class BlogManagerService {
 	 * Initializes the listener points for communication from the UI
 	 */
 	initializeListeners() {
-		
+		this.messageManager.listen('newBlog', (blog) => {
+			this.addNewBlog(blog);
+		});
+
+		this.messageManager.listen('deleteBlog', (blog) => {
+			this.deleteBlog(blog);
+		});
 	}
 
 	/**
@@ -66,6 +72,91 @@ class BlogManagerService {
 		}
 
 		return blogList;
+	}
+
+	/**
+	 * Inserts the blog into the blogs list and return the blog
+	 * @param {*} blogObj 
+	 */
+	addNewBlog(blogObj) {
+
+		var blog = new Blog(blogObj);
+
+		try {
+			var savedBlog;
+			var blogs = this.getBlogsList();
+
+			for (var i =0 ; i < blogs.length; i++) {
+				savedBlog = new Blog(blogs[i]);
+				if (savedBlog.url == blog.url) {
+
+					// shows the error alert
+					dialog.showMessageBox({
+						type: 'error',
+						title: 'Error',
+						message: 'Blog is already connected',
+						detail: 'The blog has already been connected. It cannot be added more than once.'
+					});
+
+					// sends error code
+					this.messenger.send('blogAdded', {
+						status: 1
+					});
+					return;
+				}
+			}
+
+			// adds the blog to the blog list and saves the list
+			blogs.push(blog.toJSON());
+			this.fileSystemAdapter.setConfigProperty('blogs', blogs, true);
+
+			// sends the success signal
+			this.messageManager.send('blogAdded', {
+				status: 200,
+				blog: blog.toJSON()
+			});
+
+		} catch (error) {
+			console.error("Could not connect the blog", error);
+			this.messenger.send('blogAdded', {
+				status: 0
+			});
+		}
+	}
+
+	/**
+	 * deletes a blog from conencted blogs
+	 *  */
+	deleteBlog(blogObj) {
+		try {
+
+			var blog = new Blog(blogObj);
+			var savedBlog;
+
+			var blogs = this.fs.getConfigProperty('blogs');
+			for (var i = 0 ; i < blogs.length; i++) {
+				savedBlog = new Blog(blogs[i]);
+				if (savedBlog.url == blog.url) {
+
+					// removes the blog from the bloglist and saves it
+					blogs.splice(i, 1);
+					this.fileSystemAdapter.setConfigProperty('blogs', blogs, true);
+
+					// sends the success message
+					this.messenger.send('blogDeleted', {
+						status: 200
+					});
+
+					return;
+				}
+			}
+
+		} catch (error) {
+			// sends the error message
+			this.messenger.send('blogDeleted', {
+				status: 0
+			});
+		}
 	}
 
 }
