@@ -86,7 +86,7 @@ class FileSystemAdapter {
 			this.configs['timestamp'] = Math.floor(Date.now());
 
 			//writes into the config file
-			this.writeToFile(this.configFile, this.configs);
+			this.writeToFile(this.configFile,  JSON.stringify(this.configs));
 		}
 	}
 
