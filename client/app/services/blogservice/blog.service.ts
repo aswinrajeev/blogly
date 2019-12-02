@@ -100,8 +100,8 @@ export class BlogService {
       var posts:BlogPost[] = new Array<BlogPost>();
       var post: BlogPost;
 
-      if (result != null) {
-        result.forEach(data => {
+      if (result != null && result.posts != null) {
+        result.posts.forEach(data => {
           post = new BlogPost();
           post.title = data.title;
           post.itemId = data.itemId;
@@ -176,25 +176,28 @@ export class BlogService {
   // sets the selected post as the active blog and renders it to the editor
   setPost(post:BlogPost, callback) {
     if (post.isSaved) {
-      this._messenger.request('fetchFullPost', {filename: post.file}, (result) => {
+      this._messenger.request('fetchFullPost', post.file, (result) => {
   
-        console.log(result);
-  
-        if (result != null) {
-          post.content = result.content;
-          post.title = result.title;
-          post.itemId = result.itemId;
-          post.postId = result.postId
-          post.postURL = result.postURL;
-          post.file = result.file;
-          post.isSaved = true;
-          post.tags = result.tags;
-          this.blogPost = post;
+        if (result.status == 200) {
+          var postObj = result.post;
+          if (result != null) {
+            post.content = postObj.content;
+            post.title = postObj.title;
+            post.itemId = postObj.itemId;
+            post.postId = postObj.postId
+            post.postURL = postObj.postURL;
+            post.file = postObj.file;
+            post.isSaved = true;
+            post.tags = postObj.tags;
+
+            this.blogPost = post;
+          }
         }
-        
+          
         // emit a post updated event
         this.updateListener.emit("postUpdated");
         callback();
+  
   
       });
     } else {

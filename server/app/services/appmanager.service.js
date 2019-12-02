@@ -3,6 +3,8 @@ const { FileSystemConstants, ApplicationConfigurations } = require('../../config
 const { FileSystemAdapter } = require('../adapters/filesystem.adapter');
 const { MessageManagerService } = require('./messagemanager.service');
 const { BlogManagerService } = require('./blogmanager.service');
+const { PostManagerService } = require('./postmanager.service');
+const { ServerResponse } = require('../models/response');
 
 /**
  * Manages the application operations and lifecycle.
@@ -153,6 +155,11 @@ class AppManagerService {
 			debugMode: this.debugMode,
 		});
 
+		// initializes the post manager service
+		this.postManager = new PostManagerService({
+			debugMode: this.debugMode,
+		});
+
 		this.messageManager.respond('fetchConfs', () => {
 			return this.fetchUIConfigs();
 		});
@@ -163,9 +170,7 @@ class AppManagerService {
 	 */
 	fetchUIConfigs() {
 		
-		var result = {
-			status: 0
-		};
+		var response;
 
 		try {
 			// get workspace from the configs
@@ -174,15 +179,17 @@ class AppManagerService {
 			// use blog manager service to fetch blogs from confs
 			var blogList = this.blogManger.getBlogsList();
 
+			var result = new Object();
 			result.blogs = blogList;
 			result.workspace = workspace;
-			result.status = 200;
 
-			return result;
+			response = new ServerResponse(result).ok();
+			return response;
 
 		} catch (error) {
 			console.error('Could not fetch the UI configurations.', error);
-			return result;
+			response = new ServerResponse().failure();
+			return response;
 		}
 	}
 

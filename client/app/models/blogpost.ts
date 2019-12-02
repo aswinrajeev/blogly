@@ -146,6 +146,7 @@ export class BlogPost {
 		post['postId'] = this._postId;
 		post['postURL'] = this._postURL;
 		post['tags'] = this._tags;
+		post['filename'] = this._file;
 
 		return post;
 	}

@@ -1,19 +1,25 @@
+
+const h2p = require('html2plaintext');
+
 /**
  * Model class for Blog Post
+ * 
+ * @author Aswin Rajeev
  */
 class BlogPost {
 
-	constructor() {
-		var currTime = Math.floor(Date.now());
-
-		this._title = "Untitled";
-		this._content = "";
-		this._postId = null;
-		this._postURL = null;
-		this._file = null;
-		this._itemId = 'p_' + currTime;
-		this._isSaved = false;
-		this._tags = [];
+	/**
+	 * Constructor for blog post
+	 * @param {*} postObj 
+	 */
+	constructor(postObj) {
+		this._title = postObj.title;
+		this._content = postObj.content;
+		this._postId = postObj.postId
+		this._postURL = postObj.postURL
+		this._file = postObj.file;
+		this._itemId = postObj.itemId;
+		this._tags = postObj.tags;
 	}
 
 	get title() {
@@ -134,7 +140,7 @@ class BlogPost {
 	/**
 	 * gets the post as a JSON object 
 	 * */
-	getAsPost() {
+	toJSON() {
 		var post = {};
 		post['title'] = this._title;
 		post['content'] = this._content;
@@ -142,6 +148,7 @@ class BlogPost {
 		post['postId'] = this._postId;
 		post['postURL'] = this._postURL;
 		post['tags'] = this._tags;
+		post['filename'] = this._file;
 
 		return post;
 	}

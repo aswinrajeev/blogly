@@ -134,7 +134,22 @@ class FileSystemAdapter {
 	 * @param {*} path 
 	 */
 	doesExist(path) {
-		return fs.existsSync(path);
+		try {
+			return fs.existsSync(path);
+		} catch (error) {
+			console.error('Could not check if file/folder exists.', error);
+			throw error;
+		}
+	}
+
+	getFilesInDir(dirPath) {
+		try {
+			var fileList = fs.readdirSync(dirPath);
+			return fileList;
+		} catch (error) {
+			console.error('Could not fetch the files in the directory.', error);
+			throw error;
+		}
 	}
 
 	/**
@@ -171,7 +186,23 @@ class FileSystemAdapter {
 			return contents;
 		} catch (error) {
 			console.error("Could not read from file.", error);
+			throw error;
 		}
+	}
+
+	/**
+	 * Deletes a file
+	 * 
+	 * @param {*} fileName 
+	 */
+	deleteFile(fileName) {
+		try {
+			
+		} catch (error) {
+			console.error('Could not delete file.', error);
+			throw error;
+		}
+
 	}
 }
 

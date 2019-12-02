@@ -1,6 +1,7 @@
 const { FileSystemAdapter } = require('../adapters/filesystem.adapter');
 const { MessageManagerService } = require('./messagemanager.service');
 const { Blog } = require('../models/blog');
+const { ServerResponse } = require('../models/response');
 
 /**
  * Manages the blog related operations
@@ -23,6 +24,8 @@ class BlogManagerService {
 		}
 
 		this.debugMode = args.debugMode;
+
+		// get instances for file system adapter and message manager, as those would be already initialized
 		this.fileSystemAdapter = FileSystemAdapter.getDefaultInstance();
 		this.messageManager = MessageManagerService.getDefaultInstance();
 
@@ -81,6 +84,7 @@ class BlogManagerService {
 	addNewBlog(blogObj) {
 
 		var blog = new Blog(blogObj);
+		var response;
 
 		try {
 			var savedBlog;
@@ -99,10 +103,8 @@ class BlogManagerService {
 					});
 
 					// sends error code
-					this.messenger.send('blogAdded', {
-						status: 1
-					});
-					return;
+					response = new ServerResponse().failure();
+					this.messenger.send('blogAdded', response);
 				}
 			}
 
@@ -111,16 +113,15 @@ class BlogManagerService {
 			this.fileSystemAdapter.setConfigProperty('blogs', blogs, true);
 
 			// sends the success signal
-			this.messageManager.send('blogAdded', {
-				status: 200,
+			response = new ServerResponse({
 				blog: blog.toJSON()
-			});
+			}).ok()
+			this.messageManager.send('blogAdded', response);
 
 		} catch (error) {
 			console.error("Could not connect the blog", error);
-			this.messenger.send('blogAdded', {
-				status: 0
-			});
+			response = new ServerResponse().failure();
+			this.messenger.send('blogAdded', response);
 		}
 	}
 
@@ -128,12 +129,13 @@ class BlogManagerService {
 	 * deletes a blog from conencted blogs
 	 *  */
 	deleteBlog(blogObj) {
+		var response;
 		try {
 
 			var blog = new Blog(blogObj);
 			var savedBlog;
 
-			var blogs = this.fs.getConfigProperty('blogs');
+			var blogs = this.fileSystemAdapter.getConfigProperty('blogs');
 			for (var i = 0 ; i < blogs.length; i++) {
 				savedBlog = new Blog(blogs[i]);
 				if (savedBlog.url == blog.url) {
@@ -143,19 +145,17 @@ class BlogManagerService {
 					this.fileSystemAdapter.setConfigProperty('blogs', blogs, true);
 
 					// sends the success message
-					this.messenger.send('blogDeleted', {
-						status: 200
-					});
-
-					return;
+					response = new ServerResponse().ok();
+					this.messageManager.send('blogDeleted', response);
 				}
 			}
 
 		} catch (error) {
+			console.error('Could not delete the blog post.', error);
+
 			// sends the error message
-			this.messenger.send('blogDeleted', {
-				status: 0
-			});
+			response = new ServerResponse().failure();
+			this.messageManager.send('blogDeleted', response);
 		}
 	}
 
