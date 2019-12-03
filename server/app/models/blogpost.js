@@ -17,7 +17,7 @@ class BlogPost {
 		this._content = postObj.content;
 		this._postId = postObj.postId
 		this._postURL = postObj.postURL
-		this._file = postObj.file;
+		this._file = postObj.filename;
 		this._itemId = postObj.itemId;
 		this._tags = postObj.tags;
 	}
@@ -30,7 +30,6 @@ class BlogPost {
 	}
 	setTitle(title) {
 		if (this._title !== title) {
-			this.markDirty(true);
 			this._title = title;
 		}
 	}
@@ -43,7 +42,6 @@ class BlogPost {
 	}
 	setContent(content) {
 		if (this._content !== content) {
-			this.markDirty(true);
 			this._content = content;
 		}
 	}
@@ -56,7 +54,6 @@ class BlogPost {
 	}
 	setPostId(postId) {
 		if (this._postId !== postId) {
-			this.markDirty(true);
 			this._postId = postId;
 		}
 	}
@@ -69,7 +66,6 @@ class BlogPost {
 	}
 	setFile(file) {
 		if (this._file !== file) {
-			this.markDirty(true);
 			this._file = file;
 		}
 	}
@@ -82,7 +78,6 @@ class BlogPost {
 	}
 	setItemId(itemId) {
 		if (this._itemId !== itemId) {
-			this.markDirty(true);
 			this._itemId = itemId;
 		}
 	}
@@ -95,7 +90,6 @@ class BlogPost {
 	}
 	setMiniContent(miniContent) {
 		if (this._miniContent !== miniContent) {
-			this.markDirty(true);
 			this._miniContent = miniContent;
 		}
 	}
@@ -108,7 +102,6 @@ class BlogPost {
 	}
 	setPostURL(postURL) {
 		if (this._postURL !== postURL) {
-			this.markDirty(true);
 			this._postURL = postURL;
 		}
 	}

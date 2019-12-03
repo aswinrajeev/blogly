@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 /**
  * Adapter for file system operations.
@@ -105,16 +106,6 @@ class FileSystemAdapter {
 	}
 
 	/**
-	 * Sets blogs directory. If it does not exists, creates it.
-	 * 
-	 * @param {*} dir 
-	 */
-	setBlogsDir(dir) {
-		this.createDir(dir);
-		this.blogsDir = dir;
-	}
-
-	/**
 	 * Creates a directory if it doesn't exist
 	 * 
 	 * @param {*} dir 
@@ -126,6 +117,27 @@ class FileSystemAdapter {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Generates out of a name, a unique filename for a directory and returns it
+	 * @param {*} fileName 
+	 * @param {*} extn
+	 * @param {*} dir
+	 */
+	generateFileName(name, extn, dir) {
+		var fileName = name.split(' ').join('_');
+		var index = 1;
+
+		fileName = fileName.length > 8 ? fileName.substring(0, 15) : fileName;
+		var newFileName = fileName;
+
+		// continue incrementing the number till no files with the same name found
+		while (this.doesExist(dir + path.sep + newFileName + extn)) {
+			newFileName = fileName + ++index;
+		}
+
+		return newFileName + extn;
 	}
 
 	/**
@@ -182,7 +194,7 @@ class FileSystemAdapter {
 					return defaultValue;
 				}
 			}
-			var contents = fs.readFileSync(fileName);
+			var contents = fs.readFileSync(fileName, "utf8");
 			return contents;
 		} catch (error) {
 			console.error("Could not read from file.", error);
@@ -197,7 +209,7 @@ class FileSystemAdapter {
 	 */
 	deleteFile(fileName) {
 		try {
-			
+			fs.unlinkSync(fileName);
 		} catch (error) {
 			console.error('Could not delete file.', error);
 			throw error;

@@ -186,7 +186,7 @@ export class BlogService {
             post.itemId = postObj.itemId;
             post.postId = postObj.postId
             post.postURL = postObj.postURL;
-            post.file = postObj.file;
+            post.file = postObj.filename;
             post.isSaved = true;
             post.tags = postObj.tags;
 
@@ -220,7 +220,7 @@ export class BlogService {
         post.file = result.filename;
         this.blogPost.setContent(result.data.content);
         this.blogPost.setItemId(result.data.itemId);
-        this.blogPost.setFile(result.data.file);
+        this.blogPost.setFile(result.data.filename);
         post.markDirty(false);
 
         // emit a post updated event

@@ -5,6 +5,7 @@ const { FileSystemConstants, ApplicationConfigurations } = require('../../config
 const { FileSystemAdapter } = require('../adapters/filesystem.adapter');
 const { ServerResponse } = require('../models/response');
 const path = require('path');
+const h2p = require('html2plaintext');
 
 /**
  * Handler service for blog post events
@@ -59,7 +60,15 @@ class PostManagerService {
 
 		this.messageManager.respond('fetchFullPost', (file) => {
 			return this.fetchPostData(file);
-		})
+		});
+
+		this.messageManager.respond('savePost', (data) => {
+			return this.savePost(data.filename, data.postData);
+		});
+
+		this.messageManager.listen('deletePost', (data) => {
+			this.deletePost(data.itemId);
+		});
 	}
 
 	/**
@@ -209,7 +218,7 @@ class PostManagerService {
 			postObj = JSON.parse(postContent);
 
 			// add filename on to the data
-			postObj.file = file;
+			postObj.filename = file;
 			
 			post = new BlogPost(postObj);
 
@@ -227,10 +236,85 @@ class PostManagerService {
 	}
 
 	/**
+	 * Writes the post data into the file specified by filename.
+	 * @param {*} fileName - filename for the file to which the post data is to be written
+	 * @param {*} postObj - the post data 
+	 */
+	savePost(fileName, postObj) {
+
+		var post = new BlogPost(postObj);
+		var response;
+		
+		// sets the itemId if found to be null
+		if (post.itemId == null || post.itemId.trim() == '' ) {
+			var currTime = Math.floor(Date.now());
+			var timestamp = 'p_' + currTime;
+			post.itemId = timestamp;
+		}
+
+		try {
+
+			// generates the file name if not specified
+			if (fileName == null || fileName == 'undefined') {
+				var blogsDir = this.fileSystemAdapter.getConfigProperty('blogsDir');
+				fileName =  this.fileSystemAdapter.generateFileName(post.title, FileSystemConstants.BLOGLY_FILE_EXTN, blogsDir);
+			}
+			post.file = fileName;
+
+			// writes the post data into the file
+			this.fileSystemAdapter.writeToFile(this.__getPostFilePath(fileName), JSON.stringify(post.toJSON()));
+		} catch (error) {
+			console.error('Unable to write the post data to file.', error);
+			response = new ServerResponse().failure();
+			return response;
+		}
+
+		try {
+			var indexContents =  this.fileSystemAdapter.readFromFile(this.__getIndexFile());
+			if (indexContents != null && indexContents.trim() != '') {
+				var indexData = JSON.parse(indexContents);
+				var blogPost = indexData.index[post.itemId];
+				if (blogPost == null) {
+					blogPost = indexData.index[post.itemId] = new Object();	
+				}
+
+				blogPost.title = post.title;
+				blogPost.postId = post.postId;
+				blogPost.miniContent = h2p(post.content).slice(0, 100); //updates only the mini-content. The original content is retrieved later.
+				blogPost.filename = fileName;
+
+				// add post itemId to the index posts
+				var posts = indexData.posts;
+				if (posts == null) {
+					posts = indexData.posts = [];
+				}
+				if (posts.indexOf(post.itemId) < 0) {
+					// add post to the begining
+					posts.splice(0, 0, post.itemId);
+				}
+			
+				// updates the index file
+				this.fileSystemAdapter.writeToFile(this.__getIndexFile(), JSON.stringify(indexData));
+			}
+
+			// returns success message with fileName and post data
+			response = new ServerResponse({
+				filename: fileName,
+				data: post.toJSON()
+			}).ok();
+			return response;
+		} catch (error) {
+			console.error('Error in reading indices. Regenerating the indices...', error);
+			response = new ServerResponse().failure();
+			return response;
+		}
+	}
+
+	/**
 	 * Deletes the post from the index data and from the file system
 	 * @param {*} itemId - id of the blog post to be deleted
 	 */
-	deleteBlogPost(itemId) {
+	deletePost(itemId) {
 		try {
 			dialog.showMessageBox ({
 				type: 'info',
