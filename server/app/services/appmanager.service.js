@@ -5,6 +5,8 @@ const { MessageManagerService } = require('./messagemanager.service');
 const { BlogManagerService } = require('./blogmanager.service');
 const { PostManagerService } = require('./postmanager.service');
 const { ServerResponse } = require('../models/response');
+const { BrowserWindow } =  require('electron');
+const { dialog } = require('electron')
 
 /**
  * Manages the application operations and lifecycle.
@@ -33,6 +35,7 @@ class AppManagerService {
 		this.app = args.app;
 		this.blogsDir = null;
 		this.blogManger = null;
+		this.mainWindow = null;
 		
 		// define the file system locations and initializes the required properties.
 		this.appDir = this.app.getPath(FileSystemConstants.APP_DIR) + path.sep + FileSystemConstants.BLOGLY_APP_DIR;
@@ -80,14 +83,17 @@ class AppManagerService {
 	/**
 	 * Initializes the message manager service
 	 * @param {*} ipcMain 
-	 * @param {*} webContents 
+	 * @param {*} mainWindow 
 	 */
-	initilizeMessageManagerService(ipcMain, webContents) {
+	initializeApp(ipcMain, mainWindow) {
+
+		this.mainWindow = mainWindow;
+
 		// initializes the messenger service
 		var messenger = new MessageManagerService({
 			debugMode: this.debugMode,
 			ipcMain: ipcMain,
-			webContents: webContents
+			webContents: this.mainWindow.webContents
 		});
 
 		this.messageManager = messenger;
@@ -153,11 +159,13 @@ class AppManagerService {
 		// initializes the blog manager service
 		this.blogManger = new BlogManagerService({
 			debugMode: this.debugMode,
+			appManager: this
 		});
 
 		// initializes the post manager service
 		this.postManager = new PostManagerService({
 			debugMode: this.debugMode,
+			appManager: this
 		});
 
 		this.messageManager.respond('fetchConfs', () => {
@@ -191,6 +199,30 @@ class AppManagerService {
 			response = new ServerResponse().failure();
 			return response;
 		}
+	}
+
+	/**
+	 * Creates a modal window and returns it
+	 * @param {*} args 
+	 */
+	createModalWindow(args) {
+
+		var height = args.height ? args.height : 500;
+		var width = args.width ? args.width : 400;
+		var title = args.title ? args.title : 'Blogly';
+
+		var window = new BrowserWindow({
+			height: height,
+			resizable: false,
+			width: width,
+			title: title,
+			modal: true,
+			parent: this.mainWindow,
+			fullscreenable: false,
+			show: false
+		});
+
+		return window;
 	}
 
 }

@@ -1,8 +1,11 @@
 const { dialog } = require('electron');
 const { BlogPost } = require('../models/blogpost');
 const { MessageManagerService } = require('./messagemanager.service');
-const { FileSystemConstants, ApplicationConfigurations } = require('../../configs/conf');
+const { AuthManagerService } = require('./authmanager.service');
+const { FileSystemConstants, Permissions } = require('../../configs/conf');
 const { FileSystemAdapter } = require('../adapters/filesystem.adapter');
+const { BloggerAPIAdapter } = require('../adapters/blggerapi.adapter');
+const { GoogleAPIAdapter } = require('../adapters/googleapi.adapter');
 const { ServerResponse } = require('../models/response');
 const path = require('path');
 const h2p = require('html2plaintext');
@@ -28,10 +31,24 @@ class PostManagerService {
 		}
 
 		this.debugMode = args.debugMode;
+		this.appManager = args.appManager;
 
 		// get instances for file system adapter and message manager, as those would be already initialized
 		this.fileSystemAdapter = FileSystemAdapter.getDefaultInstance();
 		this.messageManager = MessageManagerService.getDefaultInstance();
+
+		this.googleAPI = new GoogleAPIAdapter({
+			debugMode: this.debugMode
+		});
+
+		this.bloggerAPI = new BloggerAPIAdapter({
+			debugMode: this.debugMode
+		});
+
+		this.authService = new AuthManagerService({
+			debugMode: this.debugMode,
+			appManager: this.appManager
+		});
 
 		this.constructor.defaultInstance = this;
 
@@ -63,11 +80,29 @@ class PostManagerService {
 		});
 
 		this.messageManager.respond('savePost', (data) => {
-			return this.savePost(data.filename, data.postData);
+			return this.respondToSave(data.filename, data.postData);
 		});
 
 		this.messageManager.listen('deletePost', (data) => {
 			this.deletePost(data.itemId);
+		});
+
+		this.messageManager.listen('publishblog', (data) => {
+			if (data != null && data.blog != null) {
+				this.publishPost(data.blog.url, data.postData, data.fileName, true);
+			} else {
+				var response = new ServerResponse().failure();
+				this.messageManager.send('published', response);
+			}
+		});
+
+		this.messageManager.listen('publishdraft', (data) => {
+			if (data != null && data.blog != null) {
+				this.publishPost(data.blog.url, data.postData, data.fileName, false);
+			} else {
+				var response = new ServerResponse().failure();
+				this.messageManager.send('published', response);
+			}
 		});
 	}
 
@@ -179,7 +214,8 @@ class PostManagerService {
 					indexData = this.__indexPosts();
 				} catch (error) {
 					console.error('Error in indexing the posts in the workspace', error);
-					return null; //TODO: Replace this flow with success codes
+					response = new ServerResponse().failure();
+					return response;
 				}
 			}
 	
@@ -235,6 +271,19 @@ class PostManagerService {
 		}
 	}
 
+	respondToSave(fileName, postObj) {
+		try {
+			var result = this.savePost(fileName, postObj);
+
+			// returns success message with fileName and post data
+			response = new ServerResponse(result).ok();
+			return response;
+		} catch (error) {
+			response = new ServerResponse().failure();
+			return response;
+		}
+	}
+
 	/**
 	 * Writes the post data into the file specified by filename.
 	 * @param {*} fileName - filename for the file to which the post data is to be written
@@ -265,8 +314,6 @@ class PostManagerService {
 			this.fileSystemAdapter.writeToFile(this.__getPostFilePath(fileName), JSON.stringify(post.toJSON()));
 		} catch (error) {
 			console.error('Unable to write the post data to file.', error);
-			response = new ServerResponse().failure();
-			return response;
 		}
 
 		try {
@@ -298,15 +345,14 @@ class PostManagerService {
 			}
 
 			// returns success message with fileName and post data
-			response = new ServerResponse({
+			response = {
 				filename: fileName,
 				data: post.toJSON()
-			}).ok();
+			};
 			return response;
 		} catch (error) {
 			console.error('Error in reading indices. Regenerating the indices...', error);
-			response = new ServerResponse().failure();
-			return response;
+			throw error;
 		}
 	}
 
@@ -384,6 +430,30 @@ class PostManagerService {
 			response = new ServerResponse().failure();
 			this.messageManager.send('deleted' + itemId, response);
 		}
+	}
+
+	/**
+	 * Authorizes with Google API and publishes/drafts the post to Blogger.
+	 * @param {*} blogURL 
+	 * @param {*} postData 
+	 * @param {*} fileName 
+	 * @param {*} isDraft 
+	 */
+	publishPost(blogURL, postData, fileName, isDraft) {
+
+		var fileName;
+		var postData;
+
+		try {
+			var saveData = this.savePost(fileName, postData);
+			fileName = savedData.fileName;
+			postData = savedData.data;
+		} catch (error) {
+			console.error('Could not save post before publishing.', error);
+		}
+
+		//seekAuthorization
+
 	}
 }
 

@@ -81,7 +81,7 @@ class MainWindow {
 		this.mainWindow = new BrowserWindow(windowConfigs);
 		
 		// initializes the message manager service
-		this.messageService = this.appManager.initilizeMessageManagerService(ipcMain, this.mainWindow.webContents);
+		this.messageService = this.appManager.initializeApp(ipcMain, this.mainWindow);
 		this.menuHandler.setMessenger(this.messageService);
 		
 		// initializes the listeners for UI events
