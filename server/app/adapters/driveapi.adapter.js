@@ -1,5 +1,5 @@
 const { GoogleAPIAdapter } = require('./googleapi.adapter');
-const { Permissions } = require('../../configs/conf');
+const { Permissions, URLConstants } = require('../../configs/conf');
 
 /**
  * Adapter for Google Drive API
@@ -15,7 +15,7 @@ class DriveAPIAdapter {
 	 */
 	constructor(args) {
 
-		const defaultInstance = this.defaultInstance;
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance;
 		if (defaultInstance) {
 
 			if (defaultInstance.debugMode) {
@@ -90,7 +90,7 @@ class DriveAPIAdapter {
 	 * @param {*} imageStream 
 	 * @param {*} imageType 
 	 */
-	async uploadImage(albumId, imageFileName, imageStream, imageType, callback) {
+	async uploadImage(albumId, imageFileName, imageStream, imageType) {
 		try {
 
 			// create file meta data - filename and parent folder
@@ -130,7 +130,7 @@ class DriveAPIAdapter {
 	
 			var imageRef = new Object();
 			imageRef.fileId = resp.data.id;
-			imageRef.link = 'https://drive.google.com/uc?export=view&id=' + imageRef.fileId;
+			imageRef.link = URLConstants.DRIVE_URL + imageRef.fileId;
 	
 			return imageRef;
 

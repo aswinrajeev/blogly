@@ -19,6 +19,9 @@ module.exports.FileSystemConstants.BLOGLY_FILE_EXTN = ".blogly";
 module.exports.FileSystemConstants.INDEX_FILE_NAME = ".blogly.index";
 module.exports.FileSystemConstants.BLOGLY_DIR = "Blogly";
 
+module.exports.URLConstants = { };
+module.exports.URLConstants.DRIVE_URL = "https://drive.google.com/uc?export=view&id=";
+
 module.exports.ApplicationConfigurations = { };
 module.exports.ApplicationConfigurations.MIN_WIDTH = 1080;
 module.exports.ApplicationConfigurations.MIN_HEIGHT = 618;

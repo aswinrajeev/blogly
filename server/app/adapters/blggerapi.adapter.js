@@ -15,7 +15,7 @@ class BloggerAPIAdapter {
 	 */
 	constructor(args) {
 
-		const defaultInstance = this.defaultInstance;
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance;
 		if (defaultInstance) {
 
 			if (defaultInstance.debugMode) {
@@ -103,6 +103,7 @@ class BloggerAPIAdapter {
 			};
 	
 			var result;
+			var postId = post.postId;
 			if (postId != null && postId.trim() != '') {
 				
 				// TODO: Check if the post still exists, otherwise post as new
@@ -111,7 +112,7 @@ class BloggerAPIAdapter {
 				result = await this.googleAPI.getBloggerAPI().posts.update(blogData);
 			} else {		
 				// insert the post
-				result = await args.blogAPI.posts.insert(blogData);
+				result = await this.googleAPI.getBloggerAPI().posts.insert(blogData);
 			}
 	
 			if (this.debugMode) {
@@ -122,9 +123,14 @@ class BloggerAPIAdapter {
 				if (this.debugMode) {
 					console.debug('Invoking the callback after publish.');
 				}
+
+				// check if the result contains data
+				if (result.data == null) {
+					throw new Error('Did not receive a valid response from Blogger.');
+				}
 	
 				// invokes the callback
-				callback(result);
+				callback(result.data);
 			}
 		} catch (error) {
 			console.error('Could not publish the blog post.', error);

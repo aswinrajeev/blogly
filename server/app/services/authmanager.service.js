@@ -1,5 +1,5 @@
 const { GoogleAPIAdapter } = require('../adapters/googleapi.adapter');
-const { FileSystemConstants, Permissions } = require('../../configs/conf');
+const { FileSystemConstants, Permissions, AuthListener } = require('../../configs/conf');
 const http = require('http');
 const url = require('url');
 
@@ -13,7 +13,7 @@ class AuthManagerService {
 	 * @param {*} args 
 	 */
 	constructor(args) {
-		const defaultInstance = this.defaultInstance;
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance;
 		if (defaultInstance) {
 			if (defaultInstance.debugMode) {
 				console.debug('Instance already exists. Ignoring the arguments.');
@@ -65,13 +65,13 @@ class AuthManagerService {
 		});
 
 		// returns the promise for authorization
-		return this.awaitAuthorization();
+		return this.__awaitAuthorization(window);
 	}
 
 	/**
 	 * Listens for a callback from the google authorization service with the authorization code
 	 */
-	awaitAuthorization() {
+	__awaitAuthorization(dialog) {
 		var httpListener;
 
 		// create a promise that would be resolved when the code is obtained
@@ -103,7 +103,7 @@ class AuthManagerService {
 							}
 
 							// awaits the tokens using the code
-							const { tokens } = await this.googleAPI.generateToken(code);
+							const tokens = await this.googleAPI.generateToken(code);
 
 							if (this.debugMode) {
 								console.debug('Received tokens from Google server.');
@@ -131,7 +131,7 @@ class AuthManagerService {
 				});
 	
 				// starts the listener in the 
-				httpListener.listen(this.appConf.listener_port);
+				httpListener.listen(AuthListener.LISTENER_PORT);
 				httpListener.setTimeout(500);
 				if (this.debugMode) {
 					console.debug('Listening for authorization confirmation from Google.');
@@ -140,6 +140,7 @@ class AuthManagerService {
 				// stops the server automatically if no response received within 2 mins
 				setTimeout(() => {
 					httpListener.close();
+					dialog.close();
 					console.error('Could not get any response from Google.');
 					reject('Request timed out.');
 				}, 120000);
@@ -155,6 +156,7 @@ class AuthManagerService {
 				try {
 					// stops the listener
 					httpListener.close();
+					dialog.close();
 				} catch (error) {
 					console.error('Could not close the server.', error);
 				}

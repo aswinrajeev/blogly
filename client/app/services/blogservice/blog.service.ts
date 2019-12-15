@@ -72,7 +72,7 @@ export class BlogService {
     };
 
     // listens for a confirmation from the server
-    this._messenger.listen('published', (result, channel, post) => {
+    this._messenger.listen('published', (result) => {
       if (result.status == 200) {
         this.getPostData().setPostURL(result.data.postURL);
         this.getPostData().setPostId(result.data.postId);

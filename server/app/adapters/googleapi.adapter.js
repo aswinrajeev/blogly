@@ -18,7 +18,7 @@ class GoogleAPIAdapter {
 	 */
 	constructor(args) {
 
-		const defaultInstance = this.defaultInstance;
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance;
 		if (defaultInstance) {
 
 			if (defaultInstance.debugMode) {
@@ -39,9 +39,9 @@ class GoogleAPIAdapter {
 
 		// create a google API authenticator
 		this.authClient = new google.auth.OAuth2(
-			APIKeys.client_id,
-			APIKeys.client_secret,
-			`http://${AuthListener.listener_port}:${AuthListener.listener_host}`
+			APIKeys.CLIENT_ID,
+			APIKeys.CLIENT_SECRET,
+			`http://${AuthListener.LISTENER_HOST}:${AuthListener.LISTENER_PORT}`
 		);
 
 		// event handler for the token update

@@ -3,12 +3,14 @@ const { BlogPost } = require('../models/blogpost');
 const { MessageManagerService } = require('./messagemanager.service');
 const { AuthManagerService } = require('./authmanager.service');
 const { FileSystemConstants, Permissions } = require('../../configs/conf');
+const { MediaManagerService } = require('./mediamanger.service');
 const { FileSystemAdapter } = require('../adapters/filesystem.adapter');
 const { BloggerAPIAdapter } = require('../adapters/blggerapi.adapter');
 const { GoogleAPIAdapter } = require('../adapters/googleapi.adapter');
 const { ServerResponse } = require('../models/response');
 const path = require('path');
 const h2p = require('html2plaintext');
+const { DOMParser } = require('xmldom');
 
 /**
  * Handler service for blog post events
@@ -22,7 +24,7 @@ class PostManagerService {
 	 * @param {*} args 
 	 */
 	constructor(args) {
-		const defaultInstance = this.defaultInstance;
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance;
 		if (defaultInstance) {
 			if (defaultInstance.debugMode) {
 				console.debug('Instance already exists. Ignoring the arguments.');
@@ -45,7 +47,12 @@ class PostManagerService {
 			debugMode: this.debugMode
 		});
 
-		this.authService = new AuthManagerService({
+		this.authManager = new AuthManagerService({
+			debugMode: this.debugMode,
+			appManager: this.appManager
+		});
+
+		this.mediaManager = new MediaManagerService({
 			debugMode: this.debugMode,
 			appManager: this.appManager
 		});
@@ -89,7 +96,7 @@ class PostManagerService {
 
 		this.messageManager.listen('publishblog', (data) => {
 			if (data != null && data.blog != null) {
-				this.publishPost(data.blog.url, data.postData, data.fileName, true);
+				this.publishPostToBlog(data.blog.url, data.postData, data.fileName, true);
 			} else {
 				var response = new ServerResponse().failure();
 				this.messageManager.send('published', response);
@@ -98,7 +105,7 @@ class PostManagerService {
 
 		this.messageManager.listen('publishdraft', (data) => {
 			if (data != null && data.blog != null) {
-				this.publishPost(data.blog.url, data.postData, data.fileName, false);
+				this.publishPostToBlog(data.blog.url, data.postData, data.fileName, false);
 			} else {
 				var response = new ServerResponse().failure();
 				this.messageManager.send('published', response);
@@ -272,6 +279,7 @@ class PostManagerService {
 	}
 
 	respondToSave(fileName, postObj) {
+		var response;
 		try {
 			var result = this.savePost(fileName, postObj);
 
@@ -433,27 +441,151 @@ class PostManagerService {
 	}
 
 	/**
-	 * Authorizes with Google API and publishes/drafts the post to Blogger.
+	 * Authorizes with Google API and invokes the publish method to publishes/drafts the post to Blogger.
 	 * @param {*} blogURL 
 	 * @param {*} postData 
 	 * @param {*} fileName 
 	 * @param {*} isDraft 
 	 */
-	publishPost(blogURL, postData, fileName, isDraft) {
+	publishPostToBlog(blogURL, post, file, isDraft) {
 
-		var fileName;
-		var postData;
+		var fileName = file;
+		var postData = post;
 
 		try {
 			var saveData = this.savePost(fileName, postData);
-			fileName = savedData.fileName;
-			postData = savedData.data;
+			fileName = saveData.filename;
+			postData = saveData.data;
 		} catch (error) {
 			console.error('Could not save post before publishing.', error);
 		}
 
-		//seekAuthorization
+		try {
+			//seekAuthorization
+			var authPromise = this.authManager.seekAuthorization([
+				Permissions.BLOGGER_SCOPE, 
+				Permissions.DRIVE_SCOPE
+			]);
+	
+			authPromise.then(async () => {
+				try {
+					var blogData = await this.bloggerAPI.getBlogByUrl(blogURL);
+					this.publishPost(blogData.id, postData, fileName, isDraft);
+				} catch (error) {
+					console.error('Could not publish the post.', error);
+					// sends a failure status
+					response = new ServerResponse().failure();
+					this.messageManager.send('published', response);
 
+					dialog.showMessageBox({
+						type: 'error',
+						title: 'Error',
+						message: 'Error in publishing',
+						detail: 'The blog post could not be published. Please try again.'
+					});
+				}
+			}).catch(error => {
+				console.error('Could not get authorization from the user.', error);
+				// sends a failure status
+				response = new ServerResponse().failure();
+				this.messageManager.send('published', response);
+
+				dialog.showMessageBox({
+					type: 'error',
+					title: 'Error',
+					message: 'Error in publishing',
+					detail: 'The blog post could not be published. Please try again.'
+				});
+			})
+		} catch (error) {
+			console.error('Could not publish the blog post.', error);
+			// sends a failure status
+			response = new ServerResponse().failure();
+			this.messageManager.send('published', response);
+
+			dialog.showMessageBox({
+				type: 'error',
+				title: 'Error',
+				message: 'Error in publishing',
+				detail: 'The blog post could not be published. Please try again.'
+			});
+		}
+	}
+
+	/**
+	 * Publishes the blog post to Blogger. Uploads any RAW images in the post contents before publish.
+	 * @param {*} blogId 
+	 * @param {*} postData 
+	 * @param {*} fileName 
+	 * @param {*} isDraft 
+	 */
+	async publishPost(blogId, postData, fileName, isDraft) {
+		var contents = postData.content;
+		var response;
+
+		try {
+			var updatedContents = await this.uploadImagesInContent(contents);
+			
+			postData.content = updatedContents;
+			var savedPost = this.savePost(fileName, postData);
+
+			fileName = savedPost.filename;
+			postData = savedPost.data;
+
+			this.bloggerAPI.publishPost(postData, blogId, isDraft, (result) => {
+
+				postData.postId = result.id;
+				postData.postURL = result.url;
+
+				savedPost = this.savePost(fileName, postData);
+				postData = savedPost.data;
+
+				response = new ServerResponse({
+					data: postData
+				}).ok();
+				this.messageManager.send('published', response);
+
+				dialog.showMessageBox({
+					type: 'info',
+					title: 'Done',
+					message: 'Blog post published.',
+					detail: 'The blog post has been published to your blog' + (isDraft ? ' as a draft' : '') + '.'
+				});
+			});
+		} catch (error) {
+			console.error('Could not publish the post.', error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Parses RAW image data from the post content and uploads those to Blogly drive directory
+	 * @param {*} content 
+	 */
+	async uploadImagesInContent(content) {
+		// convert the HTML content into DOM
+		var dom = new DOMParser().parseFromString(content, "text/xml");
+		var images = dom.getElementsByTagName('img');
+		var imgData;
+
+		if (images.length > 0 ) {
+			var albumId = await this.mediaManager.getMediaHost();
+			for(var i = 0; i < images.length; i++) {
+				if (images[i].attributes != null && images[i].attributes.getNamedItem('src') != null) {
+					imgData = images[i].attributes.getNamedItem('src').nodeValue;
+					// if image is base64 data
+					if (imgData != null && imgData.substring(0, 5) == 'data:') {
+						// uploads the image
+						var link = await this.mediaManager.uploadRAWImage(imgData, albumId);
+
+						// updates the image src with the drive url
+						images[i].attributes.getNamedItem('src').value = link;
+					}
+				}
+			}
+		}		
+
+		return dom.toString();
 	}
 }
 

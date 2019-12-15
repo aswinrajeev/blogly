@@ -15,7 +15,7 @@ class BlogManagerService {
 	 * @param {*} args 
 	 */
 	constructor(args) {
-		const defaultInstance = this.defaultInstance;
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance;
 		if (defaultInstance) {
 			if (defaultInstance.debugMode) {
 				console.debug('Instance already exists. Ignoring the arguments.');

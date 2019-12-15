@@ -16,7 +16,7 @@ class FileSystemAdapter {
 	 */
 	constructor(args) {
 
-		const defaultInstance = this.defaultInstance;
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance;
 		if (defaultInstance) {
 
 			if (defaultInstance.debugMode) {
@@ -167,12 +167,12 @@ class FileSystemAdapter {
 	/**
 	 * Writes data to a file
 	 * 
-	 * @param {*} fileName 
+	 * @param {*} filePath 
 	 * @param {*} jsonObject 
 	 */
-	writeToFile(fileName, contents) {
+	writeToFile(filePath, contents) {
 		try {
-			fs.writeFileSync(fileName, contents, "utf8");
+			fs.writeFileSync(filePath, contents, "utf8");
 		} catch (error) {
 			console.error('Unable to write JSON', error);
 			throw error;
@@ -182,19 +182,36 @@ class FileSystemAdapter {
 	/**
 	 * Reads data from a file
 	 * 
-	 * @param {*} fileName 
+	 * @param {*} filePath 
 	 * @param {*} defaultValue
 	 */
-	readFromFile(fileName, defaultValue) {
+	readFromFile(filePath, defaultValue) {
 		try {
-			if (!fs.existsSync(fileName)) {
+			if (!fs.existsSync(filePath)) {
 				if (defaultValue == null) {
 					throw new Error("File does not exists");
 				} else {
 					return defaultValue;
 				}
 			}
-			var contents = fs.readFileSync(fileName, "utf8");
+			var contents = fs.readFileSync(filePath, "utf8");
+			return contents;
+		} catch (error) {
+			console.error("Could not read from file.", error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Reads the file stream for a given file path
+	 * @param {*} filePath 
+	 */
+	readFileStream(filePath) {
+		try {
+			if (!fs.existsSync(filePath)) {
+				throw new Error("File does not exists");
+			}
+			var contents = fs.createReadStream(filePath);
 			return contents;
 		} catch (error) {
 			console.error("Could not read from file.", error);

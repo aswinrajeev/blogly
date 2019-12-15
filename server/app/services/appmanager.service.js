@@ -20,7 +20,7 @@ class AppManagerService {
 	 */
 	constructor(args) {
 
-		const defaultInstance = this.defaultInstance;
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance
 		if (defaultInstance) {
 
 			if (defaultInstance.debugMode) {
@@ -78,6 +78,13 @@ class AppManagerService {
 
 			return defaultInstance;
 		}
+	}
+
+	/**
+	 * returns the app dir for Blogly
+	 */
+	getAppDir() {
+		return this.appDir;
 	}
 
 	/**
