@@ -5,7 +5,14 @@
  * @author Aswin Rajeev
  * @copyright Aswin (c) 2018 - 2019
  */
-class MenuHandler {
+class MenuManagerService {
+
+	/**
+	 * Constructor for the menu manager service.
+	 * TODO: Make it singleton??
+	 * @param {*} menu 
+	 * @param {*} app 
+	 */
 	constructor(menu, app) {
 
 		this.menu = menu;
@@ -203,4 +210,4 @@ class MenuHandler {
 	}
 }
 
-module.exports.MenuHandler = MenuHandler;
+module.exports.MenuManagerService = MenuManagerService;

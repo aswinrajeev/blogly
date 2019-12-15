@@ -1,7 +1,7 @@
 const { app, Menu, BrowserWindow } =  require('electron');
 const { ipcMain, WebContents } = require('electron');
 const { AppManagerService } = require('./app/services/appmanager.service');
-const { MenuHandler } = require('./app/menu_handler');
+const { MenuManagerService } = require('./app/services/menumanager.service');
 const { systemPreferences } = require('electron');
 
 /**
@@ -12,6 +12,9 @@ const { systemPreferences } = require('electron');
  */
 class MainWindow {
 
+	/**
+	 * Constructor for the main window
+	 */
 	constructor() {
 		this.mainWindow = null;
 		this.messageService = null;
@@ -60,7 +63,7 @@ class MainWindow {
 	initializeAppServices() {
 
 		// initializes menu handler
-		this.menuHandler = new MenuHandler(Menu, app);
+		this.menuHandler = new MenuManagerService(Menu, app);
 
 		// initialize app manager service
 		this.appManager = new AppManagerService({
@@ -98,4 +101,5 @@ class MainWindow {
 	
 }
 
+// initializes the main window and starts the process.
 new MainWindow();
