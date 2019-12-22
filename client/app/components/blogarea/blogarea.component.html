@@ -1,5 +1,12 @@
 <input type="text" class="form-control title-text" placeholder="Blog Title" [(ngModel)]="getBlogData().title" (ngModelChange)="markChanged()"/>
-<quill-editor format="html" [hidden]="isHTMLEditor()" [(ngModel)]="getBlogData().content" (blur)="updateBlogData()" (onContentChanged)="contentChanged($event)"></quill-editor>
+<quill-editor 
+       format="html" 
+       [modules]="quillModules"
+       [hidden]="isHTMLEditor()" 
+       [(ngModel)]="getBlogData().content" 
+       (blur)="updateBlogData()" 
+       (onContentChanged)="contentChanged($event)">
+</quill-editor>
 <div ace-editor
        #editor
        [(text)]="getBlogData().content"

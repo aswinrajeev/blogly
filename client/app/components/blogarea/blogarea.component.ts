@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BlogPost } from 'client/app/models/blogpost';
 import { BlogService } from 'client/app/services/blogservice/blog.service';
+import Quill from 'quill';
 
 import 'brace';
 import 'brace/mode/html';
@@ -13,7 +14,25 @@ import 'brace/theme/gruvbox';
 })
 export class BlogareaComponent implements OnInit {
 
-  constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { }
+  quillModules;
+
+  constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { 
+      this.quillModules = {
+        toolbar: [
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+          [{ 'color': [] }, { 'background': [] }],
+          [{ 'script': 'sub' }, { 'script': 'super' }],
+          [{ 'indent': '-1' }, { 'indent': '+1' }],
+          [{ 'direction': 'rtl' }],
+          ['blockquote', 'code-block'],
+          [{ 'header': 2 }, { 'header': [2, 3, 4, 5, 6, false] }],
+          [{ 'align': [] }],
+          ['clean'], 
+          ['link', 'image', 'video']
+        ]
+      }
+  }
 
   ngOnInit() {
     // listens for any updates to posts

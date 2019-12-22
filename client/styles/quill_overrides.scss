@@ -33,6 +33,16 @@
 	border: none;
 }
 
+.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {
+  background-color: $panel-background;
+  border: none;
+}
+
+.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label {
+  outline: none;
+  border: none;
+}
+
 .ql-snow.ql-toolbar button:hover,
 .ql-snow .ql-toolbar button:hover,
 .ql-snow.ql-toolbar button:focus,
