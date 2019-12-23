@@ -5,6 +5,7 @@
        [hidden]="isHTMLEditor()" 
        [(ngModel)]="getBlogData().content" 
        (blur)="updateBlogData()" 
+       (onEditorCreated)="quillEditorCreated($event)"
        (onContentChanged)="contentChanged($event)">
 </quill-editor>
 <div ace-editor

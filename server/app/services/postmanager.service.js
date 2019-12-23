@@ -96,7 +96,7 @@ class PostManagerService {
 
 		this.messageManager.listen('publishblog', (data) => {
 			if (data != null && data.blog != null) {
-				this.publishPostToBlog(data.blog.url, data.postData, data.fileName, true);
+				this.publishPostToBlog(data.blog.url, data.postData, data.fileName, false);
 			} else {
 				var response = new ServerResponse().failure();
 				this.messageManager.send('published', response);
@@ -105,7 +105,7 @@ class PostManagerService {
 
 		this.messageManager.listen('publishdraft', (data) => {
 			if (data != null && data.blog != null) {
-				this.publishPostToBlog(data.blog.url, data.postData, data.fileName, false);
+				this.publishPostToBlog(data.blog.url, data.postData, data.fileName, true);
 			} else {
 				var response = new ServerResponse().failure();
 				this.messageManager.send('published', response);
@@ -522,20 +522,22 @@ class PostManagerService {
 	async publishPost(blogId, postData, fileName, isDraft) {
 		var contents = postData.content;
 		var response;
+		var savedPost;
 
 		try {
-			var updatedContents = await this.uploadImagesInContent(contents);
-			
-			postData.content = updatedContents;
-			var savedPost = this.savePost(fileName, postData);
+			var localContents = await this.uploadImagesInContent(contents);
 
-			fileName = savedPost.filename;
-			postData = savedPost.data;
+			//TODO: Process the cache images.
+			var updatedContents = localContents; //= await this.replaceLocalImages(localContents);
+			
+			//process the contents for 'read more' dividers5
+			postData.content = updatedContents.replace(new RegExp("<hr>|<hr></hr>|<hr/>"), '<!--more-->')
 
 			this.bloggerAPI.publishPost(postData, blogId, isDraft, (result) => {
 
 				postData.postId = result.id;
 				postData.postURL = result.url;
+				postData.content = localContents;
 
 				savedPost = this.savePost(fileName, postData);
 				postData = savedPost.data;
@@ -563,29 +565,71 @@ class PostManagerService {
 	 * @param {*} content 
 	 */
 	async uploadImagesInContent(content) {
-		// convert the HTML content into DOM
-		var dom = new DOMParser().parseFromString(content, "text/xml");
-		var images = dom.getElementsByTagName('img');
-		var imgData;
+		try {	
+			// convert the HTML content into DOM
+			var dom = new DOMParser().parseFromString(content, "text/xml");
+			var images = dom.getElementsByTagName('img');
+			var imgData;
+			var link;
+	
+			if (images.length > 0 ) {
+				var albumId = await this.mediaManager.getMediaHost();
+				for(var i = 0; i < images.length; i++) {
+					if (images[i].attributes != null && images[i].attributes.getNamedItem('src') != null) {
+						imgData = images[i].attributes.getNamedItem('src').nodeValue;
+						// if image is base64 data
+						if (imgData != null && imgData.substring(0, 5) == 'data:') {
+							// uploads the image
+							link = await this.mediaManager.uploadRAWImage(imgData, albumId);
+	
+							// updates the image src with the drive url
+							images[i].attributes.getNamedItem('src').value = link;
+						}
+					}
+				}
+			}		
+	
+			return dom.toString();
+		} catch (error) {
+			console.error('Could not upload the images.', error);
+			throw error;
+		}
+	}
 
-		if (images.length > 0 ) {
-			var albumId = await this.mediaManager.getMediaHost();
-			for(var i = 0; i < images.length; i++) {
-				if (images[i].attributes != null && images[i].attributes.getNamedItem('src') != null) {
-					imgData = images[i].attributes.getNamedItem('src').nodeValue;
-					// if image is base64 data
-					if (imgData != null && imgData.substring(0, 5) == 'data:') {
-						// uploads the image
-						var link = await this.mediaManager.uploadRAWImage(imgData, albumId);
-
-						// updates the image src with the drive url
-						images[i].attributes.getNamedItem('src').value = link;
+	/**
+	 * Replace images with local href with that of the remote, if mapping available.
+	 * Uploads it if mapping is not available.
+	 * @param {*} content 
+	 */
+	async replaceLocalImages(content) {
+		try {	
+			var dom = new DOMParser().parseFromString(content, "text/xml");
+			var images = dom.getElementsByTagName('img');
+	
+			var link;
+	
+			if (images.length > 0 ) {
+				for(var i = 0; i < images.length; i++) {
+					if (images[i].attributes != null && images[i].attributes.getNamedItem('src') != null) {
+						
+						link = images[i].attributes.getNamedItem('src').value;
+						var mappedImage = this.mediaManager.getMappedRemoteImage(link);
+						
+						if (mappedImage == null) {
+							var albumId = await this.mediaManager.getMediaHost();
+							mappedImage = this.mediaManager.uploadImageFromFile('img0', link, albumId);
+						}
+						
+						images[i].attributes.getNamedItem('src').value = mappedImage;
 					}
 				}
 			}
-		}		
-
-		return dom.toString();
+	
+			return dom.toString();
+		} catch (error) {
+			console.error('Could not update the local images with remote images.', error);
+			throw error;
+		}
 	}
 }
 

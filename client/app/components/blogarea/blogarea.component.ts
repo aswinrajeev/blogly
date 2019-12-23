@@ -15,6 +15,7 @@ import 'brace/theme/gruvbox';
 export class BlogareaComponent implements OnInit {
 
   quillModules;
+  quillEditor;
 
   constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { 
       this.quillModules = {
@@ -29,16 +30,36 @@ export class BlogareaComponent implements OnInit {
           [{ 'header': 2 }, { 'header': [2, 3, 4, 5, 6, false] }],
           [{ 'align': [] }],
           ['clean'], 
-          ['link', 'image', 'video']
+          ['link', 'image', 'video'],
+          ['hr']
         ]
       }
   }
 
+  /**
+   * Initialize the Quill editor component and register the update listeners
+   */
   ngOnInit() {
+
+    // creates the new blog for hr tag -- acts as read more placeholder
+    const BlockEmbed = Quill.import('blots/block/embed');
+    class DividerBlot extends BlockEmbed { }
+    DividerBlot['blotName'] = 'divider';
+    DividerBlot['tagName'] = 'hr';
+    Quill.register(DividerBlot);
+
     // listens for any updates to posts
     this.blogService.updateListener.on('postUpdated', () => {
       this.cdr.detectChanges();
     })
+  }
+
+  /**
+   * Persists the Quill editor object
+   * @param editor 
+   */
+  quillEditorCreated(editor) {
+    this.quillEditor = editor;
   }
 
   // returns the blog data
@@ -65,6 +86,19 @@ export class BlogareaComponent implements OnInit {
 
   // initialize the view elements
   ngAfterViewInit() {
+
+    // adds caption and listener for the hr button
+    var moreBtn = document.querySelector('.ql-hr');
+    moreBtn.innerHTML = '--';
+    moreBtn.addEventListener('click', e => {
+      e.preventDefault();
+
+      const range = this.quillEditor.getSelection(true);
+      this.quillEditor.insertText(range.index, '\n', Quill.sources.USER);
+      this.quillEditor.insertEmbed(range.index + 1, 'divider', true, Quill.sources.USER);
+      this.quillEditor.setSelection(range.index + 2, Quill.sources.SILENT);
+    });
+
     setTimeout(() => {
       // switch to RT Editor only after 500 ms, since Ace editor would need to initialize
       this.blogService.setHTMLEditor(false);
