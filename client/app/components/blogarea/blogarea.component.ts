@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BlogPost } from 'client/app/models/blogpost';
 import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { BloglyImageBlot } from '../../blots/BloglyImageBlot';
+import { DividerBlot } from '../../blots/DividerBlot';
 import Quill from 'quill';
 
 import 'brace';
@@ -41,11 +43,8 @@ export class BlogareaComponent implements OnInit {
    */
   ngOnInit() {
 
-    // creates the new blog for hr tag -- acts as read more placeholder
-    const BlockEmbed = Quill.import('blots/block/embed');
-    class DividerBlot extends BlockEmbed { }
-    DividerBlot['blotName'] = 'divider';
-    DividerBlot['tagName'] = 'hr';
+    // initializes custom blots for the Quill editor
+    Quill.register(BloglyImageBlot);
     Quill.register(DividerBlot);
 
     // listens for any updates to posts
