@@ -17,6 +17,7 @@ class MenuManagerService {
 
 		this.menu = menu;
 		this.messenger = null;
+		this.isMac = (process.platform === 'darwin');
 
 		this.appMenu = {
 			role: 'appMenu',
@@ -91,7 +92,30 @@ class MenuManagerService {
 					role: 'copy'
 				}, {
 					role: 'paste'
-				}
+				}, {
+					role: 'paste'
+				}, ( 
+					this.isMac ? (
+						{
+							role: 'selectall'
+						},
+						{
+							label: 'Speech',
+							submenu: [
+								{ 
+									role: 'startspeaking' 
+								}, { 
+									role: 'stopspeaking' 
+								}
+							]
+						}, {
+							role: 'selectall'
+						}
+					) : ( 
+						{
+							role: 'selectall'
+						}
+					))
 			]
 		};
 
@@ -181,8 +205,7 @@ class MenuManagerService {
 	 */
 	getMenu() {
 		const menu = this.menu.buildFromTemplate([
-			this.appMenu,
-			this.fileMenu,
+			this.isMac ? (this.appMenu, this.fileMenu) : this.fileMenu,
 			this.editMenu,
 			this.blogMenu,
 			this.viewMenu,
