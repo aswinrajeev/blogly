@@ -273,12 +273,13 @@ class PostManagerService {
 			postObj.filename = file;
 
 			// loads the raw image data for the local images
-			postObj.content = this.loadRAWImages(postObj.content);
+			var fullContent = this.loadRAWImages(postObj.content);
 			
 			post = new BlogPost(postObj);
 
 			response = new ServerResponse({
-				post: post.toJSON()
+				post: post.toJSON(),
+				fullContent: fullContent
 			}).ok();
 
 			return response;

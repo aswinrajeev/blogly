@@ -8,12 +8,14 @@ export class BlogPost {
 	private _itemId:string; // for internal id
 	private _isSaved:boolean;
 	private _tags:String[];
+	private _htmlContent:String;
 
 	constructor() {
 		var currTime = Math.floor(Date.now());
 
 		this._title = "Untitled";
 		this._content = "";
+		this._htmlContent = "";
 		this._postId = null;
 		this._postURL = null;
 		this._file = null;
@@ -45,6 +47,19 @@ export class BlogPost {
 		if (this._content !== content) {
 			this.markDirty(true);
 			this._content = content;
+		}
+	}
+
+	get htmlContent() {
+		return this._htmlContent;
+	}
+	set htmlContent(content) {
+		this.setHTMLContent(content)
+	}
+	setHTMLContent(content) {
+		if (this._htmlContent !== content) {
+			this.markDirty(true);
+			this._htmlContent = content;
 		}
 	}
 

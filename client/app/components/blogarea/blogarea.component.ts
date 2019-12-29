@@ -97,11 +97,6 @@ export class BlogareaComponent implements OnInit {
       this.quillEditor.insertEmbed(range.index + 1, 'divider', true, Quill.sources.USER);
       this.quillEditor.setSelection(range.index + 2, Quill.sources.SILENT);
     });
-
-    setTimeout(() => {
-      // switch to RT Editor only after 500 ms, since Ace editor would need to initialize
-      this.blogService.setHTMLEditor(false);
-    }, 500)
   }
 
 }
