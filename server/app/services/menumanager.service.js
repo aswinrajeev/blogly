@@ -65,10 +65,10 @@ class MenuManagerService {
 						this.handleMenuClick('new');
 					}
 				}, {
-					label: 'Import',
+					label: 'Import blog post from file',
 					accelerator: 'CmdOrCtrl+O',
 				}, {
-					label: 'Save',
+					label: 'Save blog post',
 					accelerator: 'CmdOrCtrl+S',
 					click: () => {
 						this.handleMenuClick('save');
@@ -94,28 +94,10 @@ class MenuManagerService {
 					role: 'paste'
 				}, {
 					role: 'paste'
-				}, ( 
-					this.isMac ? (
-						{
-							role: 'selectall'
-						},
-						{
-							label: 'Speech',
-							submenu: [
-								{ 
-									role: 'startspeaking' 
-								}, { 
-									role: 'stopspeaking' 
-								}
-							]
-						}, {
-							role: 'selectall'
-						}
-					) : ( 
-						{
-							role: 'selectall'
-						}
-					))
+				}, 
+				{
+					role: 'selectall'
+				}
 			]
 		};
 
@@ -205,7 +187,8 @@ class MenuManagerService {
 	 */
 	getMenu() {
 		const menu = this.menu.buildFromTemplate([
-			this.isMac ? (this.appMenu, this.fileMenu) : this.fileMenu,
+			this.isMac && this.appMenu,
+			this.fileMenu,
 			this.editMenu,
 			this.blogMenu,
 			this.viewMenu,
