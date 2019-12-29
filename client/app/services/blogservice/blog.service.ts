@@ -76,7 +76,7 @@ export class BlogService {
       if (result.status == 200) {
         this.getPostData().setPostURL(result.data.postURL);
         this.getPostData().setPostId(result.data.postId);
-        this.getPostData().setContent(result.data.content);
+        this.getPostData().setContent(result.fullContent);
         this.blogPost = this.getPostData();
       }
     }, post);
@@ -218,7 +218,7 @@ export class BlogService {
     }, (result) => {
       if (result != null && result.status == 200) {
         post.file = result.filename;
-        this.blogPost.setContent(result.data.content);
+        this.blogPost.setContent(result.fullContent);
         this.blogPost.setItemId(result.data.itemId);
         this.blogPost.setFile(result.data.filename);
         post.markDirty(false);

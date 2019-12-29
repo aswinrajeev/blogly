@@ -203,6 +203,34 @@ class FileSystemAdapter {
 	}
 
 	/**
+	 * Reads an image as base64 from an image file
+	 * @param {*} filePath 
+	 */
+	readImageAsRAW(filePath) {
+		try {
+			if (!fs.existsSync(filePath)) {
+				throw new Error("File does not exists");
+			}
+
+			// extracts the image type
+			var fileParts = filePath.split('.');
+			var type = fileParts.length > 0 ? fileParts[fileParts.length - 1] : 'jpeg';
+			
+			// defines the prefix for the base64
+			var prefix = "data:image/" + type + ";base64,"
+			
+			// loads the base64 data
+			var contents = fs.readFileSync(filePath);
+			var imgData = Buffer(contents).toString('base64');
+
+			return prefix + imgData;
+		} catch (error) {
+			console.error("Could not read from file.", error);
+			throw error;
+		}
+	}
+
+	/**
 	 * Reads the file stream for a given file path
 	 * @param {*} filePath 
 	 */

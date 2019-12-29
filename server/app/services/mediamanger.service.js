@@ -48,7 +48,11 @@ class MediaManagerService {
 		}
 	}
 
-	__getImageDir() {
+	/**
+	 * Returns the image directory for the blogs.
+	 * Creates the directory if it does not exists.
+	 */
+	getImageDir() {
 		try {
 			var blogsDir = this.fileSystemAdapter.getConfigProperty('blogsDir');
 			var temp =  blogsDir + path.sep + FileSystemConstants.IMAGE_DIR ;
@@ -62,10 +66,16 @@ class MediaManagerService {
 		}
 	}
 
+	/**
+	 * Constructs and returns the path to image map file
+	 */
 	__getImageMapFile() {
-		return this.__getImageDir() + path.sep + FileSystemConstants.IMAGE_MAP_FILE;
+		return this.getImageDir() + path.sep + FileSystemConstants.IMAGE_MAP_FILE;
 	}
 
+	/**
+	 * Reads and returns the image map from the imaage map file
+	 */
 	__getImageMap() {
 		try {
 			var imgMapFile = this.__getImageMapFile();
@@ -126,12 +136,12 @@ class MediaManagerService {
 			var type = imageData.substring(11, imageData.indexOf(";base64"));
 	
 			// saves the file to disk for uploading
-			var fileDetails = await this.saveImageToDisk(imageData, type);
+			var fileDetails = await this.saveImageToDisk(imageData);
 	
 			// uploads the file to the blogly directory
 			await this.uploadImageFromFile(fileDetails.fileName, fileDetails.fullPath, albumId, type);
 			
-			return fileDetails.fullPath;
+			return fileDetails.fileName;
 		} catch (error) {
 			console.error('Could not update the image data.', error);
 			throw error;
@@ -160,7 +170,7 @@ class MediaManagerService {
 			var image = await this.driveAPI.uploadImage(albumId, fileName, imageStream, type);
 	
 			// cache the image mapping
-			this.__saveImageMapping(filePath, image.link);
+			this.__saveImageMapping(fileName, image.link);
 	
 			return image.link;
 		} catch (error) {
@@ -175,10 +185,13 @@ class MediaManagerService {
 	 * @param {*} type 
 	 * @returns an object with imageFileName and fullPath
 	 */
-	saveImageToDisk(imageData, type) {
+	saveImageToDisk(imageData) {
 		try {
 			var imageFilename;
-			var tempPath = this.__getImageDir();
+			var tempPath = this.getImageDir();
+			
+			// extracts the image type
+			var type = imageData.substring(11, imageData.indexOf(";base64"));
 	
 			var fileContents = Buffer.from(imageData.substring(imageData.indexOf(";base64") + ";base64,".length, imageData.length -1),"base64");
 			//const blob = base64util.toBlob(imageData.substring(imageData.indexOf(";base64") + ";base64,".length, imageData.length -1));

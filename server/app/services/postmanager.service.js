@@ -122,6 +122,15 @@ class PostManagerService {
 	}
 
 	/**
+	 * Constructs and returns the full file path for a local image
+	 * @param {*} fileName 
+	 */
+	__getLocalImagePath(fileName) {
+		var imgPath = this.mediaManager.getImageDir() + path.sep + fileName;
+		return imgPath;
+	}
+
+	/**
 	 * Construct and returns the index file path
 	 */
 	__getIndexFile() {
@@ -262,6 +271,9 @@ class PostManagerService {
 
 			// add filename on to the data
 			postObj.filename = file;
+
+			// loads the raw image data for the local images
+			postObj.content = this.loadRAWImages(postObj.content);
 			
 			post = new BlogPost(postObj);
 
@@ -301,6 +313,10 @@ class PostManagerService {
 
 		var post = new BlogPost(postObj);
 		var response;
+
+		// removes all the RAW (base64) images in the content after saving to images directory
+		var localContents = this.saveAndRemoveRAWImages(post.content);
+		post.content = localContents;
 		
 		// sets the itemId if found to be null
 		if (post.itemId == null || post.itemId.trim() == '' ) {
@@ -352,10 +368,14 @@ class PostManagerService {
 				this.fileSystemAdapter.writeToFile(this.__getIndexFile(), JSON.stringify(indexData));
 			}
 
+			// loads all the local images to the respective img tags
+			var fullContent = this.loadRAWImages(post.content);
+
 			// returns success message with fileName and post data
 			response = {
 				filename: fileName,
-				data: post.toJSON()
+				data: post.toJSON(),
+				fullContent: fullContent
 			};
 			return response;
 		} catch (error) {
@@ -525,10 +545,8 @@ class PostManagerService {
 		var savedPost;
 
 		try {
-			var localContents = await this.uploadImagesInContent(contents);
 
-			//TODO: Process the cache images.
-			var updatedContents = localContents; //= await this.replaceLocalImages(localContents);
+			var updatedContents = await this.replaceLocalImages(contents);
 			
 			//process the contents for 'read more' dividers5
 			postData.content = updatedContents.replace(new RegExp("<hr>|<hr></hr>|<hr/>"), '<!--more-->')
@@ -537,13 +555,19 @@ class PostManagerService {
 
 				postData.postId = result.id;
 				postData.postURL = result.url;
-				postData.content = localContents;
+
+				// replaces the post contents with the original contents (with local images)
+				postData.content = contents;
 
 				savedPost = this.savePost(fileName, postData);
 				postData = savedPost.data;
 
+				// populates the image base64 data wherever required.
+				var fullContent = this.loadRAWImages(postData.content);
+
 				response = new ServerResponse({
-					data: postData
+					data: postData,
+					fullContent: fullContent
 				}).ok();
 				this.messageManager.send('published', response);
 
@@ -561,30 +585,64 @@ class PostManagerService {
 	}
 
 	/**
-	 * Parses RAW image data from the post content and uploads those to Blogly drive directory
+	 * Parses RAW image data from the post content and saves those to images directory
 	 * @param {*} content 
 	 */
-	async uploadImagesInContent(content) {
+	saveAndRemoveRAWImages(content) {
 		try {	
 			// convert the HTML content into DOM
 			var dom = new DOMParser().parseFromString(content, "text/xml");
 			var images = dom.getElementsByTagName('img');
 			var imgData;
-			var link;
+			var savedImg;
 	
 			if (images.length > 0 ) {
-				var albumId = await this.mediaManager.getMediaHost();
 				for(var i = 0; i < images.length; i++) {
-					if (images[i].attributes != null && images[i].attributes.getNamedItem('src') != null) {
-						imgData = images[i].attributes.getNamedItem('src').nodeValue;
-						// if image is base64 data
-						if (imgData != null && imgData.substring(0, 5) == 'data:') {
+					imgData = images[i].getAttribute('src');
+					savedImg = images[i].getAttribute('local-src');
+					// if image is base64 data
+					if (imgData != null && imgData.substring(0, 5) == 'data:') {
+						if (savedImg == null || savedImg.trim() == '') {
 							// uploads the image
-							link = await this.mediaManager.uploadRAWImage(imgData, albumId);
+							savedImg = this.mediaManager.saveImageToDisk(imgData);
 	
-							// updates the image src with the drive url
-							images[i].attributes.getNamedItem('src').value = link;
+							// updates the local-src with the image file name and removes base64 data
+							this.__setLocalImage(images[i], savedImg.fileName, true);
+						} else {
+							images[i].removeAttribute('src');
 						}
+					}
+				}
+			}		
+	
+			return dom.toString();
+		} catch (error) {
+			console.error('Could not save the images.', error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Loads image src with base64 data of the local image
+	 * @param {*} content 
+	 */
+	loadRAWImages(content) {
+		try {	
+			// convert the HTML content into DOM
+			var dom = new DOMParser().parseFromString(content, "text/xml");
+			var images = dom.getElementsByTagName('img');
+			var savedImg;
+			var imgPath;
+	
+			if (images.length > 0 ) {
+				for(var i = 0; i < images.length; i++) {
+					imgPath = images[i].getAttribute('local-src');
+					if (imgPath != null && imgPath.trim() != '' && imgPath.trim() != 'null') {
+						imgPath = this.__getLocalImagePath(imgPath);
+
+						// reads the image as base64 and set it to src attribute
+						savedImg = this.fileSystemAdapter.readImageAsRAW(imgPath);
+						this.__setImage(images[i], savedImg, false);
 					}
 				}
 			}		
@@ -606,21 +664,22 @@ class PostManagerService {
 			var dom = new DOMParser().parseFromString(content, "text/xml");
 			var images = dom.getElementsByTagName('img');
 	
-			var link;
+			var imgFile;
 	
 			if (images.length > 0 ) {
 				for(var i = 0; i < images.length; i++) {
-					if (images[i].attributes != null && images[i].attributes.getNamedItem('src') != null) {
+					imgFile = images[i].getAttribute('local-src');
+					if (imgFile != null && imgFile.trim() != '' && imgFile.trim() != 'null') {
+						var mappedImage = this.mediaManager.getMappedRemoteImage(imgFile);
 						
-						link = images[i].attributes.getNamedItem('src').value;
-						var mappedImage = this.mediaManager.getMappedRemoteImage(link);
-						
+						// uploads the file if no mapping found
 						if (mappedImage == null) {
+							var link = this.__getLocalImagePath(imgFile);
 							var albumId = await this.mediaManager.getMediaHost();
-							mappedImage = this.mediaManager.uploadImageFromFile('img0', link, albumId);
+							mappedImage = await this.mediaManager.uploadImageFromFile(imgFile, link, albumId);
 						}
 						
-						images[i].attributes.getNamedItem('src').value = mappedImage;
+						this.__setImage(images[i], mappedImage, true);
 					}
 				}
 			}
@@ -629,6 +688,34 @@ class PostManagerService {
 		} catch (error) {
 			console.error('Could not update the local images with remote images.', error);
 			throw error;
+		}
+	}
+
+	/**
+	 * Sets a value to the src attribute of image dom element.
+	 * Clears the local-src attribute if clean is specified.
+	 * @param {*} imageDom 
+	 * @param {*} image 
+	 * @param {*} clean 
+	 */
+	__setImage(imageDom, image, clean) {
+		imageDom.setAttribute('src', image);
+		if (clean) {
+			imageDom.removeAttribute('local-src');
+		}
+	}
+
+	/**
+	 * Sets the local-src attribute of an image DOM element with the value provided.
+	 * Clears the src attribute value if clean is specified.
+	 * @param {*} imageDom 
+	 * @param {*} localImage 
+	 * @param {*} clean 
+	 */
+	__setLocalImage(imageDom, localImage, clean) {
+		imageDom.setAttribute('local-src', localImage);
+		if (clean) {
+			imageDom.removeAttribute('src');
 		}
 	}
 }
