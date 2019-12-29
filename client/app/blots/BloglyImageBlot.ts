@@ -1,10 +1,10 @@
 import Quill from 'quill';
-const BlockEmbed = Quill.import('blots/block/embed');
+const ImageBlot = Quill.import('formats/image');
 
 /**
- * Custom Blot to override the image tag of Quill editor
+ * Custom Blot to extend the image tag of Quill editor
  */
-export class BloglyImageBlot extends BlockEmbed {
+export class BloglyImageBlot extends ImageBlot {
 
   static blotName = 'bloglyImage';
   static tagName = 'img';
@@ -17,7 +17,6 @@ export class BloglyImageBlot extends BlockEmbed {
 
     let node = super.create();
     
-    node.setAttribute('alt', value.alt);
     node.setAttribute('src', value.url);
     node.setAttribute('local-src', value.local_src);
     return node;
@@ -30,7 +29,6 @@ export class BloglyImageBlot extends BlockEmbed {
   static value(node) {
 
     return {
-      alt: node.getAttribute('alt'),
       url: node.getAttribute('src'),
       local_src: node.getAttribute('local-src')
     };
