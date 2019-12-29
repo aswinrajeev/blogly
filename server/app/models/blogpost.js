@@ -1,36 +1,35 @@
-export class BlogPost {
-	private _title: String;
-	private _content: String;
-	private _miniContent: String;
-	private _file: String;
-	private _postId: String; //for blog id at blogger
-	private _postURL: String;
-	private _itemId:string; // for internal id
-	private _isSaved:boolean;
-	private _tags:String[];
 
-	constructor() {
-		var currTime = Math.floor(Date.now());
+const h2p = require('html2plaintext');
 
-		this._title = "Untitled";
-		this._content = "";
-		this._postId = null;
-		this._postURL = null;
-		this._file = null;
-		this._itemId = 'p_' + currTime;
-		this._isSaved = false;
-		this._tags = [];
+/**
+ * Model class for Blog Post
+ * 
+ * @author Aswin Rajeev
+ */
+class BlogPost {
+
+	/**
+	 * Constructor for blog post
+	 * @param {*} postObj 
+	 */
+	constructor(postObj) {
+		this._title = postObj.title;
+		this._content = postObj.content;
+		this._postId = postObj.postId
+		this._postURL = postObj.postURL
+		this._file = postObj.filename;
+		this._itemId = postObj.itemId;
+		this._tags = postObj.tags;
 	}
 
 	get title() {
 		return this._title;
 	}
-	set title(title: String) {
+	set title(title) {
 		this.setTitle(title);
 	}
-	setTitle(title:String) {
+	setTitle(title) {
 		if (this._title !== title) {
-			this.markDirty(true);
 			this._title = title;
 		}
 	}
@@ -43,7 +42,6 @@ export class BlogPost {
 	}
 	setContent(content) {
 		if (this._content !== content) {
-			this.markDirty(true);
 			this._content = content;
 		}
 	}
@@ -56,7 +54,6 @@ export class BlogPost {
 	}
 	setPostId(postId) {
 		if (this._postId !== postId) {
-			this.markDirty(true);
 			this._postId = postId;
 		}
 	}
@@ -69,7 +66,6 @@ export class BlogPost {
 	}
 	setFile(file) {
 		if (this._file !== file) {
-			this.markDirty(true);
 			this._file = file;
 		}
 	}
@@ -82,7 +78,6 @@ export class BlogPost {
 	}
 	setItemId(itemId) {
 		if (this._itemId !== itemId) {
-			this.markDirty(true);
 			this._itemId = itemId;
 		}
 	}
@@ -95,7 +90,6 @@ export class BlogPost {
 	}
 	setMiniContent(miniContent) {
 		if (this._miniContent !== miniContent) {
-			this.markDirty(true);
 			this._miniContent = miniContent;
 		}
 	}
@@ -108,7 +102,6 @@ export class BlogPost {
 	}
 	setPostURL(postURL) {
 		if (this._postURL !== postURL) {
-			this.markDirty(true);
 			this._postURL = postURL;
 		}
 	}
@@ -137,8 +130,10 @@ export class BlogPost {
 		}
 	}
 
-	// gets the post as a JSON object
-	getAsPost() {
+	/**
+	 * gets the post as a JSON object 
+	 * */
+	toJSON() {
 		var post = {};
 		post['title'] = this._title;
 		post['content'] = this._content;
@@ -150,12 +145,6 @@ export class BlogPost {
 
 		return post;
 	}
-
-	updateMiniContent() {
-		this._miniContent = this._content != null ? this._content.replace(/<[^>]*>/g, "").slice(0, 100) : "";
-	}
-
-	markDirty(isDirty: boolean) {
-		this._isSaved = !isDirty;
-	}
 }
+
+module.exports.BlogPost = BlogPost;

@@ -1,14 +1,53 @@
 const { IpcMain, WebContents } = require('electron');
 
-class MessagingService {
-	constructor(ipcMain, webContents) {
-		this.__ipc = ipcMain;
-		this.__webContents = webContents;
+/**
+ * Manages the messaging services between the UI and the application.
+ * 
+ * @author Aswin Rajeev
+ */
+class MessageManagerService {
+
+	/**
+	 * Singleton constructor for MessageHandlerService
+	 * @param {*} ipcMain 
+	 * @param {*} webContents 
+	 */
+	constructor(args) {
+
+		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance;
+		if (defaultInstance) {
+
+			if (defaultInstance.debugMode) {
+				console.debug("Instance already exists. Ignoring the arguments.");
+			}
+
+			return defaultInstance;
+		}
+
+		this.debugMode = args.debugMode;
+		this.__ipc = args.ipcMain;
+		this.__webContents = args.webContents;
 		this.__listeners = null;
 		this.__singleTimeListeners = null;
+
+		this.constructor.defaultInstance = this;
+
+		/**
+		 * Returns the default instance of the class
+		 */
+		this.constructor.getDefaultInstance = function() {
+			const defaultInstance = this.defaultInstance;
+			if (defaultInstance == null) {
+				throw new Error('Class not initialized yet.');
+			}
+
+			return defaultInstance;
+		}
 	}
 
-	//Internal function for callbacks
+	/**
+	 * Internal function for callbacks
+	 */
 	__callback(channel, payload, event) {
 		if (this.__listeners != null && this.__listeners[channel] != null) {
 			
@@ -30,14 +69,18 @@ class MessagingService {
 		}
 	}
 
-	//Send a message to the webapp
+	/**
+	 * Send a message to the webapp
+	 */
 	send(channel, payload) {
 		if (this.__webContents) {
 			this.__webContents.send(channel, payload);
 		}
 	}
 
-	//Register a listener with the specified channel
+	/**
+	 * Register a listener with the specified channel
+	 */
 	listen(channel, listener, args) {
 		if (this.__listeners == null) {
 			this.__listeners = new Object();
@@ -60,7 +103,9 @@ class MessagingService {
 		});
 	}
 
-	//Register a single time listener with the specified channel
+	/**
+	 * Register a single time listener with the specified channel
+	 */
 	listenOnce(channel, listener, args) {
 		if (this.__singleTimeListeners == null) {
 			this.__singleTimeListeners = new Object();
@@ -83,7 +128,9 @@ class MessagingService {
 		});
 	}
 
-	//Request for a response through a specified channel
+	/**
+	 * Request for a response through a specified channel
+	 */
 	respond(channel, action) {
 		//Create a listener for the channel
 		let that = this;
@@ -94,4 +141,4 @@ class MessagingService {
 	}
 }
 
-module.exports.MessagingService = MessagingService;
+module.exports.MessageManagerService = MessageManagerService;

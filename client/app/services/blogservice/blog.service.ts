@@ -72,11 +72,11 @@ export class BlogService {
     };
 
     // listens for a confirmation from the server
-    this._messenger.listen('published', (result, channel, post) => {
+    this._messenger.listen('published', (result) => {
       if (result.status == 200) {
         this.getPostData().setPostURL(result.data.postURL);
         this.getPostData().setPostId(result.data.postId);
-        this.getPostData().setContent(result.data.content);
+        this.getPostData().setContent(result.fullContent);
         this.blogPost = this.getPostData();
       }
     }, post);
@@ -100,8 +100,8 @@ export class BlogService {
       var posts:BlogPost[] = new Array<BlogPost>();
       var post: BlogPost;
 
-      if (result != null) {
-        result.forEach(data => {
+      if (result != null && result.posts != null) {
+        result.posts.forEach(data => {
           post = new BlogPost();
           post.title = data.title;
           post.itemId = data.itemId;
@@ -176,25 +176,28 @@ export class BlogService {
   // sets the selected post as the active blog and renders it to the editor
   setPost(post:BlogPost, callback) {
     if (post.isSaved) {
-      this._messenger.request('fetchFullPost', {filename: post.file}, (result) => {
+      this._messenger.request('fetchFullPost', post.file, (result) => {
   
-        console.log(result);
-  
-        if (result != null) {
-          post.content = result.content;
-          post.title = result.title;
-          post.itemId = result.itemId;
-          post.postId = result.postId
-          post.postURL = result.postURL;
-          post.file = result.file;
-          post.isSaved = true;
-          post.tags = result.tags;
-          this.blogPost = post;
+        if (result.status == 200) {
+          var postObj = result.post;
+          if (result != null) {
+            post.content = postObj.content;
+            post.title = postObj.title;
+            post.itemId = postObj.itemId;
+            post.postId = postObj.postId
+            post.postURL = postObj.postURL;
+            post.file = postObj.filename;
+            post.isSaved = true;
+            post.tags = postObj.tags;
+
+            this.blogPost = post;
+          }
         }
-        
+          
         // emit a post updated event
         this.updateListener.emit("postUpdated");
         callback();
+  
   
       });
     } else {
@@ -215,9 +218,9 @@ export class BlogService {
     }, (result) => {
       if (result != null && result.status == 200) {
         post.file = result.filename;
-        this.blogPost.setContent(result.data.content);
+        this.blogPost.setContent(result.fullContent);
         this.blogPost.setItemId(result.data.itemId);
-        this.blogPost.setFile(result.data.file);
+        this.blogPost.setFile(result.data.filename);
         post.markDirty(false);
 
         // emit a post updated event
@@ -240,7 +243,7 @@ export class BlogService {
         this.blogs.splice(this.blogs.indexOf(blog), 1);
         this.updateListener.emit('settingsUpdated');
       }
-    }, blog.getAsBlog());
+    }, null);
     
     this._messenger.send('deleteBlog', blog.getAsBlog());
   }
@@ -257,7 +260,7 @@ export class BlogService {
 
   addBlog(alias: String, url: String) {
     var blog:Blog = new Blog(alias, url, null);
-    this._messenger.listen('blogAdded', (result) => {
+    this._messenger.listenOnce('blogAdded', (result) => {
       if (result.status == 200) {
         var blog:Blog = new Blog(result.blog.name, result.blog.url, result.blog.blogId);
         this.blogs.push(blog);
