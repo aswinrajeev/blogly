@@ -17,6 +17,7 @@ class MenuManagerService {
 
 		this.menu = menu;
 		this.messenger = null;
+		this.isMac = (process.platform === 'darwin');
 
 		this.appMenu = {
 			role: 'appMenu',
@@ -64,10 +65,10 @@ class MenuManagerService {
 						this.handleMenuClick('new');
 					}
 				}, {
-					label: 'Import',
+					label: 'Import blog post from file',
 					accelerator: 'CmdOrCtrl+O',
 				}, {
-					label: 'Save',
+					label: 'Save blog post',
 					accelerator: 'CmdOrCtrl+S',
 					click: () => {
 						this.handleMenuClick('save');
@@ -91,6 +92,11 @@ class MenuManagerService {
 					role: 'copy'
 				}, {
 					role: 'paste'
+				}, {
+					role: 'paste'
+				}, 
+				{
+					role: 'selectall'
 				}
 			]
 		};
@@ -181,7 +187,7 @@ class MenuManagerService {
 	 */
 	getMenu() {
 		const menu = this.menu.buildFromTemplate([
-			this.appMenu,
+			this.isMac && this.appMenu,
 			this.fileMenu,
 			this.editMenu,
 			this.blogMenu,

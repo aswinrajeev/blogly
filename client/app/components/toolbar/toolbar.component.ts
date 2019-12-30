@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BlogService } from 'client/app/services/blogservice/blog.service';
 import { Blog } from 'client/app/models/blog';
 
@@ -9,7 +9,7 @@ import { Blog } from 'client/app/models/blog';
 })
 export class ToolbarComponent implements OnInit {
 
-  constructor(private blogservice: BlogService) { }
+  constructor(private blogservice: BlogService, private cdr : ChangeDetectorRef) { }
 
   ngOnInit() {
 
@@ -31,6 +31,11 @@ export class ToolbarComponent implements OnInit {
       this.toggleEditor();
       this.blogservice.updateListener.emit("postUpdated");
     });
+
+    // listens for any updates to posts
+    this.blogservice.updateListener.on('postUpdated', () => {
+      this.cdr.detectChanges();
+    })
 
   }
 

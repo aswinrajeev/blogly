@@ -178,6 +178,11 @@ class AppManagerService {
 		this.messageManager.respond('fetchConfs', () => {
 			return this.fetchUIConfigs();
 		});
+
+		// register for UI update on event
+		this.messageManager.respond('switchEditor', (data) => {
+			return this.switchEditor(data.content, data.editor);
+		});
 	}
 
 	/**
@@ -206,6 +211,39 @@ class AppManagerService {
 			response = new ServerResponse().failure();
 			return response;
 		}
+	}
+
+	/**
+	 * Transforms content as HTML editor specs to/from Quill specs
+	 * @param {*} content 
+	 * @param {*} editor 
+	 */
+	switchEditor(content, editor) {
+		var response;
+		try {
+			var htmlContent, fullContent;
+			if (content == null || content.trim() == '') {
+				htmlContent = '';
+				fullContent = '';
+			} else {
+				if (editor == 'html') {
+					fullContent = this.postManager.loadRAWImages(content);
+					htmlContent = content;
+				} else {
+					htmlContent = this.postManager.saveAndRemoveRAWImages(content);
+					fullContent = content;
+				}
+			}
+
+			response = new ServerResponse({
+				fullContent: fullContent,
+				htmlContent: htmlContent
+			}).ok();
+		} catch (error) {
+			response = new ServerResponse().failure();
+		}
+
+		return response;
 	}
 
 	/**

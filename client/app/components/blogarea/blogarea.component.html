@@ -2,7 +2,7 @@
 <quill-editor 
        format="html" 
        [modules]="quillModules"
-       [hidden]="isHTMLEditor()" 
+       [hidden]="!isHTMLEditor()" 
        [(ngModel)]="getBlogData().content" 
        (blur)="updateBlogData()" 
        (onEditorCreated)="quillEditorCreated($event)"
@@ -10,12 +10,12 @@
 </quill-editor>
 <div ace-editor
        #editor
-       [(text)]="getBlogData().content"
+       [(text)]="getBlogData().htmlContent"
        [mode]="'html'"
        [theme]="'gruvbox'"
        [options]="{printMargin: false, wrap: true, foldStyle: 'markbegin'}"
        [readOnly]="false"
        [autoUpdateContent]="true"
        (textChanged)="contentChanged($event)"
-       [hidden]="!isHTMLEditor()"
+       [hidden]="isHTMLEditor()"
        class="htmlEditor"></div>

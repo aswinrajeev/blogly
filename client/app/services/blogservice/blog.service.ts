@@ -16,7 +16,7 @@ export class BlogService {
   newFun: Function;
   workspaceDir:String;
 
-  htmlEditor: boolean = true;
+  htmlEditor: boolean = false;
 
   // event emitter for tracking post changes
   updateListener: EventEmitter = new EventEmitter();
@@ -41,15 +41,49 @@ export class BlogService {
 
   // returns if the current editor is HTML editor
   isHTMLEditor() {
-    return !this.htmlEditor;
+    return this.htmlEditor;
   }
 
   // sets the current editor as HTML if isHTML is true
   setHTMLEditor(isHTML:boolean) {
-    this.htmlEditor = !isHTML;
+    
+    var editor;
+    var content;
 
-    // emit a post updated event
-    this.updateListener.emit("postUpdated");
+    // updates the content from the back end
+    if (this.blogPost != null &&
+        this.blogPost.htmlContent != null && this.blogPost.htmlContent.trim() != '' &&
+        this.blogPost.content != null && this.blogPost.content.trim() != '') {
+
+      // passes the appropriate content acc to the current editor
+      if (!this.isHTMLEditor()) {
+        editor = 'html'
+        content = this.blogPost.htmlContent;
+      } else  {
+        editor = 'quill';
+        content = this.blogPost.content;
+      }
+      
+      // request server for updated contents
+      this._messenger.request('switchEditor', {
+        editor: editor,
+        content: content
+      }, (result) => {
+        
+        if (result.status == 200) {
+  
+          this.htmlEditor = isHTML;
+  
+          this.blogPost.setContent(result.fullContent);
+          this.blogPost.setHTMLContent(result.htmlContent);
+         
+          // emit a post updated event
+          this.updateListener.emit("postUpdated");
+        }
+      });
+    } else {
+      this.htmlEditor = isHTML;
+    }
   }
 
   // set the blog post id
@@ -77,6 +111,7 @@ export class BlogService {
         this.getPostData().setPostURL(result.data.postURL);
         this.getPostData().setPostId(result.data.postId);
         this.getPostData().setContent(result.fullContent);
+        this.getPostData().setHTMLContent(result.data.content);
         this.blogPost = this.getPostData();
       }
     }, post);
@@ -181,7 +216,6 @@ export class BlogService {
         if (result.status == 200) {
           var postObj = result.post;
           if (result != null) {
-            post.content = postObj.content;
             post.title = postObj.title;
             post.itemId = postObj.itemId;
             post.postId = postObj.postId
@@ -189,7 +223,10 @@ export class BlogService {
             post.file = postObj.filename;
             post.isSaved = true;
             post.tags = postObj.tags;
-
+            post.htmlContent = postObj.content;
+            
+            post.content = result.fullContent;
+            
             this.blogPost = post;
           }
         }
@@ -219,6 +256,7 @@ export class BlogService {
       if (result != null && result.status == 200) {
         post.file = result.filename;
         this.blogPost.setContent(result.fullContent);
+        this.blogPost.setHTMLContent(result.data.content);
         this.blogPost.setItemId(result.data.itemId);
         this.blogPost.setFile(result.data.filename);
         post.markDirty(false);
