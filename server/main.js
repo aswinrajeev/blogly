@@ -68,7 +68,8 @@ class MainWindow {
 		// initialize app manager service
 		this.appManager = new AppManagerService({
 			app: app,
-			debugMode: true
+			debugMode: true,
+			menuManager: this.menuHandler
 		});
 	}
 
@@ -76,9 +77,6 @@ class MainWindow {
 	 * Creates the main window and displays it
 	 */
 	createMainWindow() {
-		// sets the application menu
-		Menu.setApplicationMenu(this.menuHandler.getMenu());
-		
 		// initialize a new window
 		var windowConfigs = this.appManager.getStartupConfigurations();
 		this.mainWindow = new BrowserWindow(windowConfigs);
@@ -89,7 +87,11 @@ class MainWindow {
 		
 		// initializes the listeners for UI events
 		this.appManager.initializeListeners();
-
+		
+		// sets the application menu
+		this.appManager.updateBlogsMenus(this.menuHandler);
+		this.menuHandler.setMenu(Menu);
+		
 		// load the compiled index.html file
 		this.mainWindow.loadFile('./out/client/blogly/index.html');
 
