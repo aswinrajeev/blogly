@@ -33,6 +33,7 @@ class AppManagerService {
 
 		this.debugMode = args.debugMode;
 		this.app = args.app;
+		this.menuManager = args.menuManager;
 		this.blogsDir = null;
 		this.blogManger = null;
 		this.mainWindow = null;
@@ -244,6 +245,29 @@ class AppManagerService {
 		}
 
 		return response;
+	}
+
+	/**
+	 * Updates the blog to the publish/draft/import menus
+	 * 
+	 * @param {*} menuManager 
+	 */
+	updateBlogsMenus() {
+
+		// clear the blogs menus
+		this.menuManager.clearBlogs();
+
+		// updates all blogs to the blogs menu.
+		var blogs = this.blogManger.getBlogsList();
+		blogs.forEach(blogObj => {
+			this.menuManager.addBlog(blogObj);
+		})
+		// reconstructs the menu.
+		try {
+			this.menuManager.renderMenu();
+		} catch (error) {
+			//ignore
+		}
 	}
 
 	/**

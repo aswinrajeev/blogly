@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { BlogService } from './blog.service';
+import { AppManagerService } from './appmanager.service';
 
-describe('BlogdataService', () => {
+describe('NavigationService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: BlogService = TestBed.get(BlogService);
+    const service: AppManagerService = TestBed.get(AppManagerService);
     expect(service).toBeTruthy();
   });
 });

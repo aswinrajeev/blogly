@@ -1,12 +1,16 @@
 import { Component, OnInit, ComponentFactoryResolver, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { NavigationService } from 'client/app/services/navigationservice/navigation.service';
+import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
 import { SidepaleholderDirective } from 'client/app/directives/sidepaleholder.directive';
 import { PostlistComponent } from '../postlist/postlist.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { BlogconfigsComponent } from '../blogconfigs/blogconfigs.component';
 import { PostinfoComponent } from '../postinfo/postinfo.component';
-import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
+import { EventmanagerService } from 'client/app/services/event/eventmanager.service';
 
+/**
+ * Angular component for the side panel
+ */
 @Component({
   selector: 'app-sidepanel',
   templateUrl: './sidepanel.component.html',
@@ -17,24 +21,42 @@ export class SidepanelComponent implements OnInit {
   title = 'Panel';
   @ViewChild(SidepaleholderDirective) panelHolder : SidepaleholderDirective
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private navService: NavigationService, private cdr : ChangeDetectorRef, private blogService:BlogService) { 
-    this.navService.panelUpdated.on('panelUpdated', (panel) => {
+  constructor(
+      private __componentFactoryResolver: ComponentFactoryResolver, 
+      private __navService: AppManagerService, 
+      private __cdr : ChangeDetectorRef, 
+      private __eventManager: EventmanagerService
+    ) { 
+    }
+  
+  /**
+   * Initializes the listeners and sets the active panel as post list
+   */
+  ngOnInit() {
+      
+    this.setPanel('posts');
+      
+    this.__eventManager.getUIEventEmitter().on('panelUpdated', (panel) => {
       this.setPanel(panel);
     });
-  }
 
-  ngOnInit() {
-    this.setPanel('posts');
-    this.blogService.updateListener.on('panelUpdated', () => {
-      this.cdr.detectChanges();
+    //listens for any updates to the UI
+    this.__eventManager.getUIEventEmitter().on('uiUpdated', () => {
+      this.__cdr.detectChanges();
     })
   }
 
-  // closes the panel
+  /**
+   * Handles close of the panel
+   */
   close() {
-   this.navService.setPanelHidden(true);
+   this.__navService.setPanelHidden(true);
   }
 
+  /**
+   * Sets a panel as the active panel
+   * @param panel 
+   */
   setPanel(panel:String) {
 
     var componentFactory;
@@ -42,19 +64,19 @@ export class SidepanelComponent implements OnInit {
     switch(panel) {
       case '':
       case 'posts':
-        componentFactory = this.componentFactoryResolver.resolveComponentFactory(PostlistComponent);
+        componentFactory = this.__componentFactoryResolver.resolveComponentFactory(PostlistComponent);
         this.title = "Posts";
         break;
       case 'settings':
-        componentFactory = this.componentFactoryResolver.resolveComponentFactory(SettingsComponent);
+        componentFactory = this.__componentFactoryResolver.resolveComponentFactory(SettingsComponent);
         this.title = "Settings"
         break;
       case 'configs':
-        componentFactory = this.componentFactoryResolver.resolveComponentFactory(BlogconfigsComponent);
+        componentFactory = this.__componentFactoryResolver.resolveComponentFactory(BlogconfigsComponent);
         this.title = 'Post Configurations';
         break;
       case 'postinfo':
-          componentFactory = this.componentFactoryResolver.resolveComponentFactory(PostinfoComponent);
+          componentFactory = this.__componentFactoryResolver.resolveComponentFactory(PostinfoComponent);
           this.title = 'Post Info';
           break;
     }
@@ -64,7 +86,4 @@ export class SidepanelComponent implements OnInit {
 
     const componentRef = viewRef.createComponent(componentFactory);
   }
-
-
-
 }

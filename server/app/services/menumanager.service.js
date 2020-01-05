@@ -18,6 +18,7 @@ class MenuManagerService {
 		this.menu = menu;
 		this.messenger = null;
 		this.isMac = (process.platform === 'darwin');
+		this.viewSidebar = true;
 
 		this.appMenu = {
 			role: 'appMenu',
@@ -119,10 +120,24 @@ class MenuManagerService {
 		this.blogMenu = {
 			label: 'Blog',
 			submenu: [
-				this.importFromMenu,
+				/* this.importFromMenu, */ //TODO: Uncomment this once implemented
 				this.draftToMenu,
 				this.publishToMenu
 			]
+		};
+
+
+		// toggle side bar menu
+		this.togglePanelMenu = {
+			label: 'Hide side panel',
+			click: () => {
+				this.viewSidebar = !this.viewSidebar;
+				this.handleMenuClick('toggleSidePanel', {
+					viewSideBar: this.viewSidebar
+				});
+				this.togglePanelMenu.label = (this.viewSidebar ? 'Hide' : 'Show') + ' side panel';
+				this.renderMenu();
+			}
 		};
 
 		this.viewMenu = {
@@ -133,12 +148,7 @@ class MenuManagerService {
 					click: () => {
 						this.handleMenuClick('htmlEditor');
 					}
-				}, {
-					label: 'Hide side panel',
-					click: () => {
-						this.handleMenuClick('toggleSidePanel');
-					}
-				}, {
+				}, this.togglePanelMenu, {
 					type: 'separator'
 				}, {
 					role: 'togglefullscreen'
@@ -183,9 +193,17 @@ class MenuManagerService {
 	}
 
 	/**
-	 * Returns the compiled menu
+	 * Sets the compiled menu
 	 */
-	getMenu() {
+	setMenu(menubar) {
+		this.menubar = menubar;
+		this.renderMenu();
+	}
+
+	/**
+	 * Constructs the menu for the application
+	 */
+	renderMenu() {
 		const menu = this.menu.buildFromTemplate([
 			this.isMac && this.appMenu,
 			this.fileMenu,
@@ -196,7 +214,7 @@ class MenuManagerService {
 			this.helpMenu
 		]);
 
-		return menu;
+		this.menubar.setApplicationMenu(menu);
 	}
 
 	/**
@@ -213,6 +231,52 @@ class MenuManagerService {
 		} catch (error) {
 			console.error("Could not invoke menu item.", error);
 		}
+	}
+
+	/**
+	 * Clears all blogs in the menus
+	 */
+	clearBlogs() {
+		this.publishToMenu.submenu = [];
+		this.draftToMenu.submenu = [];
+		this.importFromMenu.submenu = [];
+	}
+
+	/**
+	 * Add a new blog to publish, draft and import menus.
+	 * 
+	 * @param {*} blog 
+	 */
+	addBlog(blog) {
+		var blogHandler = {
+			label: blog.name,
+			click: () => {
+				this.handleMenuClick('publishToBlog', {
+					blog: blog
+				});
+			}
+		};
+		this.publishToMenu.submenu.push(blogHandler);
+
+		blogHandler = {
+			label: blog.name,
+			click: () => {
+				this.handleMenuClick('draftToBlog', {
+					blog: blog
+				});
+			}
+		};
+		this.draftToMenu.submenu.push(blogHandler);
+
+		blogHandler = {
+			label: blog.name,
+			click: () => {
+				this.handleMenuClick('importFromBlog', {
+					blog: blog
+				});
+			}
+		};
+		this.importFromMenu.submenu.push(blogHandler);
 	}
 }
 

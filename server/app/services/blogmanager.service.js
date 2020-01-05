@@ -24,6 +24,7 @@ class BlogManagerService {
 		}
 
 		this.debugMode = args.debugMode;
+		this.appManager = args.appManager;
 
 		// get instances for file system adapter and message manager, as those would be already initialized
 		this.fileSystemAdapter = FileSystemAdapter.getDefaultInstance();
@@ -112,6 +113,9 @@ class BlogManagerService {
 			blogs.push(blog.toJSON());
 			this.fileSystemAdapter.setConfigProperty('blogs', blogs, true);
 
+			// updates the blogs menu
+			this.appManager.updateBlogsMenus();
+
 			// sends the success signal
 			response = new ServerResponse({
 				blog: blog.toJSON()
@@ -143,6 +147,9 @@ class BlogManagerService {
 					// removes the blog from the bloglist and saves it
 					blogs.splice(i, 1);
 					this.fileSystemAdapter.setConfigProperty('blogs', blogs, true);
+
+					// updates the blogs menu
+					this.appManager.updateBlogsMenus();
 
 					// sends the success message
 					response = new ServerResponse().ok();

@@ -15,7 +15,6 @@ export class AsrTagsInputComponent {
   constructor() { }
 
   ngOnInit() {
-    console.log("inputs:" + this.tagsList);
   }
 
   removeTag(tag: String) {

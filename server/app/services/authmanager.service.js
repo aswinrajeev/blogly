@@ -139,10 +139,14 @@ class AuthManagerService {
 
 				// stops the server automatically if no response received within 2 mins
 				setTimeout(() => {
-					httpListener.close();
-					dialog.close();
-					console.error('Could not get any response from Google.');
-					reject('Request timed out.');
+					try {
+						httpListener.close();
+						dialog.close();
+						console.error('Could not get any response from Google.');
+						reject('Request timed out.');
+					} catch (error) {
+						// ignore
+					}
 				}, 120000);
 
 			} catch (error) {
