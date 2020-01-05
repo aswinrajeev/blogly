@@ -36,9 +36,9 @@ export class PostManagerService {
   /**
    * Returns if the current post content is valid
    */
-  isPostContentValid(): boolean {
-    return (this.__blogPost != null && this.__blogPost.htmlContent != null && this.__blogPost.htmlContent.trim() != '' &&
-        this.__blogPost.content != null && this.__blogPost.content.trim() != '')
+  isPostContentValid(isHTMLEditor): boolean {
+    return (this.__blogPost != null && ((isHTMLEditor && this.__blogPost.htmlContent != null && this.__blogPost.htmlContent.trim() != '') ||
+        ( !isHTMLEditor && this.__blogPost.content != null && this.__blogPost.content.trim() != '')))
   }
 
   /**

@@ -172,7 +172,7 @@ export class AppManagerService {
     var content;
 
     // updates the content from the back end
-    if (this.__postManager.isPostContentValid()) {
+    if (this.__postManager.isPostContentValid(!this.isHTMLEditor())) {
 
       // passes the appropriate content acc to the current editor
       if (!this.isHTMLEditor()) {
