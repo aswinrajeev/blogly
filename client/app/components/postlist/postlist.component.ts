@@ -1,7 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
 import { BlogPost } from 'client/app/models/blogpost';
+import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
+import { EventmanagerService } from 'client/app/services/event/eventmanager.service';
 
+/**
+ * Angular component for the post list side panel
+ */
 @Component({
   selector: 'app-postlist',
   templateUrl: './postlist.component.html',
@@ -9,56 +14,84 @@ import { BlogPost } from 'client/app/models/blogpost';
 })
 export class PostlistComponent implements OnInit {
 
-  constructor(private postService:PostManagerService, private cdr : ChangeDetectorRef) { 
+  /**
+   * Constructor for the post list component.
+   * @param __postService 
+   * @param __appManager 
+   * @param __eventManager 
+   * @param __cdr 
+   */
+  constructor(
+      private __postService:PostManagerService, 
+      private __appManager:AppManagerService, 
+      private __eventManager: EventmanagerService,
+      private __cdr : ChangeDetectorRef
+    ) { 
 
-    this.postService.setNewPostAction(() => {
+    this.__postService.setNewPostAction(() => {
       this.newPost();
     });
 
   }
 
+  /**
+   * Initializes the posts list and listeners
+   */
   ngOnInit() {
-    if (this.postService.getPostList() == null || this.postService.getPostList().length == 0) {
-      this.postService.fetchPostList(() => {
-        if (this.postService.getPostList().length == 0) {
+    if (this.__postService.getPostList() == null || this.__postService.getPostList().length == 0) {
+      this.__postService.fetchPostList(() => {
+        if (this.__postService.getPostList().length == 0) {
           var post = new BlogPost();
-          this.postService.getPostList().unshift(post);
-          this.postService.setPostData(post);
+          this.__postService.getPostList().unshift(post);
+          this.__postService.setPostData(post);
         } else {
-          this.viewPost(this.postService.getPostList()[0]);
+          this.viewPost(this.__postService.getPostList()[0]);
         }
   
         // force update on the UI
-        this.cdr.detectChanges();
+        this.__cdr.detectChanges();
       });
     }
+
+    // listens for any UI updates
+    this.__eventManager.getUIEventEmitter().on('uiUpdated', () => {
+      this.__cdr.detectChanges();
+    })
   }
 
-  // fetches the list of all posts in the workspace
+  /**
+   * Fetches the list of all posts in the workspace
+   */
   getPostList() {
-    return this.postService.getPostList();
+    return this.__postService.getPostList();
   }
 
-  // fetches complete data for a selected post
+  /**
+   * Fetches complete data for a selected post
+   * @param post 
+   */
   viewPost(post) {
-    this.cdr.detectChanges();
-    console.log(post.title);
-    this.postService.setPost(post, () => {
-
+    this.__cdr.detectChanges();
+    this.__postService.setPost(post, () => {
+      this.__cdr.detectChanges();
     });
   }
 
-  // deletes a post
+  /**
+   * Handles delete action for a post
+   * @param post 
+   */
   deletePost(post:BlogPost) {
-    console.log('Deleting ' + post.itemId);
-    this.postService.deletePost(post);
+    this.__postService.deletePost(post);
   }
 
-  // creates a new post
+  /**
+   * Handles new post action
+   */
   newPost() {
     var post = new BlogPost();
-    this.postService.getPostList().unshift(post);
-    this.postService.setPostData(this.postService.getPostList()[0]);
+    this.__postService.getPostList().unshift(post);
+    this.__postService.setPostData(this.__postService.getPostList()[0]);
   }
 
 }

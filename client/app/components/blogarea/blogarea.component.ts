@@ -9,7 +9,11 @@ import 'brace';
 import 'brace/mode/html';
 import 'brace/theme/gruvbox';
 import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
+import { EventmanagerService } from 'client/app/services/event/eventmanager.service';
 
+/**
+ * Angular component for the blog editors
+ */
 @Component({
   selector: 'app-blogarea',
   templateUrl: './blogarea.component.html',
@@ -20,7 +24,19 @@ export class BlogareaComponent implements OnInit {
   quillModules;
   quillEditor;
 
-  constructor(private blogService: PostManagerService, private appManager: AppManagerService, private cdr : ChangeDetectorRef) { 
+  /**
+   * Constructor for the blog area component
+   * @param __blogService 
+   * @param __appManager 
+   * @param __eventManager 
+   * @param __cdr 
+   */
+  constructor(
+      private __blogService: PostManagerService, 
+      private __appManager: AppManagerService, 
+      private __eventManager: EventmanagerService,
+      private __cdr : ChangeDetectorRef
+    ) { 
       this.quillModules = {
         toolbar: [
           ['bold', 'italic', 'underline', 'strike'],
@@ -48,13 +64,9 @@ export class BlogareaComponent implements OnInit {
     Quill.register(BloglyImageBlot);
     Quill.register(DividerBlot);
 
-    // listens for any updates to posts
-    this.blogService.postUpdateListener.on('postUpdated', () => {
-      this.cdr.detectChanges();
-    });
-
-    this.appManager.getUIEventEmitter().on('uiUpdated', (args) => {
-      this.cdr.detectChanges();
+    // listens for any updates to the ui
+    this.__eventManager.getUIEventEmitter().on('uiUpdated', (args) => {
+      this.__cdr.detectChanges();
     });
   }
 
@@ -66,29 +78,40 @@ export class BlogareaComponent implements OnInit {
     this.quillEditor = editor;
   }
 
-  // returns the blog data
+  /**
+   * Returns the current blog post data
+   */
   getBlogData(): BlogPost {
-    return this.blogService.getCurrentPost();
+    return this.__blogService.getCurrentPost();
   }
 
-  // returns if the current editor is HTML editor
+  /**
+   * Returns if the current editor is HTML editor
+   */
   isHTMLEditor():boolean {
-    return this.appManager.isHTMLEditor();
+    return this.__appManager.isHTMLEditor();
   }
 
-  // mark the post as dirty
+  /**
+   * Marks the post as dirty
+   */
   markChanged() {
-    this.blogService.getCurrentPost().markDirty(true);
+    this.__blogService.getCurrentPost().markDirty(true);
   }
 
-  // invoked when the blog data is changed
+  /**
+   * Invoked when the blog data is changed. Updates the mini content and the dirty status.
+   * @param event 
+   */
   contentChanged(event) {
     // updates the mini content
-    this.blogService.getCurrentPost().updateMiniContent();
+    this.__blogService.getCurrentPost().updateMiniContent();
     this.markChanged();
   }
 
-  // initialize the view elements
+  /**
+   * Initialize the view elements
+   */
   ngAfterViewInit() {
 
     // adds caption and listener for the hr button

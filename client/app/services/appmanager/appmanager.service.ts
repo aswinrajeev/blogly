@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import { MessagingService } from '../messagingservice/messaging.service';
 import { Blog } from 'client/app/models/blog';
 import { PostManagerService } from '../postmanager/postmanager.service';
+import { EventmanagerService } from '../event/eventmanager.service';
 
 /**
  * Handler for app life-cycle management
@@ -17,10 +18,6 @@ export class AppManagerService {
   private __blogs: Blog[];
   private __panelHidden: boolean = false;
   private __htmlEditor: boolean = false;
-
-  // events emitters for app life-cycle control
-  private __uiUpdated: EventEmitter = new EventEmitter();
-  private __menuListener: EventEmitter = new EventEmitter();
   
   /**
    * Constructor for App Manager. Initializes the messenger and postmanager services
@@ -29,22 +26,9 @@ export class AppManagerService {
    */
   constructor(
     private __messenger: MessagingService, 
-    private __postManager: PostManagerService
+    private __postManager: PostManagerService,
+    private __eventManager: EventmanagerService
     ) { }
-
-  /**
-   * Returns the UI event emitter
-   */
-  getUIEventEmitter():EventEmitter {
-    return this.__uiUpdated;
-  }
-  
-  /**
-   * Returns the menu event emitter
-   */
-  getMenuEventEmitter() {
-    return this.__menuListener;
-  }
 
   /**
    * Returns the current active panel
@@ -59,8 +43,8 @@ export class AppManagerService {
    */
   setCurrentPanel(currentPanel:String) {
     this.__currentPanel = currentPanel;
-    this.__uiUpdated.emit('panelUpdated', currentPanel);
-    this.getUIEventEmitter().emit('uiUpdated');
+    this.__eventManager.getUIEventEmitter().emit('panelUpdated', currentPanel);
+    this.__eventManager.getUIEventEmitter().emit('uiUpdated');
   }
 
   /**
@@ -95,7 +79,7 @@ export class AppManagerService {
   listenForMenuInvocation() {
     this.__messenger.listen('menuInvoked', (payload) => {
       if (payload.action != null && payload.action != '') {
-        this.__menuListener.emit(payload.action, payload.args);
+        this.__eventManager.getMenuEventEmitter().emit(payload.action, payload.args);
       }
     }, null);
   }
@@ -133,9 +117,8 @@ export class AppManagerService {
         var blog:Blog = new Blog(result.blog.name, result.blog.url, result.blog.blogId);
         this.__blogs.push(blog);
 
-        // oublish a notification of settings updated
-        this.getUIEventEmitter().emit('settingsUpdated');
-        this.getUIEventEmitter().emit('uiUpdated');
+        // oublish a notification of UI updated
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
       }
 
     }, null);
@@ -152,8 +135,9 @@ export class AppManagerService {
     this.__messenger.listenOnce('blogDeleted', (result) => {
       if (result.status == 200) {
         this.__blogs.splice(this.__blogs.indexOf(blog), 1);
-        this.getUIEventEmitter().emit('settingsUpdated');
-        this.getUIEventEmitter().emit('uiUpdated');
+
+        // publish a UI update notification
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
       }
     }, null);
     
@@ -167,9 +151,8 @@ export class AppManagerService {
     this.__messenger.request('selectDir', null, (dir) => {
       this.__workspaceDir = dir;
 
-      // publish a notification of settings updated
-      this.getUIEventEmitter().emit('settingsUpdated');
-      this.getUIEventEmitter().emit('uiUpdated');
+      // publish a notification of ui updated
+      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     })
   }
 
@@ -213,7 +196,7 @@ export class AppManagerService {
           blogPost.setContent(result.fullContent);
           blogPost.setHTMLContent(result.htmlContent);
 
-          this.getUIEventEmitter().emit('uiUpdated');
+          this.__eventManager.getUIEventEmitter().emit('uiUpdated');
         }
       });
     } else {

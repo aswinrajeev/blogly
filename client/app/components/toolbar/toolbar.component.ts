@@ -2,7 +2,11 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
 import { Blog } from 'client/app/models/blog';
 import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
+import { EventmanagerService } from 'client/app/services/event/eventmanager.service';
 
+/**
+ * Angular component for the toolbar
+ */
 @Component({
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
@@ -10,88 +14,111 @@ import { AppManagerService } from 'client/app/services/appmanager/appmanager.ser
 })
 export class ToolbarComponent implements OnInit {
 
-  constructor(private blogservice: PostManagerService, private navService: AppManagerService, private cdr : ChangeDetectorRef) { }
+  /**
+   * Constructor for the tool bar component
+   * @param __blogservice 
+   * @param __navService 
+   * @param __eventManager 
+   * @param __cdr 
+   */
+  constructor(
+      private __blogservice: PostManagerService, 
+      private __navService: AppManagerService, 
+      private __eventManager: EventmanagerService,
+      private __cdr : ChangeDetectorRef
+    ) { }
 
+  /**
+   * Initializes the listeners for menu item actions and fetches the configurations
+   */
   ngOnInit() {
 
     this.toggleEditor();
-    this.navService.fetchConfigurations();
-    this.navService.listenForMenuInvocation();
+    this.__navService.fetchConfigurations();
+    this.__navService.listenForMenuInvocation();
 
-    this.navService.getMenuEventEmitter().on('save', (args) => {
+    this.__eventManager.getMenuEventEmitter().on('save', (args) => {
       this.savePost();
-      this.blogservice.postUpdateListener.emit('postUpdated');
+      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     });
 
-    this.navService.getMenuEventEmitter().on('new', (args) => {
+    this.__eventManager.getMenuEventEmitter().on('new', (args) => {
       this.newPost();
-      this.blogservice.postUpdateListener.emit('postUpdated');
+      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     });
 
-    this.navService.getMenuEventEmitter().on('htmlEditor', (args) => {
+    this.__eventManager.getMenuEventEmitter().on('htmlEditor', (args) => {
       this.toggleEditor();
-      this.blogservice.postUpdateListener.emit("postUpdated");
+      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     });
 
     // listens for publish to blog menu event
-    this.navService.getMenuEventEmitter().on('publishToBlog', (args) => {
+    this.__eventManager.getMenuEventEmitter().on('publishToBlog', (args) => {
       var blogObj = args.blog;
       var blog = new Blog(blogObj.name, blogObj.url, blogObj.id);
       this.publishBlog(blog, false);
     });
 
     // listens for draft to blog menu event
-    this.navService.getMenuEventEmitter().on('draftToBlog', (args) => {
+    this.__eventManager.getMenuEventEmitter().on('draftToBlog', (args) => {
       var blogObj = args.blog;
       var blog = new Blog(blogObj.name, blogObj.url, blogObj.id);
       this.publishBlog(blog, true);
     });
 
     // listens for sidebar collapse/expand
-    this.navService.getMenuEventEmitter().on('toggleSidePanel', (args) => {
-      this.navService.setPanelHidden(!args.viewSideBar);
-      this.cdr.detectChanges();
+    this.__eventManager.getMenuEventEmitter().on('toggleSidePanel', (args) => {
+      this.__navService.setPanelHidden(!args.viewSideBar);
+      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     })
 
-    // listens for any updates to posts
-    this.blogservice.postUpdateListener.on('postUpdated', () => {
-      this.cdr.detectChanges();
+    // listens for any UI update events
+    this.__eventManager.getUIEventEmitter().on('uiUpdated', (args) => {
+      this.__cdr.detectChanges();
     })
-
-
-    this.navService.getUIEventEmitter().on('uiUpdated', (args) => {
-      this.cdr.detectChanges();
-    })
-
   }
 
+  /**
+   * Returns the list of blogs for the toolbar menu
+   */
   getBlogs():Blog[] {
-    return this.navService.getBlogsList();
+    return this.__navService.getBlogsList();
   }
 
-  // pubish a blog
+  /**
+   * Publishes the active blog
+   * @param blog 
+   * @param isDraft 
+   */
   publishBlog(blog, isDraft) {
-    this.blogservice.publishBlog(blog, isDraft);
+    this.__blogservice.publishBlog(blog, isDraft);
   }
 
-  // creates a new blog post
+  /**
+   * Creates a new post
+   */
   newPost() {
-    this.blogservice.newPost();
+    this.__blogservice.newPost();
   }
 
-  // saves a post
+  /**
+   * Saves the active post
+   */
   savePost() {
-    this.blogservice.saveCurrentPost();
+    this.__blogservice.saveCurrentPost();
   }
 
-  // switches between HTML editor and RT editor
+  /**
+   * Switches between HTML editor and RT editor
+   */
   toggleEditor() {
-    this.navService.setHTMLEditor(!this.navService.isHTMLEditor());
+    this.__navService.setHTMLEditor(!this.__navService.isHTMLEditor());
   }
 
-  // returns if the current editor is HTML editor
+  /**
+   * Returns if the current editor is HTML editor
+   */
   isHTMLEditor() {
-    return this.navService.isHTMLEditor();
+    return this.__navService.isHTMLEditor();
   }
-
 }

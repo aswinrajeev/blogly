@@ -8,13 +8,22 @@ import { PostManagerService } from 'client/app/services/postmanager/postmanager.
 })
 export class PostinfoComponent implements OnInit {
 
-  constructor(private postService:PostManagerService) { }
+  /**
+   * Constructor for the post info component
+   * @param __postService 
+   */
+  constructor(
+      private __postService:PostManagerService
+    ) { }
 
   ngOnInit() {
   }
 
+  /**
+   * Returns the current blog post
+   */
   getPostData() {
-    return this.postService.getCurrentPost();
+    return this.__postService.getCurrentPost();
   }
 
 }

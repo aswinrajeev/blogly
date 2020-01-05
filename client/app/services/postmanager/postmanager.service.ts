@@ -3,6 +3,8 @@ import { BlogPost } from 'client/app/models/blogpost';
 import { MessagingService } from '../messagingservice/messaging.service';
 import { EventEmitter } from 'events';
 import { Blog } from 'client/app/models/blog';
+import { AppManagerService } from '../appmanager/appmanager.service';
+import { EventmanagerService } from '../event/eventmanager.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,15 +16,13 @@ export class PostManagerService {
   private __postsList:BlogPost[];
   private newFun: Function;
 
-  // event emitter for tracking post changes
-  private __postUpdatedEventEmitter: EventEmitter = new EventEmitter();
-
   /**
    * Constructor for post manager service. Initializes the messenger service.
    * @param _messenger 
    */
   constructor(
-    private _messenger: MessagingService
+    private _messenger: MessagingService,
+    private __eventManager: EventmanagerService
     ) {}
 
   /**
@@ -31,13 +31,6 @@ export class PostManagerService {
   getCurrentPost(): BlogPost {
     //return the blog object if exist, else initialize and return
     return this.__blogPost ? this.__blogPost : new BlogPost();
-  }
-
-  /**
-   * Returns the post updated event emitter
-   */
-  getPostUpdatedEventEmitter() {
-    return this.__postUpdatedEventEmitter;
   }
 
   /**
@@ -136,21 +129,20 @@ export class PostManagerService {
    */
   deletePost(post:BlogPost) {
     this._messenger.listenOnce('deleted' + post.itemId, (result) => {
-      console.log(result);
       if (result.status == 200) {
         this.__postsList.splice(this.__postsList.indexOf(post), 1);
 
         if (post.itemId == this.getCurrentPost().itemId && this.__postsList.length > 0) {
           this.setPost(this.__postsList[0], () => {
-            // emit a post updated event
-            this.__postUpdatedEventEmitter.emit("postUpdated");
+            // emit a ui updated event
+           this.__eventManager.getUIEventEmitter().emit('uiUpdated');
           });
         } else if (this.__postsList.length == 0) {
           this.newFun();
         }
 
-        // emit a post updated event
-        this.__postUpdatedEventEmitter.emit("postUpdated");
+        // emit a ui updated event
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
       }
     }, {});
 
@@ -193,8 +185,8 @@ export class PostManagerService {
           }
         }
           
-        // emit a post updated event
-        this.__postUpdatedEventEmitter.emit("postUpdated");
+        // emit a ui updated event
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
         callback();
   
   
@@ -202,8 +194,8 @@ export class PostManagerService {
     } else {
       this.__blogPost = post;
 
-      // emit a post updated event
-      this.__postUpdatedEventEmitter.emit("postUpdated");
+      // emit a ui updated event
+      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
       callback();
     }
   }
@@ -225,8 +217,8 @@ export class PostManagerService {
         this.__blogPost.setFile(result.data.filename);
         post.markDirty(false);
 
-        // emit a post updated event
-        this.__postUpdatedEventEmitter.emit("postUpdated");
+        // emit a ui updated event
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
       }
     });
   }
