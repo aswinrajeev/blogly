@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BlogPost } from 'client/app/models/blogpost';
-import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
 import { BloglyImageBlot } from '../../blots/BloglyImageBlot';
 import { DividerBlot } from '../../blots/DividerBlot';
 import Quill from 'quill';
@@ -8,6 +8,7 @@ import Quill from 'quill';
 import 'brace';
 import 'brace/mode/html';
 import 'brace/theme/gruvbox';
+import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
 
 @Component({
   selector: 'app-blogarea',
@@ -19,7 +20,7 @@ export class BlogareaComponent implements OnInit {
   quillModules;
   quillEditor;
 
-  constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { 
+  constructor(private blogService: PostManagerService, private appManager: AppManagerService, private cdr : ChangeDetectorRef) { 
       this.quillModules = {
         toolbar: [
           ['bold', 'italic', 'underline', 'strike'],
@@ -48,9 +49,13 @@ export class BlogareaComponent implements OnInit {
     Quill.register(DividerBlot);
 
     // listens for any updates to posts
-    this.blogService.updateListener.on('postUpdated', () => {
+    this.blogService.postUpdateListener.on('postUpdated', () => {
       this.cdr.detectChanges();
-    })
+    });
+
+    this.appManager.getUIEventEmitter().on('uiUpdated', (args) => {
+      this.cdr.detectChanges();
+    });
   }
 
   /**
@@ -63,23 +68,23 @@ export class BlogareaComponent implements OnInit {
 
   // returns the blog data
   getBlogData(): BlogPost {
-    return this.blogService.getPostData();
+    return this.blogService.getCurrentPost();
   }
 
   // returns if the current editor is HTML editor
   isHTMLEditor():boolean {
-    return this.blogService.isHTMLEditor();
+    return this.appManager.isHTMLEditor();
   }
 
   // mark the post as dirty
   markChanged() {
-    this.blogService.getPostData().markDirty(true);
+    this.blogService.getCurrentPost().markDirty(true);
   }
 
   // invoked when the blog data is changed
   contentChanged(event) {
     // updates the mini content
-    this.blogService.getPostData().updateMiniContent();
+    this.blogService.getCurrentPost().updateMiniContent();
     this.markChanged();
   }
 

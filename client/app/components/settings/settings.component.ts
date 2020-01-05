@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
 import { Blog } from 'client/app/models/blog';
+import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
 
 @Component({
   selector: 'app-settings',
@@ -13,38 +14,38 @@ export class SettingsComponent implements OnInit {
   blogName:String;
   blogUrl:String;
 
-  constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) { }
+  constructor(private blogService: PostManagerService, private appManager: AppManagerService, private cdr : ChangeDetectorRef) { }
 
   ngOnInit() {
     // listens to any changes in settings
-    this.blogService.updateListener.on('settingsUpdated', () => {
+    this.appManager.getUIEventEmitter().on('settingsUpdated', () => {
       this.cdr.detectChanges();
     })
   }
 
   // returns a list of blogs connected
   getBlogsList() {
-    return this.blogService.getBlogs();
+    return this.appManager.getBlogsList();
   }
 
   // returns the workspace path
   getWorkspaceDir() {
-    return this.blogService.workspaceDir;
+    return this.appManager.getWorkspaceDir();
   }
 
   // prompts a directory selection dialog and updates the workspace variable
   selectWorkspaceDir() {
-    this.blogService.selectWorkspaceDir();
+    this.appManager.selectWorkspaceDir();
   }
 
   addNewBlog() {
-    this.blogService.addBlog(this.blogName, this.blogUrl);
+    this.appManager.addBlog(this.blogName, this.blogUrl);
     this.blogUrl = '';
     this.blogName = '';
   }
 
   deleteBlog(blog) {
-    this.blogService.deleteBlog(blog);
+    this.appManager.deleteBlog(blog);
   }
 
 

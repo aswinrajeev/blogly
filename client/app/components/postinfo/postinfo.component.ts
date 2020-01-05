@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
 
 @Component({
   selector: 'app-postinfo',
@@ -8,13 +8,13 @@ import { BlogService } from 'client/app/services/blogservice/blog.service';
 })
 export class PostinfoComponent implements OnInit {
 
-  constructor(private postService:BlogService) { }
+  constructor(private postService:PostManagerService) { }
 
   ngOnInit() {
   }
 
   getPostData() {
-    return this.postService.getPostData();
+    return this.postService.getCurrentPost();
   }
 
 }

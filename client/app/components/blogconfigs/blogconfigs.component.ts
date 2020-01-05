@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
 import { BlogPost } from 'client/app/models/blogpost';
 
 @Component({
@@ -9,14 +9,14 @@ import { BlogPost } from 'client/app/models/blogpost';
 })
 export class BlogconfigsComponent implements OnInit {
 
-  constructor(private blogService: BlogService, private cdr : ChangeDetectorRef) {}
+  constructor(private blogService: PostManagerService, private cdr : ChangeDetectorRef) {}
 
   ngOnInit() {
   }
 
   // returns the blog data
   getBlogData(): BlogPost {
-    return this.blogService.getPostData();
+    return this.blogService.getCurrentPost();
   }
 
 }

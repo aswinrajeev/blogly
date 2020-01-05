@@ -1,0 +1,232 @@
+import { Injectable } from '@angular/core';
+import { BlogPost } from 'client/app/models/blogpost';
+import { MessagingService } from '../messagingservice/messaging.service';
+import { EventEmitter } from 'events';
+import { Blog } from 'client/app/models/blog';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PostManagerService {
+
+	// blog object data holder
+  private blogPost: BlogPost;
+  private postsList:BlogPost[];
+  private newFun: Function;
+
+
+  // event emitter for tracking post changes
+  postUpdateListener: EventEmitter = new EventEmitter();
+
+  constructor(private _messenger: MessagingService) {}
+
+  /**
+   * Returns the current blog post data
+   */
+  getCurrentPost(): BlogPost {
+    //return the blog object if exist, else initialize and return
+    return this.blogPost ? this.blogPost : new BlogPost();
+  }
+
+  /**
+   * Returns if the current post content is valid
+   */
+  isPostContentValid(): boolean {
+    return (this.blogPost != null && this.blogPost.htmlContent != null && this.blogPost.htmlContent.trim() != '' &&
+        this.blogPost.content != null && this.blogPost.content.trim() != '')
+  }
+
+  /**
+   * Sets the blog post id
+   * @param id 
+   */
+  setPostId(id:String):void {
+    this.blogPost.postId = id;
+  }
+
+  /**
+   * Sets the blog data
+   * @param blog 
+   */
+  setPostData(blog:BlogPost) {
+    this.blogPost = blog;
+  }
+
+  /**
+   * Publishes the current blog post
+   * @param blog 
+   * @param isDraft 
+   */
+  publishBlog(blog:Blog, isDraft) {
+    var post = this.getCurrentPost();
+    var postObj = {
+      fileName: post.file,
+      blog: blog.getAsBlog(),
+      postData: post.getAsPost()
+    };
+
+    // listens for a confirmation from the server
+    this._messenger.listen('published', (result) => {
+      if (result.status == 200) {
+        this.getCurrentPost().setPostURL(result.data.postURL);
+        this.getCurrentPost().setPostId(result.data.postId);
+        this.getCurrentPost().setContent(result.fullContent);
+        this.getCurrentPost().setHTMLContent(result.data.content);
+        this.blogPost = this.getCurrentPost();
+      }
+    }, post);
+
+    if (isDraft) {
+      this._messenger.send('publishdraft', postObj);
+    } else {
+      this._messenger.send('publishblog', postObj);
+    }
+    
+  }
+
+  /**
+   * Returns the post list
+   */
+  getPostList():BlogPost[] {
+    return this.postsList;
+  }
+
+  /**
+   * Fetches the post list from the back-end
+   * @param callback 
+   */
+  fetchPostList(callback){
+    this._messenger.request('fetchposts', null, (result:any) => {
+      var posts:BlogPost[] = new Array<BlogPost>();
+      var post: BlogPost;
+
+      if (result != null && result.posts != null) {
+        result.posts.forEach(data => {
+          post = new BlogPost();
+          post.title = data.title;
+          post.itemId = data.itemId;
+          post.miniContent = data.miniContent;
+          post.file = data.filename;
+          post.isSaved = true;
+
+          posts.push(post);
+        });
+      }
+
+      this.postsList = posts;
+      callback(posts);
+    });
+  }
+
+  /**
+   * Deletes a blog post
+   * @param post 
+   */
+  deletePost(post:BlogPost) {
+    this._messenger.listenOnce('deleted' + post.itemId, (result) => {
+      console.log(result);
+      if (result.status == 200) {
+        this.postsList.splice(this.postsList.indexOf(post), 1);
+
+        if (post.itemId == this.getCurrentPost().itemId && this.postsList.length > 0) {
+          this.setPost(this.postsList[0], () => {
+            // emit a post updated event
+            this.postUpdateListener.emit("postUpdated");
+          });
+        } else if (this.postsList.length == 0) {
+          this.newFun();
+        }
+
+        // emit a post updated event
+        this.postUpdateListener.emit("postUpdated");
+      }
+    }, {});
+
+    if (post.file != null && post.file.trim() != '') {
+      this._messenger.send('deletePost', {
+        itemId: post.itemId
+      });
+    } else {
+      // call the deleted event
+      this._messenger.invoke('deleted' + post.itemId, {
+        status: 200
+      }, {});
+    } 
+  }
+
+  /**
+   * Sets the selected post as the active blog and renders it to the editor
+   * @param post 
+   * @param callback 
+   */
+  setPost(post:BlogPost, callback) {
+    if (post.isSaved) {
+      this._messenger.request('fetchFullPost', post.file, (result) => {
+  
+        if (result.status == 200) {
+          var postObj = result.post;
+          if (result != null) {
+            post.title = postObj.title;
+            post.itemId = postObj.itemId;
+            post.postId = postObj.postId
+            post.postURL = postObj.postURL;
+            post.file = postObj.filename;
+            post.isSaved = true;
+            post.tags = postObj.tags;
+            post.htmlContent = postObj.content;
+            
+            post.content = result.fullContent;
+            
+            this.blogPost = post;
+          }
+        }
+          
+        // emit a post updated event
+        this.postUpdateListener.emit("postUpdated");
+        callback();
+  
+  
+      });
+    } else {
+      this.blogPost = post;
+
+      // emit a post updated event
+      this.postUpdateListener.emit("postUpdated");
+      callback();
+    }
+  }
+
+  /**
+   * Saves the current blog post
+   */
+  saveCurrentPost() {
+    var post = this.blogPost;
+    this._messenger.request('savePost', {
+      filename: post.file,
+      postData: post.getAsPost()
+    }, (result) => {
+      if (result != null && result.status == 200) {
+        post.file = result.filename;
+        this.blogPost.setContent(result.fullContent);
+        this.blogPost.setHTMLContent(result.data.content);
+        this.blogPost.setItemId(result.data.itemId);
+        this.blogPost.setFile(result.data.filename);
+        post.markDirty(false);
+
+        // emit a post updated event
+        this.postUpdateListener.emit("postUpdated");
+      }
+    });
+  }
+
+  // sets a function to be invoked when new button is pressed
+  setNewPostAction(fun) {
+    this.newFun = fun;
+  }
+
+  // invokes the new post action
+  newPost() {
+    this.newFun();
+  }
+
+}

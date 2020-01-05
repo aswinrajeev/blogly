@@ -1,6 +1,6 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
-import { NavigationService } from 'client/app/services/navigationservice/navigation.service';
-import { BlogService } from './services/blogservice/blog.service';
+import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
+import { PostManagerService } from './services/postmanager/postmanager.service';
 
 @Component({
   selector: 'app-root',
@@ -11,8 +11,8 @@ export class AppComponent {
   title = 'Blogly';
   version = '0.1.0';
 
-  constructor(private navService: NavigationService, private blogService: BlogService, private cdr: ChangeDetectorRef) { 
-    this.blogService.updateListener.on('panelUpdated', () => {
+  constructor(private navService: AppManagerService, private blogService: PostManagerService, private cdr: ChangeDetectorRef) { 
+    this.blogService.postUpdateListener.on('panelUpdated', () => {
       this.cdr.detectChanges();
     })
   }

@@ -1,11 +1,11 @@
 import { Component, OnInit, ComponentFactoryResolver, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { NavigationService } from 'client/app/services/navigationservice/navigation.service';
+import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
 import { SidepaleholderDirective } from 'client/app/directives/sidepaleholder.directive';
 import { PostlistComponent } from '../postlist/postlist.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { BlogconfigsComponent } from '../blogconfigs/blogconfigs.component';
 import { PostinfoComponent } from '../postinfo/postinfo.component';
-import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
 
 @Component({
   selector: 'app-sidepanel',
@@ -17,15 +17,15 @@ export class SidepanelComponent implements OnInit {
   title = 'Panel';
   @ViewChild(SidepaleholderDirective) panelHolder : SidepaleholderDirective
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private navService: NavigationService, private cdr : ChangeDetectorRef, private blogService:BlogService) { 
-    this.navService.panelUpdated.on('panelUpdated', (panel) => {
+  constructor(private componentFactoryResolver: ComponentFactoryResolver, private navService: AppManagerService, private cdr : ChangeDetectorRef, private blogService:PostManagerService) { 
+    this.navService.getUIEventEmitter().on('panelUpdated', (panel) => {
       this.setPanel(panel);
     });
   }
 
   ngOnInit() {
     this.setPanel('posts');
-    this.blogService.updateListener.on('panelUpdated', () => {
+    this.blogService.postUpdateListener.on('panelUpdated', () => {
       this.cdr.detectChanges();
     })
   }

@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { NavigationService } from 'client/app/services/navigationservice/navigation.service';
-import { BlogService } from 'client/app/services/blogservice/blog.service';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
+import { PostManagerService } from 'client/app/services/postmanager/postmanager.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,14 +9,14 @@ import { BlogService } from 'client/app/services/blogservice/blog.service';
 })
 export class SidebarComponent implements OnInit {
 
-  constructor(private navService: NavigationService, private blogService:BlogService) { 
+  constructor(private navService: AppManagerService, private appManager:AppManagerService, private blogService:PostManagerService, private cdr : ChangeDetectorRef) { 
 
   }
 
   ngOnInit() {
-    this.blogService.menuListener.on('showSettings', (args) => {
+    this.appManager.getMenuEventEmitter().on('showSettings', (args) => {
       this.setActiveItem('settings');
-      this.blogService.updateListener.emit('panelUpdated');
+      this.blogService.postUpdateListener.emit('panelUpdated');
     });
   }
 
