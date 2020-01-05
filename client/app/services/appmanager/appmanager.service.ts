@@ -12,37 +12,45 @@ import { PostManagerService } from '../postmanager/postmanager.service';
 })
 export class AppManagerService {
 
-  private currentPanel: String;
-  private workspaceDir: String;
-  private blogs: Blog[];
-  private panelHidden: boolean = false;
-  private htmlEditor: boolean = false;
+  private __currentPanel: String;
+  private __workspaceDir: String;
+  private __blogs: Blog[];
+  private __panelHidden: boolean = false;
+  private __htmlEditor: boolean = false;
 
   // events emitters for app life-cycle control
-  private uiUpdated: EventEmitter = new EventEmitter();
-  private menuListener: EventEmitter = new EventEmitter();
+  private __uiUpdated: EventEmitter = new EventEmitter();
+  private __menuListener: EventEmitter = new EventEmitter();
   
-  constructor(private _messenger: MessagingService, private __postManager: PostManagerService) { }
+  /**
+   * Constructor for App Manager. Initializes the messenger and postmanager services
+   * @param __messenger 
+   * @param __postManager 
+   */
+  constructor(
+    private __messenger: MessagingService, 
+    private __postManager: PostManagerService
+    ) { }
 
   /**
    * Returns the UI event emitter
    */
   getUIEventEmitter():EventEmitter {
-    return this.uiUpdated;
+    return this.__uiUpdated;
   }
   
   /**
    * Returns the menu event emitter
    */
   getMenuEventEmitter() {
-    return this.menuListener;
+    return this.__menuListener;
   }
 
   /**
    * Returns the current active panel
    */
   getCurrentPanel():String {
-    return this.currentPanel;
+    return this.__currentPanel;
   }
   
   /**
@@ -50,15 +58,16 @@ export class AppManagerService {
    * @param currentPanel 
    */
   setCurrentPanel(currentPanel:String) {
-    this.currentPanel = currentPanel;
-    this.uiUpdated.emit('panelUpdated', currentPanel);
+    this.__currentPanel = currentPanel;
+    this.__uiUpdated.emit('panelUpdated', currentPanel);
+    this.getUIEventEmitter().emit('uiUpdated');
   }
 
   /**
    * Returns is the side panel is closed or not
    */
   isPanelHidden() {
-    return this.panelHidden;
+    return this.__panelHidden;
   }
 
   /**
@@ -66,27 +75,27 @@ export class AppManagerService {
    * @param close 
    */
   setPanelHidden(close:boolean) {
-    this.panelHidden = close;
+    this.__panelHidden = close;
   }
 
   /**
    * Returns blog list from configuration
    */
   getBlogsList():Blog[] {
-    return this.blogs;
+    return this.__blogs;
   }
 
   getWorkspaceDir() {
-    return this.workspaceDir;
+    return this.__workspaceDir;
   }
 
   /**
    * Listens for menu events (from the back-end)
    */
   listenForMenuInvocation() {
-    this._messenger.listen('menuInvoked', (payload) => {
+    this.__messenger.listen('menuInvoked', (payload) => {
       if (payload.action != null && payload.action != '') {
-        this.menuListener.emit(payload.action, payload.args);
+        this.__menuListener.emit(payload.action, payload.args);
       }
     }, null);
   }
@@ -95,14 +104,14 @@ export class AppManagerService {
    * Fetches the configurations
    */
   fetchConfigurations() {
-    this._messenger.request('fetchConfs', null, (result) => {
+    this.__messenger.request('fetchConfs', null, (result) => {
       if (result.status == 200) {
-        this.workspaceDir = result.workspace;
-        if (this.blogs == null) {
-          this.blogs = [];
+        this.__workspaceDir = result.workspace;
+        if (this.__blogs == null) {
+          this.__blogs = [];
         }
         result.blogs.forEach(blog => {
-          this.blogs.push(new Blog(blog.name, blog.url, blog.postId));
+          this.__blogs.push(new Blog(blog.name, blog.url, blog.postId));
         });
       } else {
         console.error("Unable to fetch the configurations.");
@@ -118,20 +127,21 @@ export class AppManagerService {
   addBlog(alias: String, url: String) {
     var blog:Blog = new Blog(alias, url, null);
 
-    this._messenger.listenOnce('blogAdded', (result) => {
+    this.__messenger.listenOnce('blogAdded', (result) => {
 
       if (result.status == 200) {
         var blog:Blog = new Blog(result.blog.name, result.blog.url, result.blog.blogId);
-        this.blogs.push(blog);
+        this.__blogs.push(blog);
 
         // oublish a notification of settings updated
         this.getUIEventEmitter().emit('settingsUpdated');
+        this.getUIEventEmitter().emit('uiUpdated');
       }
 
     }, null);
     
     // sends a backend call to add a new blog
-    this._messenger.send('newBlog', blog.getAsBlog());
+    this.__messenger.send('newBlog', blog.getAsBlog());
   }
 
   /**
@@ -139,25 +149,27 @@ export class AppManagerService {
    * @param blog 
    */
   deleteBlog(blog:Blog) {
-    this._messenger.listenOnce('blogDeleted', (result) => {
+    this.__messenger.listenOnce('blogDeleted', (result) => {
       if (result.status == 200) {
-        this.blogs.splice(this.blogs.indexOf(blog), 1);
+        this.__blogs.splice(this.__blogs.indexOf(blog), 1);
         this.getUIEventEmitter().emit('settingsUpdated');
+        this.getUIEventEmitter().emit('uiUpdated');
       }
     }, null);
     
-    this._messenger.send('deleteBlog', blog.getAsBlog());
+    this.__messenger.send('deleteBlog', blog.getAsBlog());
   }
 
   /**
    * Requests for a select dir dialog and returns the selected path to worspace path
    */
   selectWorkspaceDir() {
-    this._messenger.request('selectDir', null, (dir) => {
-      this.workspaceDir = dir;
+    this.__messenger.request('selectDir', null, (dir) => {
+      this.__workspaceDir = dir;
 
       // publish a notification of settings updated
       this.getUIEventEmitter().emit('settingsUpdated');
+      this.getUIEventEmitter().emit('uiUpdated');
     })
   }
 
@@ -165,7 +177,7 @@ export class AppManagerService {
    * Returns if the current editor is HTML editor
    */
   isHTMLEditor() {
-    return this.htmlEditor;
+    return this.__htmlEditor;
   }
 
   /** 
@@ -189,13 +201,13 @@ export class AppManagerService {
       }
       
       // request server for updated contents
-      this._messenger.request('switchEditor', {
+      this.__messenger.request('switchEditor', {
         editor: editor,
         content: content
       }, (result) => {
         
         if (result.status == 200) {
-          this.htmlEditor = isHTML;
+          this.__htmlEditor = isHTML;
 
           var blogPost = this.__postManager.getCurrentPost();
           blogPost.setContent(result.fullContent);
@@ -205,7 +217,7 @@ export class AppManagerService {
         }
       });
     } else {
-      this.htmlEditor = isHTML;
+      this.__htmlEditor = isHTML;
     }
   }
 

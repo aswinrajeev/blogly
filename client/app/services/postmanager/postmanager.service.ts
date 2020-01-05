@@ -10,30 +10,42 @@ import { Blog } from 'client/app/models/blog';
 export class PostManagerService {
 
 	// blog object data holder
-  private blogPost: BlogPost;
-  private postsList:BlogPost[];
+  private __blogPost: BlogPost;
+  private __postsList:BlogPost[];
   private newFun: Function;
 
-
   // event emitter for tracking post changes
-  postUpdateListener: EventEmitter = new EventEmitter();
+  private __postUpdatedEventEmitter: EventEmitter = new EventEmitter();
 
-  constructor(private _messenger: MessagingService) {}
+  /**
+   * Constructor for post manager service. Initializes the messenger service.
+   * @param _messenger 
+   */
+  constructor(
+    private _messenger: MessagingService
+    ) {}
 
   /**
    * Returns the current blog post data
    */
   getCurrentPost(): BlogPost {
     //return the blog object if exist, else initialize and return
-    return this.blogPost ? this.blogPost : new BlogPost();
+    return this.__blogPost ? this.__blogPost : new BlogPost();
+  }
+
+  /**
+   * Returns the post updated event emitter
+   */
+  getPostUpdatedEventEmitter() {
+    return this.__postUpdatedEventEmitter;
   }
 
   /**
    * Returns if the current post content is valid
    */
   isPostContentValid(): boolean {
-    return (this.blogPost != null && this.blogPost.htmlContent != null && this.blogPost.htmlContent.trim() != '' &&
-        this.blogPost.content != null && this.blogPost.content.trim() != '')
+    return (this.__blogPost != null && this.__blogPost.htmlContent != null && this.__blogPost.htmlContent.trim() != '' &&
+        this.__blogPost.content != null && this.__blogPost.content.trim() != '')
   }
 
   /**
@@ -41,7 +53,7 @@ export class PostManagerService {
    * @param id 
    */
   setPostId(id:String):void {
-    this.blogPost.postId = id;
+    this.__blogPost.postId = id;
   }
 
   /**
@@ -49,7 +61,7 @@ export class PostManagerService {
    * @param blog 
    */
   setPostData(blog:BlogPost) {
-    this.blogPost = blog;
+    this.__blogPost = blog;
   }
 
   /**
@@ -72,7 +84,7 @@ export class PostManagerService {
         this.getCurrentPost().setPostId(result.data.postId);
         this.getCurrentPost().setContent(result.fullContent);
         this.getCurrentPost().setHTMLContent(result.data.content);
-        this.blogPost = this.getCurrentPost();
+        this.__blogPost = this.getCurrentPost();
       }
     }, post);
 
@@ -88,7 +100,7 @@ export class PostManagerService {
    * Returns the post list
    */
   getPostList():BlogPost[] {
-    return this.postsList;
+    return this.__postsList;
   }
 
   /**
@@ -113,7 +125,7 @@ export class PostManagerService {
         });
       }
 
-      this.postsList = posts;
+      this.__postsList = posts;
       callback(posts);
     });
   }
@@ -126,19 +138,19 @@ export class PostManagerService {
     this._messenger.listenOnce('deleted' + post.itemId, (result) => {
       console.log(result);
       if (result.status == 200) {
-        this.postsList.splice(this.postsList.indexOf(post), 1);
+        this.__postsList.splice(this.__postsList.indexOf(post), 1);
 
-        if (post.itemId == this.getCurrentPost().itemId && this.postsList.length > 0) {
-          this.setPost(this.postsList[0], () => {
+        if (post.itemId == this.getCurrentPost().itemId && this.__postsList.length > 0) {
+          this.setPost(this.__postsList[0], () => {
             // emit a post updated event
-            this.postUpdateListener.emit("postUpdated");
+            this.__postUpdatedEventEmitter.emit("postUpdated");
           });
-        } else if (this.postsList.length == 0) {
+        } else if (this.__postsList.length == 0) {
           this.newFun();
         }
 
         // emit a post updated event
-        this.postUpdateListener.emit("postUpdated");
+        this.__postUpdatedEventEmitter.emit("postUpdated");
       }
     }, {});
 
@@ -177,21 +189,21 @@ export class PostManagerService {
             
             post.content = result.fullContent;
             
-            this.blogPost = post;
+            this.__blogPost = post;
           }
         }
           
         // emit a post updated event
-        this.postUpdateListener.emit("postUpdated");
+        this.__postUpdatedEventEmitter.emit("postUpdated");
         callback();
   
   
       });
     } else {
-      this.blogPost = post;
+      this.__blogPost = post;
 
       // emit a post updated event
-      this.postUpdateListener.emit("postUpdated");
+      this.__postUpdatedEventEmitter.emit("postUpdated");
       callback();
     }
   }
@@ -200,21 +212,21 @@ export class PostManagerService {
    * Saves the current blog post
    */
   saveCurrentPost() {
-    var post = this.blogPost;
+    var post = this.__blogPost;
     this._messenger.request('savePost', {
       filename: post.file,
       postData: post.getAsPost()
     }, (result) => {
       if (result != null && result.status == 200) {
         post.file = result.filename;
-        this.blogPost.setContent(result.fullContent);
-        this.blogPost.setHTMLContent(result.data.content);
-        this.blogPost.setItemId(result.data.itemId);
-        this.blogPost.setFile(result.data.filename);
+        this.__blogPost.setContent(result.fullContent);
+        this.__blogPost.setHTMLContent(result.data.content);
+        this.__blogPost.setItemId(result.data.itemId);
+        this.__blogPost.setFile(result.data.filename);
         post.markDirty(false);
 
         // emit a post updated event
-        this.postUpdateListener.emit("postUpdated");
+        this.__postUpdatedEventEmitter.emit("postUpdated");
       }
     });
   }
