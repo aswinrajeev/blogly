@@ -59,7 +59,12 @@
 	left: 0px;
 	bottom: 0px;
 	right: 0px;
+	font-weight: 600;
+	font-size: 12px;
+	color: $app-second-foreground;
 	height: 25px;
-	padding: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-top: 3px;
 	z-index: 6;
 }

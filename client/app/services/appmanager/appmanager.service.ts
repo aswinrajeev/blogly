@@ -85,6 +85,26 @@ export class AppManagerService {
   }
 
   /**
+   * Listens for status update events (from the back-end)
+   */
+  listenForStatusUpdates() {
+    this.__messenger.listen('statusUpdate', (payload) => {
+      if (payload != null) {
+        this.updateStatus(payload.loading, payload.message);
+      }
+    }, null);
+  }
+
+  /**
+   * Posts a status update to the footer
+   * @param loading 
+   * @param message 
+   */
+  updateStatus(loading, message) {
+    this.__eventManager.getUIEventEmitter().emit('statusUpdated', loading, message);
+  }
+
+  /**
    * Fetches the configurations
    */
   fetchConfigurations() {

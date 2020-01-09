@@ -294,6 +294,18 @@ class AppManagerService {
 		return window;
 	}
 
+	/**
+	 * Updates a status message to the UI
+	 * @param {*} loading 
+	 * @param {*} message 
+	 */
+	updateStatus(loading, message) {
+		this.messageManager.send('statusUpdate', {
+			'loading': loading,
+			message: message
+		});
+	}
+
 }
 
 module.exports.AppManagerService = AppManagerService;

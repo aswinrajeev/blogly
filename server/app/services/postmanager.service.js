@@ -212,6 +212,8 @@ class PostManagerService {
 	 * Fetches the posts as specified in the current blogs index file.
 	 */
 	fetchPostsList() {
+
+		this.appManager.updateStatus(true, 'Loading posts...');
 		
 		var posts = [];
 		var response;
@@ -245,7 +247,9 @@ class PostManagerService {
 			response = new ServerResponse({
 				posts: posts
 			}).ok();
+			this.appManager.updateStatus(false, 'Done');
 			return response;
+
 
 		} catch (error) {
 			console.error('Unable to fetch the blog posts.', error);
@@ -262,6 +266,8 @@ class PostManagerService {
 		var postObj;
 		var post;
 		var response;
+
+		this.appManager.updateStatus(true, 'Fetching post data...');
 
 		try {
 
@@ -282,6 +288,7 @@ class PostManagerService {
 				fullContent: fullContent
 			}).ok();
 
+			this.appManager.updateStatus(false, 'Done');
 			return response;
 
 		} catch (error) {
@@ -292,12 +299,14 @@ class PostManagerService {
 	}
 
 	respondToSave(fileName, postObj) {
+		this.appManager.updateStatus(true, 'Saving post...');
 		var response;
 		try {
 			var result = this.savePost(fileName, postObj);
 
 			// returns success message with fileName and post data
 			response = new ServerResponse(result).ok();
+			this.appManager.updateStatus(false, 'Saved');
 			return response;
 		} catch (error) {
 			response = new ServerResponse().failure();
@@ -390,6 +399,7 @@ class PostManagerService {
 	 * @param {*} itemId - id of the blog post to be deleted
 	 */
 	deletePost(itemId) {
+		this.appManager.updateStatus(true, 'Deleting the post...');
 		try {
 			dialog.showMessageBox ({
 				type: 'info',
@@ -437,6 +447,7 @@ class PostManagerService {
 
 							// sends a success status
 							response = new ServerResponse().ok();
+							this.appManager.updateStatus(false, 'Deleted');
 							this.messageManager.send('deleted' + itemId, response);
 						} else {
 
@@ -451,6 +462,8 @@ class PostManagerService {
 						response = new ServerResponse().failure();
 						this.messageManager.send('deleted' + itemId, response);
 					}
+				} else {
+					this.appManager.updateStatus(false, 'Cancelled');
 				}
 			});
 		} catch (error) {
@@ -470,10 +483,13 @@ class PostManagerService {
 	 */
 	publishPostToBlog(blogURL, post, file, isDraft) {
 
+		this.appManager.updateStatus(true, 'Publishing the post...');
+
 		var fileName = file;
 		var postData = post;
 
 		try {
+			this.appManager.updateStatus(true, 'Saving post...');
 			var saveData = this.savePost(fileName, postData);
 			fileName = saveData.filename;
 			postData = saveData.data;
@@ -483,6 +499,7 @@ class PostManagerService {
 
 		try {
 			//seekAuthorization
+			this.appManager.updateStatus(true, 'Authenticating...');
 			var authPromise = this.authManager.seekAuthorization([
 				Permissions.BLOGGER_SCOPE, 
 				Permissions.DRIVE_SCOPE
@@ -490,6 +507,7 @@ class PostManagerService {
 	
 			authPromise.then(async () => {
 				try {
+					this.appManager.updateStatus(true, 'Fetching blog details...');
 					var blogData = await this.bloggerAPI.getBlogByUrl(blogURL);
 					this.publishPost(blogData.id, postData, fileName, isDraft);
 				} catch (error) {
@@ -541,17 +559,20 @@ class PostManagerService {
 	 * @param {*} isDraft 
 	 */
 	async publishPost(blogId, postData, fileName, isDraft) {
+		this.appManager.updateStatus(true, 'Publishing the post...');
 		var contents = postData.content;
 		var response;
 		var savedPost;
 
 		try {
 
+			this.appManager.updateStatus(true, 'Getting the images...');
 			var updatedContents = await this.replaceLocalImages(contents);
 			
 			//process the contents for 'read more' dividers5
 			postData.content = updatedContents.replace(new RegExp("<hr>|<hr></hr>|<hr/>"), '<!--more-->')
 
+			this.appManager.updateStatus(true, 'Publishing the post to blogger...');
 			this.bloggerAPI.publishPost(postData, blogId, isDraft, (result) => {
 
 				postData.postId = result.id;
@@ -570,6 +591,7 @@ class PostManagerService {
 					data: postData,
 					fullContent: fullContent
 				}).ok();
+				this.appManager.updateStatus(false, isDraft ? 'Drafted' : 'Published');
 				this.messageManager.send('published', response);
 
 				dialog.showMessageBox({
