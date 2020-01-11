@@ -13,7 +13,7 @@ import { EventmanagerService } from '../event/eventmanager.service';
 })
 export class AppManagerService {
 
-  private __currentPanel: String;
+  private __currentPanel: String = "posts";
   private __workspaceDir: String;
   private __blogs: Blog[];
   private __panelHidden: boolean = false;
@@ -82,6 +82,26 @@ export class AppManagerService {
         this.__eventManager.getMenuEventEmitter().emit(payload.action, payload.args);
       }
     }, null);
+  }
+
+  /**
+   * Listens for status update events (from the back-end)
+   */
+  listenForStatusUpdates() {
+    this.__messenger.listen('statusUpdate', (payload) => {
+      if (payload != null) {
+        this.updateStatus(payload.loading, payload.message);
+      }
+    }, null);
+  }
+
+  /**
+   * Posts a status update to the footer
+   * @param loading 
+   * @param message 
+   */
+  updateStatus(loading, message) {
+    this.__eventManager.getUIEventEmitter().emit('statusUpdated', loading, message);
   }
 
   /**

@@ -77,6 +77,7 @@ export class PostManagerService {
         this.getCurrentPost().setPostId(result.data.postId);
         this.getCurrentPost().setContent(result.fullContent);
         this.getCurrentPost().setHTMLContent(result.data.content);
+        this.getCurrentPost().setFile(result.data.filename);
         this.__blogPost = this.getCurrentPost();
       }
     }, post);

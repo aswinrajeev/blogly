@@ -100,6 +100,8 @@ class PostManagerService {
 			} else {
 				var response = new ServerResponse().failure();
 				this.messageManager.send('published', response);
+
+				this.appManager.updateStatus(false, 'Could not publish');
 			}
 		});
 
@@ -109,6 +111,7 @@ class PostManagerService {
 			} else {
 				var response = new ServerResponse().failure();
 				this.messageManager.send('published', response);
+				this.appManager.updateStatus(false, 'Could not draft');
 			}
 		});
 	}
@@ -152,6 +155,8 @@ class PostManagerService {
 		var currTime = Math.floor(Date.now());
 
 		try {
+
+			this.appManager.updateStatus(true, 'Indexing the posts...');
 
 			// read each file in the blogs directory.
 			var blogsDir = this.fileSystemAdapter.getConfigProperty('blogsDir');
@@ -200,6 +205,8 @@ class PostManagerService {
 	
 			// writes the index data into the index file
 			this.fileSystemAdapter.writeToFile(this.__getIndexFile(), JSON.stringify(indexData));
+
+			this.appManager.updateStatus(false, 'Indexing completed');
 		} catch (error) {
 			console.error('Error in indexing the posts.', error);
 			throw error;
@@ -212,6 +219,8 @@ class PostManagerService {
 	 * Fetches the posts as specified in the current blogs index file.
 	 */
 	fetchPostsList() {
+
+		this.appManager.updateStatus(true, 'Loading posts...');
 		
 		var posts = [];
 		var response;
@@ -231,6 +240,7 @@ class PostManagerService {
 				} catch (error) {
 					console.error('Error in indexing the posts in the workspace', error);
 					response = new ServerResponse().failure();
+					this.appManager.updateStatus(false, 'Failed to read indices');
 					return response;
 				}
 			}
@@ -245,11 +255,14 @@ class PostManagerService {
 			response = new ServerResponse({
 				posts: posts
 			}).ok();
+			this.appManager.updateStatus(false, 'Done');
 			return response;
+
 
 		} catch (error) {
 			console.error('Unable to fetch the blog posts.', error);
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not load the post');
 			return response;
 		}
 	}
@@ -262,6 +275,8 @@ class PostManagerService {
 		var postObj;
 		var post;
 		var response;
+
+		this.appManager.updateStatus(true, 'Fetching post data...');
 
 		try {
 
@@ -282,11 +297,13 @@ class PostManagerService {
 				fullContent: fullContent
 			}).ok();
 
+			this.appManager.updateStatus(false, 'Done');
 			return response;
 
 		} catch (error) {
 			console.error('Error in reading the post file.', error);
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not read the post');
 			return response;
 		}
 	}
@@ -298,9 +315,11 @@ class PostManagerService {
 
 			// returns success message with fileName and post data
 			response = new ServerResponse(result).ok();
+			this.appManager.updateStatus(false, 'Saved');
 			return response;
 		} catch (error) {
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not save');
 			return response;
 		}
 	}
@@ -311,6 +330,8 @@ class PostManagerService {
 	 * @param {*} postObj - the post data 
 	 */
 	savePost(fileName, postObj) {
+
+		this.appManager.updateStatus(true, 'Saving post...');
 
 		var post = new BlogPost(postObj);
 		var response;
@@ -390,6 +411,7 @@ class PostManagerService {
 	 * @param {*} itemId - id of the blog post to be deleted
 	 */
 	deletePost(itemId) {
+		this.appManager.updateStatus(true, 'Deleting the post...');
 		try {
 			dialog.showMessageBox ({
 				type: 'info',
@@ -437,12 +459,14 @@ class PostManagerService {
 
 							// sends a success status
 							response = new ServerResponse().ok();
+							this.appManager.updateStatus(false, 'Deleted');
 							this.messageManager.send('deleted' + itemId, response);
 						} else {
 
 							// sends a failure status
 							response = new ServerResponse().failure();
 							this.messageManager.send('deleted' + itemId, response);
+							this.appManager.updateStatus(false, 'Could not delete');
 						}
 					} catch (error) {
 						console.error('Could not delete the blog post.', error);
@@ -450,13 +474,17 @@ class PostManagerService {
 						// sends a failure status
 						response = new ServerResponse().failure();
 						this.messageManager.send('deleted' + itemId, response);
+						this.appManager.updateStatus(false, 'Could not delete');
 					}
+				} else {
+					this.appManager.updateStatus(false, 'Cancelled deletetion');
 				}
 			});
 		} catch (error) {
 			console.error('Error in deleting the blog post.', error);
 			// sends a failure status
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not delete');
 			this.messageManager.send('deleted' + itemId, response);
 		}
 	}
@@ -470,10 +498,13 @@ class PostManagerService {
 	 */
 	publishPostToBlog(blogURL, post, file, isDraft) {
 
+		this.appManager.updateStatus(true, 'Publishing the post...');
+
 		var fileName = file;
 		var postData = post;
 
 		try {
+			this.appManager.updateStatus(true, 'Saving post...');
 			var saveData = this.savePost(fileName, postData);
 			fileName = saveData.filename;
 			postData = saveData.data;
@@ -483,6 +514,7 @@ class PostManagerService {
 
 		try {
 			//seekAuthorization
+			this.appManager.updateStatus(true, 'Authenticating...');
 			var authPromise = this.authManager.seekAuthorization([
 				Permissions.BLOGGER_SCOPE, 
 				Permissions.DRIVE_SCOPE
@@ -490,12 +522,14 @@ class PostManagerService {
 	
 			authPromise.then(async () => {
 				try {
+					this.appManager.updateStatus(true, 'Fetching blog details...');
 					var blogData = await this.bloggerAPI.getBlogByUrl(blogURL);
 					this.publishPost(blogData.id, postData, fileName, isDraft);
 				} catch (error) {
 					console.error('Could not publish the post.', error);
 					// sends a failure status
 					response = new ServerResponse().failure();
+					this.appManager.updateStatus(false, 'Could not publish');
 					this.messageManager.send('published', response);
 
 					dialog.showMessageBox({
@@ -509,6 +543,7 @@ class PostManagerService {
 				console.error('Could not get authorization from the user.', error);
 				// sends a failure status
 				response = new ServerResponse().failure();
+				this.appManager.updateStatus(false, 'Could not publish');
 				this.messageManager.send('published', response);
 
 				dialog.showMessageBox({
@@ -522,6 +557,7 @@ class PostManagerService {
 			console.error('Could not publish the blog post.', error);
 			// sends a failure status
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not publish');
 			this.messageManager.send('published', response);
 
 			dialog.showMessageBox({
@@ -541,17 +577,20 @@ class PostManagerService {
 	 * @param {*} isDraft 
 	 */
 	async publishPost(blogId, postData, fileName, isDraft) {
+		this.appManager.updateStatus(true, 'Publishing the post...');
 		var contents = postData.content;
 		var response;
 		var savedPost;
 
 		try {
 
+			this.appManager.updateStatus(true, 'Getting the images...');
 			var updatedContents = await this.replaceLocalImages(contents);
 			
 			//process the contents for 'read more' dividers5
 			postData.content = updatedContents.replace(new RegExp("<hr>|<hr></hr>|<hr/>"), '<!--more-->')
 
+			this.appManager.updateStatus(true, 'Publishing the post to blogger...');
 			this.bloggerAPI.publishPost(postData, blogId, isDraft, (result) => {
 
 				postData.postId = result.id;
@@ -570,6 +609,7 @@ class PostManagerService {
 					data: postData,
 					fullContent: fullContent
 				}).ok();
+				this.appManager.updateStatus(false, isDraft ? 'Drafted' : 'Published');
 				this.messageManager.send('published', response);
 
 				dialog.showMessageBox({
@@ -592,6 +632,8 @@ class PostManagerService {
 	saveAndRemoveRAWImages(content) {
 		try {	
 			// convert the HTML content into DOM
+			this.appManager.updateStatus(true, 'Saving images...');
+
 			var dom = new DOMParser().parseFromString(content, "text/xml");
 			var images = dom.getElementsByTagName('img');
 			var imgData;
@@ -630,6 +672,8 @@ class PostManagerService {
 	loadRAWImages(content) {
 		try {	
 			// convert the HTML content into DOM
+			this.appManager.updateStatus(true, 'Fetching images...');
+
 			var dom = new DOMParser().parseFromString(content, "text/xml");
 			var images = dom.getElementsByTagName('img');
 			var savedImg;
@@ -662,6 +706,9 @@ class PostManagerService {
 	 */
 	async replaceLocalImages(content) {
 		try {	
+
+			this.appManager.updateStatus(true, 'Refreshing images...');
+
 			var dom = new DOMParser().parseFromString(content, "text/xml");
 			var images = dom.getElementsByTagName('img');
 	
@@ -677,6 +724,8 @@ class PostManagerService {
 						if (mappedImage == null) {
 							var link = this.__getLocalImagePath(imgFile);
 							var albumId = await this.mediaManager.getMediaHost();
+
+							this.appManager.updateStatus(true, 'Uploading images...');
 							mappedImage = await this.mediaManager.uploadImageFromFile(imgFile, link, albumId);
 						}
 						
