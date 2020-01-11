@@ -40,14 +40,14 @@ export class BlogareaComponent implements OnInit {
       this.quillModules = {
         toolbar: [
           ['bold', 'italic', 'underline', 'strike'],
-          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
           [{ 'color': [] }, { 'background': [] }],
-          [{ 'script': 'sub' }, { 'script': 'super' }],
-          [{ 'indent': '-1' }, { 'indent': '+1' }],
-          [{ 'direction': 'rtl' }],
-          ['blockquote', 'code-block'],
           [{ 'header': 2 }, { 'header': [2, 3, 4, 5, 6, false] }],
           [{ 'align': [] }],
+          [{ 'indent': '-1' }, { 'indent': '+1' }],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+          [{ 'script': 'sub' }, { 'script': 'super' }],
+          [{ 'direction': 'rtl' }],
+          ['blockquote', 'code-block'],
           ['clean'], 
           ['link', 'image', 'video'],
           ['hr']
@@ -63,6 +63,10 @@ export class BlogareaComponent implements OnInit {
     // initializes custom blots for the Quill editor
     Quill.register(BloglyImageBlot);
     Quill.register(DividerBlot);
+
+    // handle alignment as a style instead of class
+    var alignStyle = Quill.import('attributors/style/align');
+    Quill.register(alignStyle, true);
 
     // listens for any updates to the ui
     this.__eventManager.getUIEventEmitter().on('uiUpdated', (args) => {
