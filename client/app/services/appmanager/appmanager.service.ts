@@ -13,7 +13,7 @@ import { EventmanagerService } from '../event/eventmanager.service';
 })
 export class AppManagerService {
 
-  private __currentPanel: String;
+  private __currentPanel: String = "posts";
   private __workspaceDir: String;
   private __blogs: Blog[];
   private __panelHidden: boolean = false;
