@@ -192,6 +192,7 @@ class AppManagerService {
 	fetchUIConfigs() {
 		
 		var response;
+		this.updateStatus(true, 'Fetching configs...');
 
 		try {
 			// get workspace from the configs
@@ -205,11 +206,13 @@ class AppManagerService {
 			result.workspace = workspace;
 
 			response = new ServerResponse(result).ok();
+			this.updateStatus(false, 'Done');
 			return response;
 
 		} catch (error) {
 			console.error('Could not fetch the UI configurations.', error);
 			response = new ServerResponse().failure();
+			this.updateStatus(false, 'Could not fetch configs');
 			return response;
 		}
 	}
@@ -221,6 +224,7 @@ class AppManagerService {
 	 */
 	switchEditor(content, editor) {
 		var response;
+		this.updateStatus(true, 'Refreshing contents...');
 		try {
 			var htmlContent, fullContent;
 			if (content == null || content.trim() == '') {
@@ -240,8 +244,10 @@ class AppManagerService {
 				fullContent: fullContent,
 				htmlContent: htmlContent
 			}).ok();
+			this.updateStatus(false, 'Done');
 		} catch (error) {
 			response = new ServerResponse().failure();
+			this.updateStatus(false, 'Could not refresh contents');
 		}
 
 		return response;

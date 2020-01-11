@@ -100,6 +100,8 @@ class PostManagerService {
 			} else {
 				var response = new ServerResponse().failure();
 				this.messageManager.send('published', response);
+
+				this.appManager.updateStatus(false, 'Could not publish');
 			}
 		});
 
@@ -109,6 +111,7 @@ class PostManagerService {
 			} else {
 				var response = new ServerResponse().failure();
 				this.messageManager.send('published', response);
+				this.appManager.updateStatus(false, 'Could not draft');
 			}
 		});
 	}
@@ -152,6 +155,8 @@ class PostManagerService {
 		var currTime = Math.floor(Date.now());
 
 		try {
+
+			this.appManager.updateStatus(true, 'Indexing the posts...');
 
 			// read each file in the blogs directory.
 			var blogsDir = this.fileSystemAdapter.getConfigProperty('blogsDir');
@@ -200,6 +205,8 @@ class PostManagerService {
 	
 			// writes the index data into the index file
 			this.fileSystemAdapter.writeToFile(this.__getIndexFile(), JSON.stringify(indexData));
+
+			this.appManager.updateStatus(false, 'Indexing completed');
 		} catch (error) {
 			console.error('Error in indexing the posts.', error);
 			throw error;
@@ -233,6 +240,7 @@ class PostManagerService {
 				} catch (error) {
 					console.error('Error in indexing the posts in the workspace', error);
 					response = new ServerResponse().failure();
+					this.appManager.updateStatus(false, 'Failed to read indices');
 					return response;
 				}
 			}
@@ -254,6 +262,7 @@ class PostManagerService {
 		} catch (error) {
 			console.error('Unable to fetch the blog posts.', error);
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not load the post');
 			return response;
 		}
 	}
@@ -294,12 +303,12 @@ class PostManagerService {
 		} catch (error) {
 			console.error('Error in reading the post file.', error);
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not read the post');
 			return response;
 		}
 	}
 
 	respondToSave(fileName, postObj) {
-		this.appManager.updateStatus(true, 'Saving post...');
 		var response;
 		try {
 			var result = this.savePost(fileName, postObj);
@@ -310,6 +319,7 @@ class PostManagerService {
 			return response;
 		} catch (error) {
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not save');
 			return response;
 		}
 	}
@@ -320,6 +330,8 @@ class PostManagerService {
 	 * @param {*} postObj - the post data 
 	 */
 	savePost(fileName, postObj) {
+
+		this.appManager.updateStatus(true, 'Saving post...');
 
 		var post = new BlogPost(postObj);
 		var response;
@@ -454,6 +466,7 @@ class PostManagerService {
 							// sends a failure status
 							response = new ServerResponse().failure();
 							this.messageManager.send('deleted' + itemId, response);
+							this.appManager.updateStatus(false, 'Could not delete');
 						}
 					} catch (error) {
 						console.error('Could not delete the blog post.', error);
@@ -461,15 +474,17 @@ class PostManagerService {
 						// sends a failure status
 						response = new ServerResponse().failure();
 						this.messageManager.send('deleted' + itemId, response);
+						this.appManager.updateStatus(false, 'Could not delete');
 					}
 				} else {
-					this.appManager.updateStatus(false, 'Cancelled');
+					this.appManager.updateStatus(false, 'Cancelled deletetion');
 				}
 			});
 		} catch (error) {
 			console.error('Error in deleting the blog post.', error);
 			// sends a failure status
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not delete');
 			this.messageManager.send('deleted' + itemId, response);
 		}
 	}
@@ -514,6 +529,7 @@ class PostManagerService {
 					console.error('Could not publish the post.', error);
 					// sends a failure status
 					response = new ServerResponse().failure();
+					this.appManager.updateStatus(false, 'Could not publish');
 					this.messageManager.send('published', response);
 
 					dialog.showMessageBox({
@@ -527,6 +543,7 @@ class PostManagerService {
 				console.error('Could not get authorization from the user.', error);
 				// sends a failure status
 				response = new ServerResponse().failure();
+				this.appManager.updateStatus(false, 'Could not publish');
 				this.messageManager.send('published', response);
 
 				dialog.showMessageBox({
@@ -540,6 +557,7 @@ class PostManagerService {
 			console.error('Could not publish the blog post.', error);
 			// sends a failure status
 			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not publish');
 			this.messageManager.send('published', response);
 
 			dialog.showMessageBox({
@@ -614,6 +632,8 @@ class PostManagerService {
 	saveAndRemoveRAWImages(content) {
 		try {	
 			// convert the HTML content into DOM
+			this.appManager.updateStatus(true, 'Saving images...');
+
 			var dom = new DOMParser().parseFromString(content, "text/xml");
 			var images = dom.getElementsByTagName('img');
 			var imgData;
@@ -652,6 +672,8 @@ class PostManagerService {
 	loadRAWImages(content) {
 		try {	
 			// convert the HTML content into DOM
+			this.appManager.updateStatus(true, 'Fetching images...');
+
 			var dom = new DOMParser().parseFromString(content, "text/xml");
 			var images = dom.getElementsByTagName('img');
 			var savedImg;
@@ -684,6 +706,9 @@ class PostManagerService {
 	 */
 	async replaceLocalImages(content) {
 		try {	
+
+			this.appManager.updateStatus(true, 'Refreshing images...');
+
 			var dom = new DOMParser().parseFromString(content, "text/xml");
 			var images = dom.getElementsByTagName('img');
 	
@@ -699,6 +724,8 @@ class PostManagerService {
 						if (mappedImage == null) {
 							var link = this.__getLocalImagePath(imgFile);
 							var albumId = await this.mediaManager.getMediaHost();
+
+							this.appManager.updateStatus(true, 'Uploading images...');
 							mappedImage = await this.mediaManager.uploadImageFromFile(imgFile, link, albumId);
 						}
 						
