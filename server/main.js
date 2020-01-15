@@ -18,9 +18,10 @@ class MainWindow {
 	constructor() {
 		this.mainWindow = null;
 		this.messageService = null;
-		this.menuHandler
-		this.appManager
+		this.menuHandler;
+		this.appManager;
 
+		this.isMac = (process.platform === 'darwin');
 
 		//register async initialization of the application window.
 		app.on('ready', () => {
@@ -45,12 +46,14 @@ class MainWindow {
 			this.createMainWindow();
 
 			// subscribe to the system preferences
-			systemPreferences.subscribeNotification(
-				'AppleInterfaceThemeChangedNotification',
-				function theThemeHasChanged () {
-					console.log('The theme has been changed to ' + systemPreferences.isDarkMode() ? 'dark' : 'light');
-				}
-			)
+			if (this.isMac) {
+				systemPreferences.subscribeNotification(
+					'AppleInterfaceThemeChangedNotification',
+					function theThemeHasChanged () {
+						console.log('The theme has been changed to ' + systemPreferences.isDarkMode() ? 'dark' : 'light');
+					}
+				)
+			}
 
 		} catch (error) {
 			console.error(error);

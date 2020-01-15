@@ -102,6 +102,21 @@ class MenuManagerService {
 			]
 		};
 
+		// preferences in edit menu if not mac
+		if (!this.isMac) {
+			this.editMenu.submenu.push({
+				type: 'separator'
+			});
+
+			this.editMenu.submenu.push({ 
+				label: 'Preferences',
+				accelerator: 'CmdOrCtrl+,',
+				click: () => {
+					this.handleMenuClick('showSettings');
+				}
+			});
+		}
+
 		this.importFromMenu = {
 			label: 'Import from blog',
 			submenu: []
@@ -171,15 +186,26 @@ class MenuManagerService {
 			]
 		};
 
+		// about blogly in help menu if not mac
+		var helpMenuItems = [];
+		if (!this.isMac) {
+			helpMenuItems.push({ 
+				role: 'about',
+				label: 'About Blogly'
+			});
+		}
+
+		helpMenuItems.push({
+			label: 'Usage manual'
+		});
+		
+		helpMenuItems.push({
+			label: 'About the author'
+		});
+
 		this.helpMenu = {
 			role: 'help',
-			submenu: [
-				{
-					label: 'Usage manual'
-				}, {
-					label: 'About the author'
-				}
-			]
+			submenu: helpMenuItems
 		};
 	}
 
@@ -204,15 +230,19 @@ class MenuManagerService {
 	 * Constructs the menu for the application
 	 */
 	renderMenu() {
-		const menu = this.menu.buildFromTemplate([
-			this.isMac && this.appMenu,
-			this.fileMenu,
-			this.editMenu,
-			this.blogMenu,
-			this.viewMenu,
-			this.windowMenu,
-			this.helpMenu
-		]);
+		var menuItems  = [];
+		
+		// render app menu only if mac
+		if (this.isMac) {
+			menuItems.push(this.appMenu);
+		}
+		menuItems.push(this.fileMenu);
+		menuItems.push(this.editMenu);
+		menuItems.push(this.blogMenu);
+		menuItems.push(this.viewMenu);
+		menuItems.push(this.windowMenu);
+		menuItems.push(this.helpMenu);
+		const menu = this.menu.buildFromTemplate(menuItems);
 
 		this.menubar.setApplicationMenu(menu);
 	}
