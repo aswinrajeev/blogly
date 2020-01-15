@@ -28,3 +28,15 @@
 	left: 0px;
 	right: 0px;
 }
+
+::-webkit-scrollbar
+{
+  width: 3px;  /* for vertical scrollbars */
+  height: 3px; /* for horizontal scrollbars */
+}
+
+
+::-webkit-scrollbar-thumb
+{
+  background: rgba(0, 0, 0, 0.5);
+}

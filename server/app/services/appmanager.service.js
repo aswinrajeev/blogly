@@ -6,7 +6,7 @@ const { BlogManagerService } = require('./blogmanager.service');
 const { PostManagerService } = require('./postmanager.service');
 const { ServerResponse } = require('../models/response');
 const { BrowserWindow } =  require('electron');
-const { dialog } = require('electron')
+const beautify = require('js-beautify').html;
 
 /**
  * Manages the application operations and lifecycle.
@@ -233,9 +233,10 @@ class AppManagerService {
 			} else {
 				if (editor == 'html') {
 					fullContent = this.postManager.loadRAWImages(content);
-					htmlContent = content;
+					htmlContent = beautify(content);
 				} else {
 					htmlContent = this.postManager.saveAndRemoveRAWImages(content);
+					htmlContent = beautify(htmlContent);
 					fullContent = content;
 				}
 			}

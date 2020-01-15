@@ -11,6 +11,7 @@ const { ServerResponse } = require('../models/response');
 const path = require('path');
 const h2p = require('html2plaintext');
 const { DOMParser } = require('xmldom');
+const beautify = require('js-beautify').html;
 
 /**
  * Handler service for blog post events
@@ -338,7 +339,7 @@ class PostManagerService {
 
 		// removes all the RAW (base64) images in the content after saving to images directory
 		var localContents = this.saveAndRemoveRAWImages(post.content);
-		post.content = localContents;
+		post.content = beautify(localContents);
 		
 		// sets the itemId if found to be null
 		if (post.itemId == null || post.itemId.trim() == '' ) {
