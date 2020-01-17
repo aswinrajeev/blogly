@@ -13,7 +13,7 @@
     "productName": "Blogly",
     "mac": {
       "darkModeSupport": true,
-      "category": "public.app-category.photography",
+      "category": "public.app-category.productivity",
       "extendInfo": {
         "com.apple.security.network.server": true
       }
@@ -22,7 +22,13 @@
       "target": ["portable", "squirrel"]
     },
     "linux": {
-      "target": ["deb, AppImage"]
+      "target": ["deb, AppImage"],
+      "desktop": {
+        "Name": "Blogly",
+        "Icon": "build/icon.png",
+        "Comment": "Blogly open source blogger client",
+        "Categories": "Productivity"
+      }
     }
   },
   "keywords": [
