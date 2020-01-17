@@ -27,6 +27,10 @@ class MainWindow {
 		app.on('ready', () => {
 			this.initializeApp()
 		});
+
+		app.on('window-all-closed', () => {
+			app.quit()
+		});
 	}
 
 	/**

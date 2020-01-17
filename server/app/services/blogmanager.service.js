@@ -100,7 +100,8 @@ class BlogManagerService {
 						type: 'error',
 						title: 'Error',
 						message: 'Blog is already connected',
-						detail: 'The blog has already been connected. It cannot be added more than once.'
+						detail: 'The blog has already been connected. It cannot be added more than once.',
+						buttons: ['Okay']
 					});
 
 					// sends error code

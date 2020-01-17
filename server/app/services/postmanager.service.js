@@ -537,7 +537,8 @@ class PostManagerService {
 						type: 'error',
 						title: 'Error',
 						message: 'Error in publishing',
-						detail: 'The blog post could not be published. Please try again.'
+						detail: 'The blog post could not be published. Please try again.',
+						buttons: ['Okay']
 					});
 				}
 			}).catch(error => {
@@ -551,7 +552,8 @@ class PostManagerService {
 					type: 'error',
 					title: 'Error',
 					message: 'Error in publishing',
-					detail: 'The blog post could not be published. Please try again.'
+					detail: 'The blog post could not be published. Please try again.',
+					buttons: ['Okay']
 				});
 			})
 		} catch (error) {
@@ -565,7 +567,8 @@ class PostManagerService {
 				type: 'error',
 				title: 'Error',
 				message: 'Error in publishing',
-				detail: 'The blog post could not be published. Please try again.'
+				detail: 'The blog post could not be published. Please try again.',
+				buttons: ['Okay']
 			});
 		}
 	}
@@ -617,7 +620,8 @@ class PostManagerService {
 					type: 'info',
 					title: 'Done',
 					message: 'Blog post published.',
-					detail: 'The blog post has been published to your blog' + (isDraft ? ' as a draft' : '') + '.'
+					detail: 'The blog post has been published to your blog' + (isDraft ? ' as a draft' : '') + '.',
+					buttons: ['Okay']
 				});
 			});
 		} catch (error) {
