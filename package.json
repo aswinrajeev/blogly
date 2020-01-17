@@ -19,7 +19,7 @@
       }
     },
     "win": {
-      "target": ["portable", "squirrel"]
+      "target": ["portable"]
     },
     "linux": {
       "target": ["deb, AppImage"],
