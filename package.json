@@ -23,6 +23,7 @@
     },
     "linux": {
       "target": ["deb, AppImage"],
+      "category": "Productivity",
       "desktop": {
         "Name": "Blogly",
         "Icon": "build/icon.png",
@@ -39,7 +40,10 @@
     "publish",
     "writer"
   ],
-  "author": "Aswin Rajeev",
+  "author": {
+    "name": "Aswin Rajeev",
+    "email": "aswin@aswinsblog.com"
+  },
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/aswinrajeev/blogly/issues"
