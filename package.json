@@ -17,6 +17,12 @@
       "extendInfo": {
         "com.apple.security.network.server": true
       }
+    },
+    "win": {
+      "target": ["portable", "squirrel"]
+    },
+    "linux": {
+      "target": ["deb, AppImage"]
     }
   },
   "keywords": [
