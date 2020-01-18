@@ -76,9 +76,15 @@ class MenuManagerService {
 				}, {
 					label: 'Import blog post from file',
 					accelerator: 'CmdOrCtrl+O',
+					click: () => {
+						this.handleMenuClick('import');
+					}
 				}, {
 					label: 'Export blog post to file',
 					accelerator: 'CmdOrCtrl+Shift+S',
+					click: () => {
+						this.handleMenuClick('export');
+					}
 				}
 			]
 		};

@@ -427,8 +427,7 @@ class PostManagerService {
 				title: 'Save to file',
 				filters: [
 					{name: 'Blogly Post (*.bpst)', extensions: ['bpst']}
-				],
-				message: 'Specify a file name for saving'
+				]
 			});
 	
 			if (fileName != null && post != null) {
