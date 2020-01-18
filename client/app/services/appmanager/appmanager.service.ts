@@ -94,7 +94,6 @@ export class AppManagerService {
     }, null);
 
     this.__messenger.listen('switchEditor', (result) => { 
-      console.log(result);
       if (result != null && result.status == 200) {
         this.__htmlEditor = result.isHTML;
 
