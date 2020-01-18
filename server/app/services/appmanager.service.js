@@ -7,6 +7,7 @@ const { PostManagerService } = require('./postmanager.service');
 const { ServerResponse } = require('../models/response');
 const { BrowserWindow } =  require('electron');
 const beautify = require('js-beautify').html;
+const { dialog } = require('electron');
 
 /**
  * Manages the application operations and lifecycle.
@@ -86,6 +87,13 @@ class AppManagerService {
 	 */
 	getAppDir() {
 		return this.appDir;
+	}
+
+	/**
+	 * Returns the main window
+	 */
+	getMainWindow() {
+		return this.mainWindow;
 	}
 
 	/**
@@ -181,9 +189,16 @@ class AppManagerService {
 			return this.fetchUIConfigs();
 		});
 
+		// selects a workspace directory
+		this.messageManager.respond('selectDir', () => {
+			return this.selectDir();
+		});
+
 		// register for UI update on event
 		this.messageManager.respond('switchEditor', (data) => {
-			return this.switchEditor(data.content, data.editor);
+			this.messageManager.send('switchEditor',
+				this.switchEditor(data.content, data.editor)
+			);
 		});
 	}
 
@@ -244,7 +259,8 @@ class AppManagerService {
 
 			response = new ServerResponse({
 				fullContent: fullContent,
-				htmlContent: htmlContent
+				htmlContent: htmlContent,
+				isHTML: (editor == 'html')
 			}).ok();
 			this.updateStatus(false, 'Done');
 		} catch (error) {
@@ -300,6 +316,45 @@ class AppManagerService {
 		});
 
 		return window;
+	}
+
+	/**
+	 * Opens a select directory dialog and returns the selected dir path.
+	 * Restarts the aplplication if selected.
+	 */
+	selectDir() {
+		var response;
+		var path = dialog.showOpenDialog(this.mainWindow, {
+			properties: ['openDirectory']
+		});
+
+		dialog.showMessageBox(this.mainWindow, {
+			type: 'info',
+			buttons: ['Confirm', 'Cancel'],
+			message: 'Changing workspace will require a restart. Are sure to continue?',
+			title: 'Confirm Configuration'
+		}, (result) => {
+			if (result == 0) {
+
+				try {
+					this.fileSystemAdapter.saveConfigForLater('blogsDir', path[0]);
+				} catch (error) {
+					console.error('Unable to save the workspace path.', error);
+				}
+
+				this.app.relaunch();
+				this.app.exit(0)
+		
+				response = new ServerResponse({
+					path: path
+				}).ok();
+				return response;
+			} else {
+				this.updateStatus(false, 'Discarded config');
+				return new ServerResponse().failure();
+			}
+		});
+
 	}
 
 	/**

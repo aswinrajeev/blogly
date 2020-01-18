@@ -91,6 +91,14 @@ class PostManagerService {
 			return this.respondToSave(data.filename, data.postData);
 		});
 
+		this.messageManager.respond('exportPost', (data) => {
+			return this.exportPost(data.postData);
+		});
+
+		this.messageManager.respond('importPost', (data) => {
+			return this.importPost();
+		});
+
 		this.messageManager.listen('deletePost', (data) => {
 			this.deletePost(data.itemId);
 		});
@@ -408,13 +416,97 @@ class PostManagerService {
 	}
 
 	/**
+	 * Exports a post into a file
+	 * @param {*} post 
+	 */
+	exportPost(post) {
+		this.appManager.updateStatus(true, 'Exporting the post...');
+		var response;
+		try {
+			var fileName = dialog.showSaveDialog(this.appManager.getMainWindow(), {
+				title: 'Save to file',
+				filters: [
+					{name: 'Blogly Post (*.bpst)', extensions: ['bpst']}
+				]
+			});
+	
+			if (fileName != null && post != null) {
+				var postData = new BlogPost(post);
+				delete postData.file
+	
+				this.fileSystemAdapter.writeToFile(fileName, JSON.stringify(postData));
+				
+				this.appManager.updateStatus(false, 'Exported');
+				response = new ServerResponse({
+					fileName: fileName
+				}).ok();
+				return response;
+			} 
+
+			response = new ServerResponse().failure();
+			return response;
+			
+		} catch (error) {
+			console.error('Could not export the post.', error);
+			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not export');
+			return response;
+		}
+
+	}
+
+	/**
+	 * Imports a post from a file and returns the data to the UI
+	 */
+	importPost() {
+		var response;
+		this.appManager.updateStatus(true, 'Importing post...');
+		try {
+			// select the file to import
+			var selectedFiles = dialog.showOpenDialog(this.appManager.getMainWindow(), {
+				title: 'File to import',
+				filters: [
+					{name: 'Blogly Post (*.bpst)', extensions: ['bpst']}
+				]
+			});
+
+			if (selectedFiles != null && selectedFiles.length > 0) {
+
+				var fileName = selectedFiles[0];
+
+				// read the post contents
+				var postFileContents = this.fileSystemAdapter.readFromFile(fileName);
+				var postData = JSON.parse(postFileContents);
+				var post = new BlogPost(postData);
+				
+				// saves the post data into the workspace
+				var savedData = this.savePost(null, post);
+	
+				response = new ServerResponse(savedData).ok();
+				this.appManager.updateStatus(false, 'Imported');
+				return response;
+			}
+
+			this.appManager.updateStatus(false, 'Cancelled');
+			response = new ServerResponse(savedData).failure();
+			return response;
+		} catch (error) {
+			console.error('Could not import the post.', error);
+			this.appManager.updateStatus(true, 'Could not import');
+			response = new ServerResponse().failure();
+			return response;
+		}
+	}
+
+	/**
 	 * Deletes the post from the index data and from the file system
 	 * @param {*} itemId - id of the blog post to be deleted
 	 */
 	deletePost(itemId) {
 		this.appManager.updateStatus(true, 'Deleting the post...');
 		try {
-			dialog.showMessageBox ({
+			// seeks a confirmation
+			dialog.showMessageBox(this.appManager.getMainWindow(), {
 				type: 'info',
 				buttons: ['Delete', 'Cancel'],
 				message: 'Are you sure to delete the post?',
@@ -533,7 +625,7 @@ class PostManagerService {
 					this.appManager.updateStatus(false, 'Could not publish');
 					this.messageManager.send('published', response);
 
-					dialog.showMessageBox({
+					dialog.showMessageBox(this.appManager.getMainWindow(), {
 						type: 'error',
 						title: 'Error',
 						message: 'Error in publishing',
@@ -548,7 +640,7 @@ class PostManagerService {
 				this.appManager.updateStatus(false, 'Could not publish');
 				this.messageManager.send('published', response);
 
-				dialog.showMessageBox({
+				dialog.showMessageBox(this.appManager.getMainWindow(), {
 					type: 'error',
 					title: 'Error',
 					message: 'Error in publishing',
@@ -563,7 +655,7 @@ class PostManagerService {
 			this.appManager.updateStatus(false, 'Could not publish');
 			this.messageManager.send('published', response);
 
-			dialog.showMessageBox({
+			dialog.showMessageBox(this.appManager.getMainWindow(), {
 				type: 'error',
 				title: 'Error',
 				message: 'Error in publishing',
@@ -616,7 +708,7 @@ class PostManagerService {
 				this.appManager.updateStatus(false, isDraft ? 'Drafted' : 'Published');
 				this.messageManager.send('published', response);
 
-				dialog.showMessageBox({
+				dialog.showMessageBox(this.appManager.getMainWindow(), {
 					type: 'info',
 					title: 'Done',
 					message: 'Blog post published.',

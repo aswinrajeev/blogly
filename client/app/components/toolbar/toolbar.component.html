@@ -5,15 +5,20 @@
       <i class="material-icons md-18">note_add</i> 
   </button>
   
-  <!-- Open Button -->
-  <button class="btn btn-dark btn-sm" aria-label="Import from file">
-      <i class="material-icons md-18">folder_open</i> 
-  </button> 
-
   <!-- Save Button -->
   <button class="btn btn-dark btn-sm" aria-label="Save" (click)="savePost()">
-      <i class="material-icons md-18">save</i> 
+    <i class="material-icons md-18">save</i> 
   </button>  
+  
+  <!-- Import Button -->
+  <button class="btn btn-dark btn-sm" aria-label="Import from file" (click)="importPost()">
+      <i class="material-icons md-18">folder_open</i> 
+  </button> 
+  
+  <!-- Export Button -->
+  <button class="btn btn-dark btn-sm" aria-label="Export to file" (click)="exportPost()">
+    <i class="material-icons md-18">share</i> 
+  </button> 
 </div>
 
 <!-- Publish and import from Blogger-->

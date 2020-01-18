@@ -44,7 +44,6 @@ export class AppManagerService {
   setCurrentPanel(currentPanel:String) {
     this.__currentPanel = currentPanel;
     this.__eventManager.getUIEventEmitter().emit('panelUpdated', currentPanel);
-    this.__eventManager.getUIEventEmitter().emit('uiUpdated');
   }
 
   /**
@@ -91,6 +90,18 @@ export class AppManagerService {
     this.__messenger.listen('statusUpdate', (payload) => {
       if (payload != null) {
         this.updateStatus(payload.loading, payload.message);
+      }
+    }, null);
+
+    this.__messenger.listen('switchEditor', (result) => { 
+      if (result != null && result.status == 200) {
+        this.__htmlEditor = result.isHTML;
+
+        var blogPost = this.__postManager.getCurrentPost();
+        blogPost.setContent(result.fullContent);
+        blogPost.setHTMLContent(result.htmlContent);
+
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
       }
     }, null);
   }
@@ -168,11 +179,14 @@ export class AppManagerService {
    * Requests for a select dir dialog and returns the selected path to worspace path
    */
   selectWorkspaceDir() {
-    this.__messenger.request('selectDir', null, (dir) => {
-      this.__workspaceDir = dir;
+    this.__messenger.request('selectDir', null, (result) => {
 
-      // publish a notification of ui updated
-      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+      if (result != null && result.status == 200) {
+        this.__workspaceDir = result.dir;
+  
+        // publish a notification of ui updated
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+      }
     })
   }
 
@@ -204,20 +218,9 @@ export class AppManagerService {
       }
       
       // request server for updated contents
-      this.__messenger.request('switchEditor', {
+      this.__messenger.send('switchEditor', {
         editor: editor,
         content: content
-      }, (result) => {
-        
-        if (result.status == 200) {
-          this.__htmlEditor = isHTML;
-
-          var blogPost = this.__postManager.getCurrentPost();
-          blogPost.setContent(result.fullContent);
-          blogPost.setHTMLContent(result.htmlContent);
-
-          this.__eventManager.getUIEventEmitter().emit('uiUpdated');
-        }
       });
     } else {
       this.__htmlEditor = isHTML;

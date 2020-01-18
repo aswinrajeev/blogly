@@ -1,4 +1,4 @@
-
+const { shell } = require('electron');
 /**
  * Handles the menu functions of the application
  * 
@@ -66,17 +66,40 @@ class MenuManagerService {
 						this.handleMenuClick('new');
 					}
 				}, {
-					label: 'Import blog post from file',
-					accelerator: 'CmdOrCtrl+O',
-				}, {
 					label: 'Save blog post',
 					accelerator: 'CmdOrCtrl+S',
 					click: () => {
 						this.handleMenuClick('save');
 					}
+				}, {
+					type: 'separator'
+				}, {
+					label: 'Import blog post from file',
+					accelerator: 'CmdOrCtrl+O',
+					click: () => {
+						this.handleMenuClick('import');
+					}
+				}, {
+					label: 'Export blog post to file',
+					accelerator: 'CmdOrCtrl+Shift+S',
+					click: () => {
+						this.handleMenuClick('export');
+					}
 				}
 			]
 		};
+
+		// quit menu item in the file menu if not mac
+		if (!this.isMac) {
+			this.fileMenu.submenu.push({
+				type: 'separator'
+			});
+
+			this.fileMenu.submenu.push({ 
+				role: 'quit' ,
+				label: 'Quit Blogly'
+			});
+		}
 
 		this.editMenu = {
 			label: 'Edit',
@@ -191,16 +214,32 @@ class MenuManagerService {
 		if (!this.isMac) {
 			helpMenuItems.push({ 
 				role: 'about',
-				label: 'About Blogly'
+				label: 'About Blogly',
+				click: () => {
+					shell.openExternal("https://www.aswinsblog.com");
+				}
 			});
 		}
 
 		helpMenuItems.push({
-			label: 'Usage manual'
+			label: 'Usage manual',
+			click: () => {
+				shell.openExternal("https://github.com/aswinrajeev/blogly/blob/master/README.md");
+			}
 		});
 		
 		helpMenuItems.push({
-			label: 'About the author'
+			label: 'View license',
+			click: () => {
+				shell.openExternal("https://github.com/aswinrajeev/blogly/blob/master/LICENSE");
+			}
+		});
+
+		helpMenuItems.push({
+			label: 'About the author',
+			click: () => {
+				shell.openExternal("https://www.aswinsblog.com/p/aswin-rajeev.html");
+			}
 		});
 
 		this.helpMenu = {

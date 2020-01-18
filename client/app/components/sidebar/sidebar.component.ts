@@ -34,7 +34,6 @@ export class SidebarComponent implements OnInit {
     this.__eventManager.getMenuEventEmitter().on('showSettings', (args) => {
       this.setActiveItem('settings');
       this.__eventManager.getUIEventEmitter().emit('panelUpdated');
-      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     });
 
     // listens for any updates to UI

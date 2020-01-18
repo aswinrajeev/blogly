@@ -42,6 +42,16 @@ export class ToolbarComponent implements OnInit {
       this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     });
 
+    this.__eventManager.getMenuEventEmitter().on('import', (args) => {
+      this.importPost();
+      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+    });
+
+    this.__eventManager.getMenuEventEmitter().on('export', (args) => {
+      this.exportPost();
+      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+    });
+
     this.__eventManager.getMenuEventEmitter().on('new', (args) => {
       this.newPost();
       this.__eventManager.getUIEventEmitter().emit('uiUpdated');
@@ -106,6 +116,20 @@ export class ToolbarComponent implements OnInit {
    */
   savePost() {
     this.__blogservice.saveCurrentPost();
+  }
+
+  /**
+   * Exports the active post
+   */
+  exportPost() {
+    this.__blogservice.exportCurrentPost();
+  }
+
+  /**
+   * Imports a new post from a file
+   */
+  importPost() {
+    this.__blogservice.importPost();
   }
 
   /**

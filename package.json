@@ -13,16 +13,23 @@
     "productName": "Blogly",
     "mac": {
       "darkModeSupport": true,
-      "category": "public.app-category.photography",
+      "category": "public.app-category.productivity",
       "extendInfo": {
         "com.apple.security.network.server": true
       }
     },
     "win": {
-      "target": ["portable", "squirrel"]
+      "target": ["portable"]
     },
     "linux": {
-      "target": ["deb, AppImage"]
+      "target": ["deb, AppImage"],
+      "category": "Productivity",
+      "desktop": {
+        "Name": "Blogly",
+        "Icon": "build/icon.png",
+        "Comment": "Blogly open source blogger client",
+        "Categories": "Productivity"
+      }
     }
   },
   "keywords": [
@@ -33,7 +40,10 @@
     "publish",
     "writer"
   ],
-  "author": "Aswin Rajeev",
+  "author": {
+    "name": "Aswin Rajeev",
+    "email": "aswin@aswinsblog.com"
+  },
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/aswinrajeev/blogly/issues"
@@ -48,7 +58,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist-all": "electron-builder -mwl"
   },
   "private": true,
   "dependencies": {

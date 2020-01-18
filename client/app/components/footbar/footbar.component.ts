@@ -31,9 +31,8 @@ export class FootbarComponent implements OnInit {
     this.__eventManager.getUIEventEmitter().on('statusUpdated', (loading, message) => {
       this.message = message;
       if (!loading) {
-        var interval = setInterval(() => {
+        setTimeout(() => {
           this.message = "Ready";
-          clearInterval(interval);
           this.__cdr.detectChanges();
         }, 2000);
       }
