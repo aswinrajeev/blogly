@@ -58,7 +58,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist-all": "electron-builder -mwl"
   },
   "private": true,
   "dependencies": {
