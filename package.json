@@ -16,17 +16,20 @@
       "category": "public.app-category.productivity",
       "extendInfo": {
         "com.apple.security.network.server": true
-      }
+      },
+      "icon": "./build/icon.icns"
     },
     "win": {
-      "target": ["portable"]
+      "target": ["portable"],
+      "icon": "./build/icon.png"
     },
     "linux": {
       "target": ["deb, AppImage"],
       "category": "Productivity",
+      "icon": "./build/icon.icns",
       "desktop": {
         "Name": "Blogly",
-        "Icon": "build/icon.png",
+        "Icon": "./build/icon.png",
         "Comment": "Blogly open source blogger client",
         "Categories": "Productivity"
       }
