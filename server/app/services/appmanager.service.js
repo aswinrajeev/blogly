@@ -196,7 +196,9 @@ class AppManagerService {
 
 		// register for UI update on event
 		this.messageManager.respond('switchEditor', (data) => {
-			return this.switchEditor(data.content, data.editor);
+			this.messageManager.send('switchEditor',
+				this.switchEditor(data.content, data.editor)
+			);
 		});
 	}
 
@@ -257,7 +259,8 @@ class AppManagerService {
 
 			response = new ServerResponse({
 				fullContent: fullContent,
-				htmlContent: htmlContent
+				htmlContent: htmlContent,
+				isHTML: (editor == 'html')
 			}).ok();
 			this.updateStatus(false, 'Done');
 		} catch (error) {

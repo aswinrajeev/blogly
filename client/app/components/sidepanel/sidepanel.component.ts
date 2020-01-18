@@ -38,6 +38,7 @@ export class SidepanelComponent implements OnInit {
       
     this.__eventManager.getUIEventEmitter().on('panelUpdated', (panel) => {
       this.setPanel(panel);
+      //this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     });
 
     //listens for any updates to the UI

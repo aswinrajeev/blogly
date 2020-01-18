@@ -44,7 +44,6 @@ export class AppManagerService {
   setCurrentPanel(currentPanel:String) {
     this.__currentPanel = currentPanel;
     this.__eventManager.getUIEventEmitter().emit('panelUpdated', currentPanel);
-    this.__eventManager.getUIEventEmitter().emit('uiUpdated');
   }
 
   /**
@@ -91,6 +90,19 @@ export class AppManagerService {
     this.__messenger.listen('statusUpdate', (payload) => {
       if (payload != null) {
         this.updateStatus(payload.loading, payload.message);
+      }
+    }, null);
+
+    this.__messenger.listen('switchEditor', (result) => { 
+      console.log(result);
+      if (result != null && result.status == 200) {
+        this.__htmlEditor = result.isHTML;
+
+        var blogPost = this.__postManager.getCurrentPost();
+        blogPost.setContent(result.fullContent);
+        blogPost.setHTMLContent(result.htmlContent);
+
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
       }
     }, null);
   }
@@ -207,20 +219,9 @@ export class AppManagerService {
       }
       
       // request server for updated contents
-      this.__messenger.request('switchEditor', {
+      this.__messenger.send('switchEditor', {
         editor: editor,
         content: content
-      }, (result) => {
-        
-        if (result.status == 200) {
-          this.__htmlEditor = isHTML;
-
-          var blogPost = this.__postManager.getCurrentPost();
-          blogPost.setContent(result.fullContent);
-          blogPost.setHTMLContent(result.htmlContent);
-
-          this.__eventManager.getUIEventEmitter().emit('uiUpdated');
-        }
       });
     } else {
       this.__htmlEditor = isHTML;
