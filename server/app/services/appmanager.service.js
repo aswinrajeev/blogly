@@ -90,6 +90,13 @@ class AppManagerService {
 	}
 
 	/**
+	 * Returns the main window
+	 */
+	getMainWindow() {
+		return this.mainWindow;
+	}
+
+	/**
 	 * Initializes the message manager service
 	 * @param {*} ipcMain 
 	 * @param {*} mainWindow 
@@ -314,11 +321,11 @@ class AppManagerService {
 	 */
 	selectDir() {
 		var response;
-		var path = dialog.showOpenDialog({
+		var path = dialog.showOpenDialog(this.mainWindow, {
 			properties: ['openDirectory']
 		});
 
-		dialog.showMessageBox({
+		dialog.showMessageBox(this.mainWindow, {
 			type: 'info',
 			buttons: ['Confirm', 'Cancel'],
 			message: 'Changing workspace will require a restart. Are sure to continue?',

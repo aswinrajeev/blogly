@@ -96,7 +96,7 @@ class BlogManagerService {
 				if (savedBlog.url == blog.url) {
 
 					// shows the error alert
-					dialog.showMessageBox({
+					dialog.showMessageBox(this.appManager.getMainWindow(), {
 						type: 'error',
 						title: 'Error',
 						message: 'Blog is already connected',

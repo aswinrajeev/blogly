@@ -421,7 +421,8 @@ class PostManagerService {
 	deletePost(itemId) {
 		this.appManager.updateStatus(true, 'Deleting the post...');
 		try {
-			dialog.showMessageBox ({
+			// seeks a confirmation
+			dialog.showMessageBox(this.appManager.getMainWindow(), {
 				type: 'info',
 				buttons: ['Delete', 'Cancel'],
 				message: 'Are you sure to delete the post?',
@@ -540,7 +541,7 @@ class PostManagerService {
 					this.appManager.updateStatus(false, 'Could not publish');
 					this.messageManager.send('published', response);
 
-					dialog.showMessageBox({
+					dialog.showMessageBox(this.appManager.getMainWindow(), {
 						type: 'error',
 						title: 'Error',
 						message: 'Error in publishing',
@@ -555,7 +556,7 @@ class PostManagerService {
 				this.appManager.updateStatus(false, 'Could not publish');
 				this.messageManager.send('published', response);
 
-				dialog.showMessageBox({
+				dialog.showMessageBox(this.appManager.getMainWindow(), {
 					type: 'error',
 					title: 'Error',
 					message: 'Error in publishing',
@@ -570,7 +571,7 @@ class PostManagerService {
 			this.appManager.updateStatus(false, 'Could not publish');
 			this.messageManager.send('published', response);
 
-			dialog.showMessageBox({
+			dialog.showMessageBox(this.appManager.getMainWindow(), {
 				type: 'error',
 				title: 'Error',
 				message: 'Error in publishing',
@@ -623,7 +624,7 @@ class PostManagerService {
 				this.appManager.updateStatus(false, isDraft ? 'Drafted' : 'Published');
 				this.messageManager.send('published', response);
 
-				dialog.showMessageBox({
+				dialog.showMessageBox(this.appManager.getMainWindow(), {
 					type: 'info',
 					title: 'Done',
 					message: 'Blog post published.',

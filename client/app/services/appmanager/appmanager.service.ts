@@ -170,12 +170,12 @@ export class AppManagerService {
   selectWorkspaceDir() {
     this.__messenger.request('selectDir', null, (result) => {
 
-      if (result.status == 200) {
+      if (result != null && result.status == 200) {
         this.__workspaceDir = result.dir;
+  
+        // publish a notification of ui updated
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
       }
-
-      // publish a notification of ui updated
-      this.__eventManager.getUIEventEmitter().emit('uiUpdated');
     })
   }
 
