@@ -109,10 +109,17 @@ export class ToolbarComponent implements OnInit {
   }
 
   /**
-   * Saves the active post
+   * Exports the active post
    */
   exportPost() {
     this.__blogservice.exportCurrentPost();
+  }
+
+  /**
+   * Imports a new post from a file
+   */
+  importPost() {
+    this.__blogservice.importPost();
   }
 
   /**

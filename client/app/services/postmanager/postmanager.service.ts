@@ -239,6 +239,30 @@ export class PostManagerService {
     });
   }
 
+  /**
+   * Imports a post from a file and add it to the blogs list
+   */
+  importPost() {
+    this._messenger.request('importPost', {
+
+    }, (result) => {
+      if (result != null && result.status == 200) {
+          var post = new BlogPost();
+          post.title = result.data.title;
+          post.itemId = result.data.itemId;
+          post.miniContent = result.data.miniContent;
+          post.file = result.data.filename;
+          post.isSaved = true;
+
+          this.__postsList.unshift(post);
+          this.setPost(post, () => {
+            // emit a ui updated event
+           this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+          });
+      }
+    })
+  }
+
   // sets a function to be invoked when new button is pressed
   setNewPostAction(fun) {
     this.newFun = fun;

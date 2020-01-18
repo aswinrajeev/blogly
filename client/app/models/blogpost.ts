@@ -171,6 +171,8 @@ export class BlogPost {
 	}
 
 	markDirty(isDirty: boolean) {
-		this._isSaved = !isDirty;
+		setTimeout(() => {
+			this._isSaved = !isDirty;
+		}, 800);
 	}
 }

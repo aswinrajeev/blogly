@@ -95,6 +95,10 @@ class PostManagerService {
 			return this.exportPost(data.postData);
 		});
 
+		this.messageManager.respond('importPost', (data) => {
+			return this.importPost();
+		});
+
 		this.messageManager.listen('deletePost', (data) => {
 			this.deletePost(data.itemId);
 		});
@@ -450,6 +454,49 @@ class PostManagerService {
 			return response;
 		}
 
+	}
+
+	/**
+	 * Imports a post from a file and returns the data to the UI
+	 */
+	importPost() {
+		var response;
+		this.appManager.updateStatus(true, 'Importing post...');
+		try {
+			// select the file to import
+			var selectedFiles = dialog.showOpenDialog(this.appManager.getMainWindow(), {
+				title: 'File to import',
+				filters: [
+					{name: 'Blogly Post (*.bpst)', extensions: ['bpst']}
+				]
+			});
+
+			if (selectedFiles != null && selectedFiles.length > 0) {
+
+				var fileName = selectedFiles[0];
+
+				// read the post contents
+				var postFileContents = this.fileSystemAdapter.readFromFile(fileName);
+				var postData = JSON.parse(postFileContents);
+				var post = new BlogPost(postData);
+				
+				// saves the post data into the workspace
+				var savedData = this.savePost(null, post);
+	
+				response = new ServerResponse(savedData).ok();
+				this.appManager.updateStatus(false, 'Imported');
+				return response;
+			}
+
+			this.appManager.updateStatus(false, 'Cancelled');
+			response = new ServerResponse(savedData).failure();
+			return response;
+		} catch (error) {
+			console.error('Could not import the post.', error);
+			this.appManager.updateStatus(true, 'Could not import');
+			response = new ServerResponse().failure();
+			return response;
+		}
 	}
 
 	/**
