@@ -17,8 +17,8 @@ module.exports.FileSystemConstants.BLOGLY_APP_DIR = "blogly";
 module.exports.FileSystemConstants.IMAGE_DIR = "images";
 module.exports.FileSystemConstants.IMAGE_MAP_FILE = ".imgmap";
 module.exports.FileSystemConstants.CONFIG_FILE = "config.json";
-module.exports.FileSystemConstants.BLOGLY_FILE_EXTN = ".blogly";
-module.exports.FileSystemConstants.INDEX_FILE_NAME = ".blogly.index";
+module.exports.FileSystemConstants.BLOGLY_FILE_EXTN = "bpst";
+module.exports.FileSystemConstants.INDEX_FILE_NAME = ".bpst.index";
 module.exports.FileSystemConstants.BLOGLY_DIR = "Blogly";
 
 module.exports.URLConstants = { };

@@ -168,8 +168,11 @@ export class AppManagerService {
    * Requests for a select dir dialog and returns the selected path to worspace path
    */
   selectWorkspaceDir() {
-    this.__messenger.request('selectDir', null, (dir) => {
-      this.__workspaceDir = dir;
+    this.__messenger.request('selectDir', null, (result) => {
+
+      if (result.status == 200) {
+        this.__workspaceDir = result.dir;
+      }
 
       // publish a notification of ui updated
       this.__eventManager.getUIEventEmitter().emit('uiUpdated');

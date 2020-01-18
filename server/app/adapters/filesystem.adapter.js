@@ -78,7 +78,9 @@ class FileSystemAdapter {
 		}
 
 		// sets the property value
-		this.configs[key] = value;
+		if (key != null) {
+			this.configs[key] = value;
+		}
 		
 		// writes the configuration if required.
 		if (write) {
@@ -89,6 +91,21 @@ class FileSystemAdapter {
 			//writes into the config file
 			this.writeToFile(this.configFile,  JSON.stringify(this.configs));
 		}
+	}
+
+	/**
+	 * Saves a config property for later. 
+	 * @param {*} key 
+	 * @param {*} value 
+	 */
+	saveConfigForLater(key, value) {
+		var configsContent = this.readFromFile(this.configFile, null);
+		var configs = JSON.parse(configsContent);
+		if (key != null) {
+			configs[key] = value;
+		}
+		//writes into the config file
+		this.writeToFile(this.configFile,  JSON.stringify(configs));
 	}
 
 	/**
@@ -133,7 +150,7 @@ class FileSystemAdapter {
 		var newFileName = fileName;
 
 		// continue incrementing the number till no files with the same name found
-		while (this.doesExist(dir + path.sep + newFileName + extn)) {
+		while (this.doesExist(dir + path.sep + newFileName + "." + extn)) {
 			newFileName = fileName + ++index;
 		}
 
