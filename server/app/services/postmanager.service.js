@@ -407,6 +407,13 @@ class PostManagerService {
 		}
 	}
 
+	exportPost(post) {
+		this.appManager.updateStatus(true, 'Exporting the post...');
+
+		var fileName;
+		var postData = post;
+	}
+
 	/**
 	 * Deletes the post from the index data and from the file system
 	 * @param {*} itemId - id of the blog post to be deleted

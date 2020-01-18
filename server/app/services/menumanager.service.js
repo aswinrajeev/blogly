@@ -66,17 +66,34 @@ class MenuManagerService {
 						this.handleMenuClick('new');
 					}
 				}, {
-					label: 'Import blog post from file',
-					accelerator: 'CmdOrCtrl+O',
-				}, {
 					label: 'Save blog post',
 					accelerator: 'CmdOrCtrl+S',
 					click: () => {
 						this.handleMenuClick('save');
 					}
+				}, {
+					type: 'separator'
+				}, {
+					label: 'Import blog post from file',
+					accelerator: 'CmdOrCtrl+O',
+				}, {
+					label: 'Export blog post to file',
+					accelerator: 'CmdOrCtrl+Shift+S',
 				}
 			]
 		};
+
+		// quit menu item in the file menu if not mac
+		if (!this.isMac) {
+			this.fileMenu.submenu.push({
+				type: 'separator'
+			});
+
+			this.fileMenu.submenu.push({ 
+				role: 'quit' ,
+				label: 'Quit Blogly'
+			});
+		}
 
 		this.editMenu = {
 			label: 'Edit',
