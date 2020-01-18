@@ -24,7 +24,10 @@
       "icon": "./build/icon.png"
     },
     "linux": {
-      "target": ["deb, AppImage"],
+      "target": [
+        "deb",
+        "AppImage"
+      ],
       "category": "Productivity",
       "icon": "./build/icon.icns",
       "desktop": {
