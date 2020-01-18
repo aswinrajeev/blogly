@@ -91,6 +91,10 @@ class PostManagerService {
 			return this.respondToSave(data.filename, data.postData);
 		});
 
+		this.messageManager.respond('exportPost', (data) => {
+			return this.exportPost(data.postData);
+		});
+
 		this.messageManager.listen('deletePost', (data) => {
 			this.deletePost(data.itemId);
 		});
@@ -407,11 +411,45 @@ class PostManagerService {
 		}
 	}
 
+	/**
+	 * Exports a post into a file
+	 * @param {*} post 
+	 */
 	exportPost(post) {
 		this.appManager.updateStatus(true, 'Exporting the post...');
+		var response;
+		try {
+			var fileName = dialog.showSaveDialog(this.appManager.getMainWindow(), {
+				title: 'Save to file',
+				filters: [
+					{name: 'Blogly Post (*.bpst)', extensions: ['bpst']}
+				],
+				message: 'Specify a file name for saving'
+			});
+	
+			if (fileName != null && post != null) {
+				var postData = new BlogPost(post);
+				delete postData.file
+	
+				this.fileSystemAdapter.writeToFile(fileName, JSON.stringify(postData));
+				
+				this.appManager.updateStatus(false, 'Exported');
+				response = new ServerResponse({
+					fileName: fileName
+				}).ok();
+				return response;
+			} 
 
-		var fileName;
-		var postData = post;
+			response = new ServerResponse().failure();
+			return response;
+			
+		} catch (error) {
+			console.error('Could not export the post.', error);
+			response = new ServerResponse().failure();
+			this.appManager.updateStatus(false, 'Could not export');
+			return response;
+		}
+
 	}
 
 	/**

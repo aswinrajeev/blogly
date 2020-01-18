@@ -224,6 +224,21 @@ export class PostManagerService {
     });
   }
 
+  /**
+   * Exports a post to a file
+   */
+  exportCurrentPost() {
+    var post = this.__blogPost;
+    this._messenger.request('exportPost', {
+      postData: post.getAsPost()
+    }, (result) => {
+      if (result != null && result.status == 200) {
+        // emit a ui updated event
+        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+      }
+    });
+  }
+
   // sets a function to be invoked when new button is pressed
   setNewPostAction(fun) {
     this.newFun = fun;

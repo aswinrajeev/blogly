@@ -109,6 +109,13 @@ export class ToolbarComponent implements OnInit {
   }
 
   /**
+   * Saves the active post
+   */
+  exportPost() {
+    this.__blogservice.exportCurrentPost();
+  }
+
+  /**
    * Switches between HTML editor and RT editor
    */
   toggleEditor() {
