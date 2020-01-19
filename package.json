@@ -21,7 +21,7 @@
     },
     "win": {
       "target": ["portable"],
-      "icon": "./build/icon.png"
+      "icon": "./build/icon.ico"
     },
     "linux": {
       "target": [
@@ -29,13 +29,7 @@
         "AppImage"
       ],
       "category": "Productivity",
-      "icon": "./build/icon.icns",
-      "desktop": {
-        "Name": "Blogly",
-        "Icon": "./build/icon.png",
-        "Comment": "Blogly open source blogger client",
-        "Categories": "Productivity"
-      }
+      "icon": "./build/icon.icns"
     }
   },
   "keywords": [
