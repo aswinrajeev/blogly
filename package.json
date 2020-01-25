@@ -20,7 +20,9 @@
       "icon": "./build/icon.icns"
     },
     "win": {
-      "target": ["portable"],
+      "target": [
+        "portable"
+      ],
       "icon": "./build/icon.ico"
     },
     "linux": {

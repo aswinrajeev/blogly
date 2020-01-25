@@ -2,7 +2,7 @@
 <div class="toolbar-group">
   <!-- New Button -->
   <button class="btn btn-dark btn-sm" aria-label="New blog" (click)="newPost()">
-      <i class="material-icons md-18">note_add</i> 
+      <i class="material-icons md-18">add_box</i> 
   </button>
   
   <!-- Save Button -->
@@ -39,7 +39,7 @@
   <!-- Publish as draft dropdown button -->
   <div class="btn-group" ngbDropdown role="group">
     <button class="btn btn-dark btn-sm" ngbDropdownToggle aria-label="Publish blog">
-        <i class="material-icons md-18">cloud</i> 
+        <i class="material-icons md-18">cloud_queue</i> 
     </button>
     <div class="dropdown-menu" ngbDropdownMenu>
       <button disabled="true" [hidden]="getBlogs() != null && getBlogs().length > 0" ngbDropdownItem>(No blogs defined)</button>
