@@ -1,7 +1,7 @@
-@import '../styles/const_dark.scss';
+@import '../styles/theme.scss';
 
 .app-toolbar {
-	background-color: $panel-background;
+	background-color: var(--background-four);
 	position: absolute;
 	top: 0px;
 	right: 0px;
@@ -23,7 +23,7 @@
 }
 
 .app-sidebar {
-	background-color: $app-second-background;
+	background-color: var(--background-three);
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -34,7 +34,7 @@
 }
 
 .app-sidepanel {
-	background-color: $app-third-background;
+	background-color: var(--background-two);
 	position: absolute;
 	top: 0px;
 	left: 45px;
@@ -54,14 +54,14 @@
 }
 
 .app-footer {
-	background-color: $panel-background;
+	background-color: var(--background-four);
 	position: absolute;
 	left: 0px;
 	bottom: 0px;
 	right: 0px;
 	font-weight: 600;
 	font-size: 12px;
-	color: $app-second-foreground;
+	color: var(--foreground-two);
 	height: 25px;
 	padding-left: 5px;
 	padding-right: 5px;

@@ -1,23 +1,23 @@
-@import '../../../styles/const_dark.scss';
+@import '../../../styles/theme.scss';
 @import '../../../styles/material_overrides.scss';
 
 .postItem {
-	background-color: $app-background;
-	border: thin solid $panel-background;
+	background-color: var(--background-one);
+	border: thin solid var(--background-four);
 	padding: 8px;
 	margin-bottom: 2px;
 	cursor: pointer;
 }
 
 .postItem:hover, .postItem.active {
-	background-color: $app-second-background;
+	background-color: var(--background-three);
 }
 
 .filename-text{
 	background: none;
 	border: none;
 	border-radius: 0px;
-	color: $app-foreground;
+	color: var(--foreground-one);
 	width: 100%;
 	margin-top: 2px;
 	padding:0px;
@@ -28,13 +28,13 @@
 
 .post-title {
 	font-size: 14px;
-	color: $app-foreground;
+	color: var(--foreground-one);
 	width:100%;
 }
 
 .post-contents {
 	font-size: 10px;
-	color: $app-second-foreground;
+	color: var(--foreground-two);
 	width:100%;
 	line-height: 1.5;
     display: block;

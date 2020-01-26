@@ -1,15 +1,15 @@
-@import 'const_dark.scss';
+@import 'theme.scss';
 
 button.mat-menu-item {
     line-height: 35px;
 	height: 35px;
-	color: $app-foreground;
-	background-color: $panel-background;
+	color: var(--foreground-one);
+	background-color: var(--background-four);
 	vertical-align: middle;
 }
 
 button.mat-menu-item:hover {
-    background-color: $app-second-background;
+    background-color: var(--background-three);
 }
 
 .mat-menu-content {

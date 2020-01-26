@@ -1,7 +1,7 @@
-@import '../../../styles/const_dark.scss';
+@import '../../../styles/theme.scss';
 
 .tags-container {
-	background-color: $app-second-background;
+	background-color: var(--background-three);
 	padding: 5px;
 	margin: 5px;
 	overflow-x: auto;
@@ -11,8 +11,8 @@
 }
 
 .tags-container .tag {
-	background-color: $app-background;
-	color: $app-foreground;
+	background-color: var(--background-one);
+	color: var(--foreground-one);
 	font-size: 12px;
 	padding: 1px;
 	padding-left: 4px;
@@ -29,7 +29,7 @@
 }
 
 .tags-container .remove-tag {
-	color: $app-second-foreground;
+	color: var(--foreground-two);
 	position: absolute;
 	right: 5px;
 	font-size: 12px;
@@ -39,13 +39,13 @@
 }
 
 .tags-container .remove-tag:hover {
-	color: $app-foreground;
+	color: var(--foreground-one);
 }
 
 .tags-container .tag-input {
 	background: transparent;
 	outline: none;
 	border: none;
-	color: $app-foreground;
+	color: var(--foreground-one);
 	font-size: 12px;
 }

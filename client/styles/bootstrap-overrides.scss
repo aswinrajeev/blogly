@@ -1,4 +1,4 @@
-@import 'const_dark.scss';
+@import 'theme.scss';
 
 .btn-sm {
     padding: .15rem .25rem;
@@ -9,8 +9,8 @@
 }
 
 .btn-dark {
-    background-color: $panel-background;
-    color: $app-second-foreground;
+    background-color: var(--background-four);
+    color: var(--foreground-two);
     border: none;
 }
 
@@ -23,12 +23,12 @@
 }
 
 .dropdown-menu {
-    background-color: $panel-background;
-    color: $app-second-foreground;
+    background-color: var(--background-four);
+    color: var(--foreground-two);
 }
 
 .dropdown-item {
-    color: $app-second-foreground;
+    color: var(--foreground-two);
     padding-top: 0px;
     padding-bottom: 0px;
     font-size: 12px;
@@ -36,6 +36,6 @@
 }
 
 .dropdown-item:hover {
-    background-color: $app-second-background;
-    color: $app-foreground;
+    background-color: var(--background-three);
+    color: var(--foreground-one);
 }
