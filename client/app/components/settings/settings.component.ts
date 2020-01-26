@@ -56,6 +56,21 @@ export class SettingsComponent implements OnInit {
   }
 
   /**
+   * Returns if the dark theme is enabled
+   */
+  isDarkThemeEnabled() {
+    return this.__appManager.isDarkThemeEnabled();
+  }
+
+  /**
+   * Sets the dark theme
+   * @param enable 
+   */
+  setDarkThemeEnabled(enable) {
+    this.__appManager.setDarkThemeEnabled(enable);
+  }
+
+  /**
    * Adds a new blog to the connected blogs
    */
   addNewBlog() {

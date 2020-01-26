@@ -19,6 +19,7 @@ export class AppManagerService {
   private __blogs: Blog[];
   private __panelHidden: boolean = false;
   private __htmlEditor: boolean = false;
+  private __isDarkTheme: boolean = true;
   
   /**
    * Constructor for App Manager. Initializes the messenger and postmanager services
@@ -69,8 +70,27 @@ export class AppManagerService {
     return this.__blogs;
   }
 
+  /**
+   * Returns the current workspace directory
+   */
   getWorkspaceDir() {
     return this.__workspaceDir;
+  }
+
+  /**
+   * Returns if the dark theme is enabled
+   */
+  isDarkThemeEnabled() {
+    return this.__isDarkTheme;
+  }
+
+  /**
+   * Sets the dark theme
+   * @param isDarkTheme 
+   */
+  setDarkThemeEnabled(isDarkTheme: boolean) {
+    this.__isDarkTheme = isDarkTheme;
+    this.setTheme(isDarkTheme ? 'dark' : 'light');
   }
 
   /**

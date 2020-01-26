@@ -16,6 +16,16 @@
   </div>
 </div>
 
+<!-- Appearance settings -->
+<div class="panel">
+  <div class="panel-heading">Appearance Settings</div>
+  <div class="panel-body">
+    <p>Choose the theme</p>
+    <div class="box-selector" [class.active]="!isDarkThemeEnabled()" (click)="setDarkThemeEnabled(false)" style="background-color: rgb(236, 236, 236); color:rgb(21, 21, 21)">Light</div>
+    <div class="box-selector" [class.active]="isDarkThemeEnabled()" (click)="setDarkThemeEnabled(true)" style="background-color: rgb(40, 40, 40); color: rgb(210, 210, 210)">Dark</div>
+  </div>
+</div>
+
 <!-- Blogger integration settings -->
 <div class="panel">
   <div class="panel-heading">Blogger Settings</div>
