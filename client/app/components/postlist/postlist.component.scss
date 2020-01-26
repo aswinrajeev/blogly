@@ -2,8 +2,8 @@
 @import '../../../styles/material_overrides.scss';
 
 .postItem {
-	background-color: var(--background-one);
-	border: thin solid var(--background-four);
+	background-color: var(--background-four);
+	border: thin solid var(--outline-one);
 	padding: 8px;
 	margin-bottom: 2px;
 	cursor: pointer;

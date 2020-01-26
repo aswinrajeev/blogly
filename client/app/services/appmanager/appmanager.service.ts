@@ -4,6 +4,7 @@ import { MessagingService } from '../messagingservice/messaging.service';
 import { Blog } from 'client/app/models/blog';
 import { PostManagerService } from '../postmanager/postmanager.service';
 import { EventmanagerService } from '../event/eventmanager.service';
+import { Themes } from 'client/app/configs/themes';
 
 /**
  * Handler for app life-cycle management
@@ -225,6 +226,31 @@ export class AppManagerService {
     } else {
       this.__htmlEditor = isHTML;
     }
+  }
+  
+  /**
+   * Sets a UI theme. Currently supported are light and dark
+   * @param theme 
+   */
+  setTheme(theme) {
+    var themeStyle;
+    if (theme == 'light') {
+      themeStyle = Themes.lightTheme
+    } else {
+      themeStyle = Themes.darkTheme
+    }
+
+    this.setThemeValues(themeStyle);
+  }
+
+  /**
+   * Sets theme values from the theme style
+   * @param themeStyle 
+   */
+  setThemeValues(themeStyle) {
+    Object.keys(themeStyle).forEach(k =>
+      document.documentElement.style.setProperty(`--${k}`, themeStyle[k])
+    );
   }
 
 }
