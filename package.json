@@ -64,10 +64,6 @@
 		"dist-all": "electron-builder -mwl"
 	},
 	"private": true,
-	"browser": {
-		"path": false,
-		"fs": false
-	},
 	"dependencies": {
 		"@angular/animations": "^7.2.7",
 		"@angular/cdk": "^7.3.3",

@@ -62,6 +62,7 @@ class MainWindow {
 			}
 		} catch (error) {
 			console.error(error);
+			throw error;
 		}
 	}
 
