@@ -1,35 +1,38 @@
 const path = require('path');
-const { FileSystemConstants, ApplicationConfigurations } = require('../../configs/conf');
+const {
+	FileSystemConstants,
+	ApplicationConfigurations,
+} = require('../../configs/conf');
 const { FileSystemAdapter } = require('../adapters/filesystem.adapter');
 const { MessageManagerService } = require('./messagemanager.service');
 const { BlogManagerService } = require('./blogmanager.service');
 const { PostManagerService } = require('./postmanager.service');
 const { ServerResponse } = require('../models/response');
-const { BrowserWindow } =  require('electron');
+const { BrowserWindow } = require('electron');
 const beautify = require('js-beautify').html;
 const { dialog } = require('electron');
 
 /**
  * Manages the application operations and lifecycle.
- * 
+ *
  * @author Aswin Rajeev
  */
 class AppManagerService {
-	
 	/**
 	 * Singleton constructor for AppManagerService
 	 */
 	constructor(args) {
-
-		const defaultInstance = this.defaultInstance ? this.defaultInstance : this.constructor.defaultInstance
+		const defaultInstance = this.defaultInstance
+			? this.defaultInstance
+			: this.constructor.defaultInstance;
 		if (defaultInstance) {
-
 			if (defaultInstance.debugMode) {
-				console.debug('Instance already exists. Ignoring the arguments.');
+				console.debug(
+					'Instance already exists. Ignoring the arguments.'
+				);
 			}
 
 			return defaultInstance;
-			
 		}
 
 		this.debugMode = args.debugMode;
@@ -38,21 +41,30 @@ class AppManagerService {
 		this.blogsDir = null;
 		this.blogManger = null;
 		this.mainWindow = null;
-		
+
 		// define the file system locations and initializes the required properties.
-		this.appDir = this.app.getPath(FileSystemConstants.APP_DIR) + path.sep + FileSystemConstants.BLOGLY_APP_DIR;
-		this.configFile = this.appDir  + path.sep +  FileSystemConstants.CONFIG_FILE;
-		this.blogsDir = this.app.getPath(FileSystemConstants.DOCS_DIR) + path.sep + FileSystemConstants.BLOGLY_DIR;
+		this.appDir =
+			this.app.getPath(FileSystemConstants.APP_DIR) +
+			path.sep +
+			FileSystemConstants.BLOGLY_APP_DIR;
+		this.configFile =
+			this.appDir + path.sep + FileSystemConstants.CONFIG_FILE;
+		this.blogsDir =
+			this.app.getPath(FileSystemConstants.DOCS_DIR) +
+			path.sep +
+			FileSystemConstants.BLOGLY_DIR;
 
 		this.configs = null;
 
 		this.fileSystemAdapter = new FileSystemAdapter({
 			debugMode: this.debugMode,
-			configFile: this.configFile
+			configFile: this.configFile,
 		});
 
 		try {
-			var confLastUpdated = this.fileSystemAdapter.getConfigProperty('timestamp');
+			var confLastUpdated = this.fileSystemAdapter.getConfigProperty(
+				'timestamp'
+			);
 		} catch (error) {
 			console.error('Could not load the configurations.', error);
 			if (this.debugMode) {
@@ -62,24 +74,27 @@ class AppManagerService {
 			try {
 				this.__initializeConfig();
 			} catch (error) {
-				console.error('Could not initialize the configurations. Application would now abort.', error);
+				console.error(
+					'Could not initialize the configurations. Application would now abort.',
+					error
+				);
 				//TODO: Exit the application.
 			}
 		}
-		
+
 		this.constructor.defaultInstance = this;
 
 		/**
 		 * Returns the default instance of the class
 		 */
-		this.constructor.getDefaultInstance = function() {
+		this.constructor.getDefaultInstance = function () {
 			const defaultInstance = this.constructor.defaultInstance;
 			if (defaultInstance == null) {
 				throw new Error('Class not initialized yet.');
 			}
 
 			return defaultInstance;
-		}
+		};
 	}
 
 	/**
@@ -98,52 +113,51 @@ class AppManagerService {
 
 	/**
 	 * Initializes the message manager service
-	 * @param {*} ipcMain 
-	 * @param {*} mainWindow 
+	 * @param {*} ipcMain
+	 * @param {*} mainWindow
 	 */
 	initializeApp(ipcMain, mainWindow) {
-
 		this.mainWindow = mainWindow;
 
 		// initializes the messenger service
 		var messenger = new MessageManagerService({
 			debugMode: this.debugMode,
 			ipcMain: ipcMain,
-			webContents: this.mainWindow.webContents
+			webContents: this.mainWindow.webContents,
 		});
 
 		this.messageManager = messenger;
 
 		return messenger;
-
 	}
 
 	/**
 	 * Returns the startup configurations for the main window
 	 */
 	getStartupConfigurations() {
-		var confs = { 
-			width: this.fileSystemAdapter.getConfigProperty('windowWidth'), 
-			height: this.fileSystemAdapter.getConfigProperty('windowHeight'), 
+		var confs = {
+			width: this.fileSystemAdapter.getConfigProperty('windowWidth'),
+			height: this.fileSystemAdapter.getConfigProperty('windowHeight'),
 			minHeight: ApplicationConfigurations.MIN_HEIGHT,
 			minWidth: ApplicationConfigurations.MIN_WIDTH,
 			backgroundColor: ApplicationConfigurations.BACKGROUND_COLOR,
 			icon: path.join(__dirname, '../../../build/icon.png'),
-			show: false
+			show: false,
+			webPreferences: {
+				nodeIntegration: true,
+			},
 		};
 
 		return confs;
 	}
 
-
 	/**
 	 * Initializes the configurations
 	 */
 	__initializeConfig() {
-
 		// initial window size
 		var conf = {
-			windowWidth: 1080, 
+			windowWidth: 1080,
 			windowHeight: 640,
 		};
 
@@ -152,17 +166,22 @@ class AppManagerService {
 		conf.blogs = [];
 
 		try {
-
 			// creates the app directory and blog directory if those do not exist
-			this.fileSystemAdapter.createDir(this.appDir)
+			this.fileSystemAdapter.createDir(this.appDir);
 			this.fileSystemAdapter.createDir(this.blogsDir);
-	
+
 			// store the conf into a config file in the user app dir
-			this.fileSystemAdapter.writeToFile(this.configFile, JSON.stringify(conf));
+			this.fileSystemAdapter.writeToFile(
+				this.configFile,
+				JSON.stringify(conf)
+			);
 
 			return conf;
 		} catch (error) {
-			console.error("Could not create the configuration file. Please check if the application has sufficient permissions to read/write in the application data directory.", error);
+			console.error(
+				'Could not create the configuration file. Please check if the application has sufficient permissions to read/write in the application data directory.',
+				error
+			);
 			throw error;
 		}
 	}
@@ -172,17 +191,16 @@ class AppManagerService {
 	 * Also initializes the secondary service points for listening to class specific events
 	 */
 	initializeListeners() {
-
 		// initializes the blog manager service
 		this.blogManger = new BlogManagerService({
 			debugMode: this.debugMode,
-			appManager: this
+			appManager: this,
 		});
 
 		// initializes the post manager service
 		this.postManager = new PostManagerService({
 			debugMode: this.debugMode,
-			appManager: this
+			appManager: this,
 		});
 
 		this.messageManager.respond('fetchConfs', () => {
@@ -196,23 +214,41 @@ class AppManagerService {
 
 		// register for UI update on event
 		this.messageManager.respond('switchEditor', (data) => {
-			this.messageManager.send('switchEditor',
+			this.messageManager.send(
+				'switchEditor',
 				this.switchEditor(data.content, data.editor)
 			);
 		});
+
+		this.messageManager.listen('themeChanged', (args) => {
+			this.setDarkThemeEnabled(args.isDarkTheme);
+		});
+
+		// this.messageManager.respond('getTheme', () => {
+		// 	return this.isDarkThemeEnabled();
+		// });
 	}
 
 	/**
 	 * Returns the configurations for the UI
 	 */
 	fetchUIConfigs() {
-		
 		var response;
 		this.updateStatus(true, 'Fetching configs...');
 
 		try {
 			// get workspace from the configs
-			var workspace = this.fileSystemAdapter.getConfigProperty('blogsDir');
+			var workspace = this.fileSystemAdapter.getConfigProperty(
+				'blogsDir'
+			);
+
+			var darkThemeEnabled = this.fileSystemAdapter.getConfigProperty(
+				'darkThemeEnabled'
+			);
+
+			if (darkThemeEnabled == null) {
+				darkThemeEnabled = true;
+			}
 
 			// use blog manager service to fetch blogs from confs
 			var blogList = this.blogManger.getBlogsList();
@@ -220,11 +256,11 @@ class AppManagerService {
 			var result = new Object();
 			result.blogs = blogList;
 			result.workspace = workspace;
+			result.darkThemeEnabled = darkThemeEnabled;
 
 			response = new ServerResponse(result).ok();
 			this.updateStatus(false, 'Done');
 			return response;
-
 		} catch (error) {
 			console.error('Could not fetch the UI configurations.', error);
 			response = new ServerResponse().failure();
@@ -234,9 +270,22 @@ class AppManagerService {
 	}
 
 	/**
+	 * Sets/unsets the dark theme enabled
+	 *
+	 * @param {boolean} isDarkTheme
+	 */
+	setDarkThemeEnabled(isDarkTheme) {
+		this.fileSystemAdapter.setConfigProperty(
+			'darkThemeEnabled',
+			isDarkTheme,
+			true
+		);
+	}
+
+	/**
 	 * Transforms content as HTML editor specs to/from Quill specs
-	 * @param {*} content 
-	 * @param {*} editor 
+	 * @param {*} content
+	 * @param {*} editor
 	 */
 	switchEditor(content, editor) {
 		var response;
@@ -251,7 +300,9 @@ class AppManagerService {
 					fullContent = this.postManager.loadRAWImages(content);
 					htmlContent = beautify(content);
 				} else {
-					htmlContent = this.postManager.saveAndRemoveRAWImages(content);
+					htmlContent = this.postManager.saveAndRemoveRAWImages(
+						content
+					);
 					htmlContent = beautify(htmlContent);
 					fullContent = content;
 				}
@@ -260,7 +311,7 @@ class AppManagerService {
 			response = new ServerResponse({
 				fullContent: fullContent,
 				htmlContent: htmlContent,
-				isHTML: (editor == 'html')
+				isHTML: editor == 'html',
 			}).ok();
 			this.updateStatus(false, 'Done');
 		} catch (error) {
@@ -273,19 +324,18 @@ class AppManagerService {
 
 	/**
 	 * Updates the blog to the publish/draft/import menus
-	 * 
-	 * @param {*} menuManager 
+	 *
+	 * @param {*} menuManager
 	 */
 	updateBlogsMenus() {
-
 		// clear the blogs menus
 		this.menuManager.clearBlogs();
 
 		// updates all blogs to the blogs menu.
 		var blogs = this.blogManger.getBlogsList();
-		blogs.forEach(blogObj => {
+		blogs.forEach((blogObj) => {
 			this.menuManager.addBlog(blogObj);
-		})
+		});
 		// reconstructs the menu.
 		try {
 			this.menuManager.renderMenu();
@@ -296,10 +346,9 @@ class AppManagerService {
 
 	/**
 	 * Creates a modal window and returns it
-	 * @param {*} args 
+	 * @param {*} args
 	 */
 	createModalWindow(args) {
-
 		var height = args.height ? args.height : 500;
 		var width = args.width ? args.width : 400;
 		var title = args.title ? args.title : 'Blogly';
@@ -312,7 +361,7 @@ class AppManagerService {
 			modal: true,
 			parent: this.mainWindow,
 			fullscreenable: false,
-			show: false
+			show: false,
 		});
 
 		return window;
@@ -325,50 +374,58 @@ class AppManagerService {
 	selectDir() {
 		var response;
 		var path = dialog.showOpenDialog(this.mainWindow, {
-			properties: ['openDirectory']
+			properties: ['openDirectory'],
 		});
 
-		dialog.showMessageBox(this.mainWindow, {
-			type: 'info',
-			buttons: ['Confirm', 'Cancel'],
-			message: 'Changing workspace will require a restart. Are sure to continue?',
-			title: 'Confirm Configuration'
-		}, (result) => {
-			if (result == 0) {
+		dialog.showMessageBox(
+			this.mainWindow,
+			{
+				type: 'info',
+				buttons: ['Confirm', 'Cancel'],
+				message:
+					'Changing workspace will require a restart. Are sure to continue?',
+				title: 'Confirm Configuration',
+			},
+			(result) => {
+				if (result == 0) {
+					try {
+						this.fileSystemAdapter.saveConfigForLater(
+							'blogsDir',
+							path[0]
+						);
+					} catch (error) {
+						console.error(
+							'Unable to save the workspace path.',
+							error
+						);
+					}
 
-				try {
-					this.fileSystemAdapter.saveConfigForLater('blogsDir', path[0]);
-				} catch (error) {
-					console.error('Unable to save the workspace path.', error);
+					this.app.relaunch();
+					this.app.exit(0);
+
+					response = new ServerResponse({
+						path: path,
+					}).ok();
+					return response;
+				} else {
+					this.updateStatus(false, 'Discarded config');
+					return new ServerResponse().failure();
 				}
-
-				this.app.relaunch();
-				this.app.exit(0)
-		
-				response = new ServerResponse({
-					path: path
-				}).ok();
-				return response;
-			} else {
-				this.updateStatus(false, 'Discarded config');
-				return new ServerResponse().failure();
 			}
-		});
-
+		);
 	}
 
 	/**
 	 * Updates a status message to the UI
-	 * @param {*} loading 
-	 * @param {*} message 
+	 * @param {*} loading
+	 * @param {*} message
 	 */
 	updateStatus(loading, message) {
 		this.messageManager.send('statusUpdate', {
-			'loading': loading,
-			message: message
+			loading: loading,
+			message: message,
 		});
 	}
-
 }
 
 module.exports.AppManagerService = AppManagerService;

@@ -10,267 +10,298 @@ import { Themes } from 'client/app/configs/themes';
  * Handler for app life-cycle management
  */
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root',
 })
 export class AppManagerService {
+	private __currentPanel: String = 'posts';
+	private __workspaceDir: String;
+	private __blogs: Blog[];
+	private __panelHidden: boolean = false;
+	private __htmlEditor: boolean = false;
+	private __isDarkTheme: boolean = true;
 
-  private __currentPanel: String = "posts";
-  private __workspaceDir: String;
-  private __blogs: Blog[];
-  private __panelHidden: boolean = false;
-  private __htmlEditor: boolean = false;
-  private __isDarkTheme: boolean = true;
-  
-  /**
-   * Constructor for App Manager. Initializes the messenger and postmanager services
-   * @param __messenger 
-   * @param __postManager 
-   */
-  constructor(
-    private __messenger: MessagingService, 
-    private __postManager: PostManagerService,
-    private __eventManager: EventmanagerService
-    ) { }
+	/**
+	 * Constructor for App Manager. Initializes the messenger and postmanager services
+	 * @param __messenger
+	 * @param __postManager
+	 */
+	constructor(
+		private __messenger: MessagingService,
+		private __postManager: PostManagerService,
+		private __eventManager: EventmanagerService
+	) {}
 
-  /**
-   * Returns the current active panel
-   */
-  getCurrentPanel():String {
-    return this.__currentPanel;
-  }
-  
-  /**
-   * Sets a panel as active.
-   * @param currentPanel 
-   */
-  setCurrentPanel(currentPanel:String) {
-    this.__currentPanel = currentPanel;
-    this.__eventManager.getUIEventEmitter().emit('panelUpdated', currentPanel);
-  }
+	/**
+	 * Returns the current active panel
+	 */
+	getCurrentPanel(): String {
+		return this.__currentPanel;
+	}
 
-  /**
-   * Returns is the side panel is closed or not
-   */
-  isPanelHidden() {
-    return this.__panelHidden;
-  }
+	/**
+	 * Sets a panel as active.
+	 * @param currentPanel
+	 */
+	setCurrentPanel(currentPanel: String) {
+		this.__currentPanel = currentPanel;
+		this.__eventManager
+			.getUIEventEmitter()
+			.emit('panelUpdated', currentPanel);
+	}
 
-  /**
-   * Sets if the side panel is closed or not.
-   * @param close 
-   */
-  setPanelHidden(close:boolean) {
-    this.__panelHidden = close;
-  }
+	/**
+	 * Returns is the side panel is closed or not
+	 */
+	isPanelHidden() {
+		return this.__panelHidden;
+	}
 
-  /**
-   * Returns blog list from configuration
-   */
-  getBlogsList():Blog[] {
-    return this.__blogs;
-  }
+	/**
+	 * Sets if the side panel is closed or not.
+	 * @param close
+	 */
+	setPanelHidden(close: boolean) {
+		this.__panelHidden = close;
+	}
 
-  /**
-   * Returns the current workspace directory
-   */
-  getWorkspaceDir() {
-    return this.__workspaceDir;
-  }
+	/**
+	 * Returns blog list from configuration
+	 */
+	getBlogsList(): Blog[] {
+		return this.__blogs;
+	}
 
-  /**
-   * Returns if the dark theme is enabled
-   */
-  isDarkThemeEnabled() {
-    return this.__isDarkTheme;
-  }
+	/**
+	 * Returns the current workspace directory
+	 */
+	getWorkspaceDir() {
+		return this.__workspaceDir;
+	}
 
-  /**
-   * Sets the dark theme
-   * @param isDarkTheme 
-   */
-  setDarkThemeEnabled(isDarkTheme: boolean) {
-    this.__isDarkTheme = isDarkTheme;
-    this.setTheme(isDarkTheme ? 'dark' : 'light');
-  }
+	/**
+	 * Returns if the dark theme is enabled
+	 */
+	isDarkThemeEnabled() {
+		return this.__isDarkTheme;
+	}
 
-  /**
-   * Listens for menu events (from the back-end)
-   */
-  listenForMenuInvocation() {
-    this.__messenger.listen('menuInvoked', (payload) => {
-      if (payload.action != null && payload.action != '') {
-        this.__eventManager.getMenuEventEmitter().emit(payload.action, payload.args);
-      }
-    }, null);
-  }
+	/**
+	 * Sets the dark theme
+	 * @param isDarkTheme
+	 */
+	setDarkThemeEnabled(isDarkTheme: boolean) {
+		this.setTheme(isDarkTheme ? 'dark' : 'light');
+		this.__messenger.send('themeChanged', { isDarkTheme });
+	}
 
-  /**
-   * Listens for status update events (from the back-end)
-   */
-  listenForStatusUpdates() {
-    this.__messenger.listen('statusUpdate', (payload) => {
-      if (payload != null) {
-        this.updateStatus(payload.loading, payload.message);
-      }
-    }, null);
+	/**
+	 * Listens for menu events (from the back-end)
+	 */
+	listenForMenuInvocation() {
+		this.__messenger.listen(
+			'menuInvoked',
+			(payload) => {
+				if (payload.action != null && payload.action != '') {
+					this.__eventManager
+						.getMenuEventEmitter()
+						.emit(payload.action, payload.args);
+				}
+			},
+			null
+		);
+	}
 
-    this.__messenger.listen('switchEditor', (result) => { 
-      if (result != null && result.status == 200) {
-        this.__htmlEditor = result.isHTML;
+	/**
+	 * Listens for status update events (from the back-end)
+	 */
+	listenForStatusUpdates() {
+		this.__messenger.listen(
+			'statusUpdate',
+			(payload) => {
+				if (payload != null) {
+					this.updateStatus(payload.loading, payload.message);
+				}
+			},
+			null
+		);
 
-        var blogPost = this.__postManager.getCurrentPost();
-        blogPost.setContent(result.fullContent);
-        blogPost.setHTMLContent(result.htmlContent);
+		this.__messenger.listen(
+			'switchEditor',
+			(result) => {
+				if (result != null && result.status == 200) {
+					this.__htmlEditor = result.isHTML;
 
-        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
-      }
-    }, null);
-  }
+					var blogPost = this.__postManager.getCurrentPost();
+					blogPost.setContent(result.fullContent);
+					blogPost.setHTMLContent(result.htmlContent);
 
-  /**
-   * Posts a status update to the footer
-   * @param loading 
-   * @param message 
-   */
-  updateStatus(loading, message) {
-    this.__eventManager.getUIEventEmitter().emit('statusUpdated', loading, message);
-  }
+					this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+				}
+			},
+			null
+		);
+	}
 
-  /**
-   * Fetches the configurations
-   */
-  fetchConfigurations() {
-    this.__messenger.request('fetchConfs', null, (result) => {
-      if (result.status == 200) {
-        this.__workspaceDir = result.workspace;
-        if (this.__blogs == null) {
-          this.__blogs = [];
-        }
-        result.blogs.forEach(blog => {
-          this.__blogs.push(new Blog(blog.name, blog.url, blog.postId));
-        });
-      } else {
-        console.error("Unable to fetch the configurations.");
-      }
-    });
-  }
+	/**
+	 * Posts a status update to the footer
+	 * @param loading
+	 * @param message
+	 */
+	updateStatus(loading, message) {
+		this.__eventManager
+			.getUIEventEmitter()
+			.emit('statusUpdated', loading, message);
+	}
 
-  /**
-   * Adds a new blog to the connected blogs
-   * @param alias 
-   * @param url 
-   */
-  addBlog(alias: String, url: String) {
-    var blog:Blog = new Blog(alias, url, null);
+	/**
+	 * Fetches the configurations
+	 */
+	fetchConfigurations() {
+		this.__messenger.request('fetchConfs', null, (result) => {
+			if (result.status == 200) {
+				this.__workspaceDir = result.workspace;
+				if (this.__blogs == null) {
+					this.__blogs = [];
+				}
+				result.blogs.forEach((blog) => {
+					this.__blogs.push(
+						new Blog(blog.name, blog.url, blog.postId)
+					);
+				});
 
-    this.__messenger.listenOnce('blogAdded', (result) => {
+				// sets the theme
+				this.setTheme(result.darkThemeEnabled ? 'dark' : 'light');
+			} else {
+				console.error('Unable to fetch the configurations.');
+			}
+		});
+	}
 
-      if (result.status == 200) {
-        var blog:Blog = new Blog(result.blog.name, result.blog.url, result.blog.blogId);
-        this.__blogs.push(blog);
+	/**
+	 * Adds a new blog to the connected blogs
+	 * @param alias
+	 * @param url
+	 */
+	addBlog(alias: String, url: String) {
+		var blog: Blog = new Blog(alias, url, null);
 
-        // oublish a notification of UI updated
-        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
-      }
+		this.__messenger.listenOnce(
+			'blogAdded',
+			(result) => {
+				if (result.status == 200) {
+					var blog: Blog = new Blog(
+						result.blog.name,
+						result.blog.url,
+						result.blog.blogId
+					);
+					this.__blogs.push(blog);
 
-    }, null);
-    
-    // sends a backend call to add a new blog
-    this.__messenger.send('newBlog', blog.getAsBlog());
-  }
+					// oublish a notification of UI updated
+					this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+				}
+			},
+			null
+		);
 
-  /**
-   * Removes a blog from the connected blogs
-   * @param blog 
-   */
-  deleteBlog(blog:Blog) {
-    this.__messenger.listenOnce('blogDeleted', (result) => {
-      if (result.status == 200) {
-        this.__blogs.splice(this.__blogs.indexOf(blog), 1);
+		// sends a backend call to add a new blog
+		this.__messenger.send('newBlog', blog.getAsBlog());
+	}
 
-        // publish a UI update notification
-        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
-      }
-    }, null);
-    
-    this.__messenger.send('deleteBlog', blog.getAsBlog());
-  }
+	/**
+	 * Removes a blog from the connected blogs
+	 * @param blog
+	 */
+	deleteBlog(blog: Blog) {
+		this.__messenger.listenOnce(
+			'blogDeleted',
+			(result) => {
+				if (result.status == 200) {
+					this.__blogs.splice(this.__blogs.indexOf(blog), 1);
 
-  /**
-   * Requests for a select dir dialog and returns the selected path to worspace path
-   */
-  selectWorkspaceDir() {
-    this.__messenger.request('selectDir', null, (result) => {
+					// publish a UI update notification
+					this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+				}
+			},
+			null
+		);
 
-      if (result != null && result.status == 200) {
-        this.__workspaceDir = result.dir;
-  
-        // publish a notification of ui updated
-        this.__eventManager.getUIEventEmitter().emit('uiUpdated');
-      }
-    })
-  }
+		this.__messenger.send('deleteBlog', blog.getAsBlog());
+	}
 
-  /** 
-   * Returns if the current editor is HTML editor
-   */
-  isHTMLEditor() {
-    return this.__htmlEditor;
-  }
+	/**
+	 * Requests for a select dir dialog and returns the selected path to worspace path
+	 */
+	selectWorkspaceDir() {
+		this.__messenger.request('selectDir', null, (result) => {
+			if (result != null && result.status == 200) {
+				this.__workspaceDir = result.dir;
 
-  /** 
-   * Sets the current editor as HTML if isHTML is true
-   */ 
-  setHTMLEditor(isHTML:boolean) {
-    
-    var editor;
-    var content;
+				// publish a notification of ui updated
+				this.__eventManager.getUIEventEmitter().emit('uiUpdated');
+			}
+		});
+	}
 
-    // updates the content from the back end
-    if (this.__postManager.isPostContentValid(!this.isHTMLEditor())) {
+	/**
+	 * Returns if the current editor is HTML editor
+	 */
+	isHTMLEditor() {
+		return this.__htmlEditor;
+	}
 
-      // passes the appropriate content acc to the current editor
-      if (!this.isHTMLEditor()) {
-        editor = 'html'
-        content = this.__postManager.getCurrentPost().htmlContent;
-      } else  {
-        editor = 'quill';
-        content = this.__postManager.getCurrentPost().content;
-      }
-      
-      // request server for updated contents
-      this.__messenger.send('switchEditor', {
-        editor: editor,
-        content: content
-      });
-    } else {
-      this.__htmlEditor = isHTML;
-    }
-  }
-  
-  /**
-   * Sets a UI theme. Currently supported are light and dark
-   * @param theme 
-   */
-  setTheme(theme) {
-    var themeStyle;
-    if (theme == 'light') {
-      themeStyle = Themes.lightTheme
-    } else {
-      themeStyle = Themes.darkTheme
-    }
+	/**
+	 * Sets the current editor as HTML if isHTML is true
+	 */
 
-    this.setThemeValues(themeStyle);
-  }
+	setHTMLEditor(isHTML: boolean) {
+		var editor;
+		var content;
 
-  /**
-   * Sets theme values from the theme style
-   * @param themeStyle 
-   */
-  setThemeValues(themeStyle) {
-    Object.keys(themeStyle).forEach(k =>
-      document.documentElement.style.setProperty(`--${k}`, themeStyle[k])
-    );
-  }
+		// updates the content from the back end
+		if (this.__postManager.isPostContentValid(!this.isHTMLEditor())) {
+			// passes the appropriate content acc to the current editor
+			if (!this.isHTMLEditor()) {
+				editor = 'html';
+				content = this.__postManager.getCurrentPost().htmlContent;
+			} else {
+				editor = 'quill';
+				content = this.__postManager.getCurrentPost().content;
+			}
 
+			// request server for updated contents
+			this.__messenger.send('switchEditor', {
+				editor: editor,
+				content: content,
+			});
+		} else {
+			this.__htmlEditor = isHTML;
+		}
+	}
+
+	/**
+	 * Sets a UI theme. Currently supported are light and dark
+	 * @param theme
+	 */
+	setTheme(theme) {
+		var themeStyle;
+		if (theme == 'light') {
+			themeStyle = Themes.lightTheme;
+			this.__isDarkTheme = false;
+		} else {
+			themeStyle = Themes.darkTheme;
+			this.__isDarkTheme = true;
+		}
+
+		this.setThemeValues(themeStyle);
+	}
+
+	/**
+	 * Sets theme values from the theme style
+	 * @param themeStyle
+	 */
+	setThemeValues(themeStyle) {
+		Object.keys(themeStyle).forEach((k) =>
+			document.documentElement.style.setProperty(`--${k}`, themeStyle[k])
+		);
+	}
 }
