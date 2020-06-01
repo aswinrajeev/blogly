@@ -141,7 +141,6 @@ class AppManagerService {
 			minHeight: ApplicationConfigurations.MIN_HEIGHT,
 			minWidth: ApplicationConfigurations.MIN_WIDTH,
 			backgroundColor: ApplicationConfigurations.BACKGROUND_COLOR,
-			icon: path.join(__dirname, '../../../build/icon.png'),
 			show: false,
 			webPreferences: {
 				nodeIntegration: true,
