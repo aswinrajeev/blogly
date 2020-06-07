@@ -27,5 +27,5 @@ Blogly version 1.0.0.beta.1 running on MacOX Catalina
 
 Licensed under [BSD 3-Clause License](LICENSE).  
 
-Copyright © 2019, Aswin Rajeev  
+Copyright © 2019-2020, Aswin Rajeev  
 All rights reserved.
