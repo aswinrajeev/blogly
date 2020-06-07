@@ -17,6 +17,9 @@ Blogly has also enabled the author(s) to meaningfully contribute towards open so
 
 Blogly application could be downloaded directly from Github. For downloads, one can visit the [Blogly releases page](https://github.com/aswinrajeev/blogly/releases) and download the appropriate binaries for their respective operating system.
 
+![Blogly 1.0.0.beta.1](https://user-images.githubusercontent.com/1933915/83966266-c7fdfb00-a8d6-11ea-95cb-fa112f99e6e6.png)
+Blogly version 1.0.0.beta.1 running on MacOX Catalina
+
 ## License
 
 ![Blogly - License](https://img.shields.io/pypi/l/blogly.svg?color=green&label=License&style=plastic)
