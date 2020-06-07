@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { AppManagerService } from 'client/app/services/appmanager/appmanager.service';
 import { PostManagerService } from './services/postmanager/postmanager.service';
 import { EventmanagerService } from './services/event/eventmanager.service';
@@ -8,7 +8,7 @@ import { EventmanagerService } from './services/event/eventmanager.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit{
   title = 'Blogly';
   version = '0.1.0';
 
@@ -24,6 +24,7 @@ export class AppComponent {
     private blogService: PostManagerService, 
     private __eventManager: EventmanagerService,
     private cdr: ChangeDetectorRef) { 
+
     // listens for any UI updates
     this.__eventManager.getUIEventEmitter().on('uiUpdated', () => {
       this.cdr.detectChanges();
@@ -34,4 +35,10 @@ export class AppComponent {
   isClosed() {
     return this.navService.isPanelHidden();
   }
+
+  ngAfterViewInit() {
+    //this.navService.setTheme('light');
+  }
+
+  
 }

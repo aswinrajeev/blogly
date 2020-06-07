@@ -1,8 +1,8 @@
-@import '../../../styles/const_dark.scss';
+@import '../../../styles/theme.scss';
 @import '../../../styles/material_overrides.scss';
 
 .sidepanel-title {
-	background-color: $panel-background;
+	background-color: var(--background-four);
 	font-size: 12px;
 	padding: 5px;
 	padding-top: 8px;
@@ -27,7 +27,7 @@
 
 .panel {
 	border: solid thin;
-	border-color: $panel-outline-color;
+	border-color: var(--outline-one);
 	border-radius: 3px;
 	width: 260px;
 	font-size: 12px;
@@ -38,9 +38,9 @@
 .panel-heading {
 	font-weight: bold;
 	border-bottom: thin solid;
-	border-color: $panel-outline-color;
+	border-color: var(--outline-one);
 	box-shadow: -2px 2px 20px -8px rgba(0,0,0,0.8);
-	background-color: $app-second-background;
+	background-color: var(--background-four);
 	padding: 5px;
 }
 
@@ -49,8 +49,8 @@
 }
 
 .panel-textbox {
-	background-color: $panel-background;
-	color: $app-foreground;
+	background-color: var(--background-four);
+	color: var(--foreground-one);
     border: thin;
     height: 27px;
 	width: 210px;
@@ -65,26 +65,26 @@ p {
 }
 
 .listItem {
-	background-color: $app-background;
-	border: thin solid $panel-background;
+	background-color: var(--background-one);
+	border: thin solid var(--background-four);
 	padding: 4px;
 	margin-bottom: 2px;
 	position: relative;
 }
 
 .listItem:hover {
-	background-color: $app-second-background;
+	background-color: var(--background-three);
 }
 
 .listItem .listItem-title {
 	font-size: 14px;
-	color: $app-foreground;
+	color: var(--foreground-one);
 	width:100%;
 }
 
 .listItem .listItem-contents {
 	font-size: 10px;
-	color: $app-second-foreground;
+	color: var(--foreground-two);
 	width:100%;
 	line-height: 1.5;
     display: block;

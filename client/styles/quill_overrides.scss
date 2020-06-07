@@ -1,4 +1,4 @@
-@import './const_dark.scss';
+@import './theme.scss';
 
 /* Overrides for Quill Editor  */
 .ql-container {
@@ -26,7 +26,7 @@
 
 .ql-toolbar.ql-snow{
 	border: none;
-	background-color: $app-second-background
+	background-color: var(--background-three)
 }
 
 .ql-container.ql-snow {
@@ -34,7 +34,7 @@
 }
 
 .ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {
-  background-color: $panel-background;
+  background-color: var(--background-four);
   border: none;
 }
 
@@ -65,7 +65,7 @@
 .ql-snow .ql-toolbar .ql-picker-item:hover,
 .ql-snow.ql-toolbar .ql-picker-item.ql-selected,
 .ql-snow .ql-toolbar .ql-picker-item.ql-selected {
-  color: $app-foreground
+  color: var(--foreground-one)
 }
 .ql-snow.ql-toolbar button:hover .ql-fill,
 .ql-snow .ql-toolbar button:hover .ql-fill,
@@ -95,7 +95,7 @@
 .ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,
 .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,
 .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill {
-  fill: $app-foreground
+  fill: var(--foreground-one)
 }
 .ql-snow.ql-toolbar button:hover .ql-stroke,
 .ql-snow .ql-toolbar button:hover .ql-stroke,
@@ -125,5 +125,5 @@
 .ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter,
 .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,
 .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter {
-  stroke: $app-foreground
+  stroke: var(--foreground-one)
 }

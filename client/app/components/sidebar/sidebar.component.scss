@@ -1,4 +1,4 @@
-@import '../../../styles/const_dark.scss';
+@import '../../../styles/theme.scss';
 @import '../../../styles/bootstrap-overrides.scss';
 @import '../../../styles/material_overrides.scss';
 @import '../../../../node_modules/material-design-icons/iconfont/material-icons.css';
@@ -7,14 +7,14 @@
 	margin: 5px;
 	margin-right: 10px;
 	font-size: 18px;
-	color: $app-second-foreground;
+	color: var(--foreground-two);
 	cursor: pointer;
 }
 
 .sidebar-item:hover {
-	color: $app-foreground;
+	color: var(--foreground-one);
 }
 
 .sidebar-item.active {
-	color: $app-foreground;
+	color: var(--foreground-one);
 }
