@@ -5,7 +5,7 @@ Blogly is an open-source desktop application for bloggers and content writers. I
 ![Blogly - Latest](https://img.shields.io/github/package-json/v/aswinrajeev/blogly)
 ![Blogly - Last Release](https://img.shields.io/github/v/release/aswinrajeev/blogly?include_prereleases)
 ![Blogly - Repo Size](https://img.shields.io/github/repo-size/aswinrajeev/blogly)
-![Blogly - Downloads](https://img.shields.io/github/downloads/aswinrajeev/blogly/total)
+[![Blogly - Downloads](https://img.shields.io/github/downloads/aswinrajeev/blogly/total)](https://github.com/aswinrajeev/blogly/releases)
 
 ## Why Blogly?
 
